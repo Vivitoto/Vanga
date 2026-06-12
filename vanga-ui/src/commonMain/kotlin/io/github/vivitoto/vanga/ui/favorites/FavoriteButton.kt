@@ -19,7 +19,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.model.rememberScreenModel
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
@@ -68,7 +67,7 @@ private fun FavoriteButton(
     toggleFavorite: suspend (FavoriteToggleViewModel) -> Boolean,
 ) {
     val viewModelFactory = LocalViewModelFactory.current
-    val vm = rememberScreenModel("favorite-toggle-$key") { viewModelFactory.getFavoriteToggleViewModel() }
+    val vm = remember(key) { viewModelFactory.getFavoriteToggleViewModel() }
     val coroutineScope = rememberCoroutineScope()
     val isOffline = LocalOfflineMode.current.collectAsState().value
     var isFavorite by remember(key) { mutableStateOf(false) }

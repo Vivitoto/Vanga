@@ -24,10 +24,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.default.Help
-import androidx.compose.material.icons.automirrored.default.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -136,7 +136,7 @@ fun SettingsSideMenuOverlay(
                     Text("退出阅读")
                 }
                 Spacer(Modifier.weight(1f))
-                IconButton(onClick = { onShowHelpMenu() }) { Icon(Icons.AutoMirrored.Default.Help, null) }
+                IconButton(onClick = { onShowHelpMenu() }) { Icon(Icons.Default.Help, null) }
             }
             if (book != null) {
                 BookTitles(book)
@@ -361,7 +361,7 @@ private fun BookTitles(book: VangaBook) {
         if (!book.oneshot) {
             Row(verticalAlignment = Alignment.Top) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.MenuBook,
+                    imageVector = Icons.Default.MenuBook,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )

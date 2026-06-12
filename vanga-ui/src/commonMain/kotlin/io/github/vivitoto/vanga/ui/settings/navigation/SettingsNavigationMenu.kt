@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.default.MenuBook
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Download
@@ -23,6 +22,7 @@ import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PriorityHigh
@@ -142,7 +142,7 @@ fun SettingsNavigationMenu(
             NavigationButton(
                 label = "EPUB 阅读器",
                 description = "选择 EPUB 阅读内核",
-                icon = Icons.AutoMirrored.Default.MenuBook,
+                icon = Icons.Default.MenuBook,
                 onClick = { onNavigation(EpubReaderSettingsScreen()) },
                 isSelected = currentScreen is EpubReaderSettingsScreen,
                 color = contentColor,
