@@ -183,8 +183,8 @@ fun AppDialogLayout(
 
 @Composable
 fun DialogConfirmCancelButtons(
-    confirmText: String = "Confirm",
-    cancelText: String = "Cancel",
+    confirmText: String = "确认",
+    cancelText: String = "取消",
     onConfirm: () -> Unit,
     onCancel: () -> Unit,
     confirmEnabled: Boolean = true,

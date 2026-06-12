@@ -438,8 +438,12 @@ class SeriesMatchConditionState(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val seriesChangeFlow = conditions.flatMapLatest { conditions ->
-        combine(conditions.map { it.seriesChangeFlow }) { conditions ->
-            toSeriesCondition(conditions.filterNotNull().toList())
+        if (conditions.isEmpty()) {
+            flowOf(toSeriesCondition(emptyList()))
+        } else {
+            combine(conditions.map { it.seriesChangeFlow }) { conditions ->
+                toSeriesCondition(conditions.filterNotNull().toList())
+            }
         }
     }
 

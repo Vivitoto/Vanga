@@ -30,7 +30,7 @@ class CollectionEditDialogViewModel(
     private var collections by mutableStateOf<List<KomgaCollection>>(emptyList())
     val nameValidationError by derivedStateOf {
         when {
-            name.isBlank() -> "Required"
+            name.isBlank() -> "必填"
             name != collection.name && collections.any { it.name == this.name } -> "已存在同名合集"
             else -> null
         }

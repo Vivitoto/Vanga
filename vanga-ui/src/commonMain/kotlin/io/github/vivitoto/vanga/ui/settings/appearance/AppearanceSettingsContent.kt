@@ -25,6 +25,12 @@ import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
+private val themeOptions = listOf(
+    AppTheme.SYSTEM,
+    AppTheme.DARK,
+    AppTheme.LIGHT,
+)
+
 @Composable
 fun AppearanceSettingsContent(
     cardWidth: Dp,
@@ -43,7 +49,7 @@ fun AppearanceSettingsContent(
         DropdownChoiceMenu(
             label = { Text("主题模式") },
             selectedOption = LabeledEntry(currentTheme, strings.forAppTheme(currentTheme)),
-            options = AppTheme.entries.map { LabeledEntry(it, strings.forAppTheme(it)) },
+            options = themeOptions.map { LabeledEntry(it, strings.forAppTheme(it)) },
             onOptionChange = { onThemeChange(it.value) },
             inputFieldModifier = Modifier.widthIn(min = 250.dp)
         )

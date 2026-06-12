@@ -72,7 +72,7 @@ class CollectionScreen(val collectionId: KomgaCollectionId) : ReloadableScreen {
                     )
             }
 
-            is Error -> Text("Error")
+            is Error -> Text("错误")
         }
 
         BackPressHandler { navigator.pop() }

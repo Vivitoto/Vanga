@@ -424,7 +424,7 @@ private fun ProviderCard(
                 WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier
                 else -> Modifier.widthIn(max = 700.dp)
             },
-            title = "Edit ${strings.forProvider(state.provider)}",
+            title = "编辑 ${strings.forProvider(state.provider)}",
             currentTab = currentTab,
             tabs = tabs,
             onTabChange = { currentTab = it },

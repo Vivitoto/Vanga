@@ -39,7 +39,7 @@ class StartupUpdateChecker(
             settings.putLastCheckedReleaseVersion(latest.version)
 
             if (AppVersion.current >= latest.version) return null
-            if (settings.getDismissedVersion().first() == AppVersion.current) return null
+            if (settings.getDismissedVersion().first() == latest.version) return null
 
             return latest
         } catch (e: Exception) {

@@ -22,7 +22,7 @@ internal class OptionsTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "OPTIONS",
+        title = "选项",
         icon = Icons.Default.Tune
     )
 

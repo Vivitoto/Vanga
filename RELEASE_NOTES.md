@@ -1,16 +1,25 @@
-# Vanga 0.1.1
+# Vanga 0.1.2
 
-Android 启动崩溃修复版本。
+Vanga 体验优化版本，重点清理英文残留、统一视觉风格，并修复首页自定义筛选和应用内更新的若干问题。
 
-## 修复内容
+## 主要变化
 
-- 修复 Android APK 启动时找不到 `libsqlitejdbc.so` 导致的崩溃：
-  - `java.lang.UnsatisfiedLinkError: dlopen failed: library "libsqlitejdbc.so" not found`
-- 将 SQLite JDBC 的 Android native library 自动解包到 Gradle 生成目录，并接入 Android `jniLibs` 打包流程。
-- CI 发布流程会构建并打包 Android 图片解码所需 native libraries，并校验 APK 中包含关键 `.so` 文件。
-- 修正图片解码 native JNI 符号的包名，避免 Vanga 包名迁移后调用不到旧命名空间下的 JNI 方法。
-- 调整 Android / 桌面 / metadata 图标留白比例，避免启动器裁切导致图标显示不全；背景保持深色，不引入白边。
+- 首页自定义筛选/编辑页面全面汉化，筛选类型、条件、操作符、排序、状态、按钮和日期占位等不再混用英文。
+- 扩展全局汉化范围，清理通用弹窗、编辑弹窗、书库/用户/文件选择、Komf 设置、服务器设置、阅读器设置和错误提示里的明显英文残留。
+- 新增主题模式：跟随系统、深色、浅色；默认跟随系统。
+- 调整整体视觉风格，使用墨黑、香槟金和暖纸色系，靠近 Vink Flasher / Visto 的品牌观感，减少原 Komelia 风格痕迹。
+- 放大 Vanga 图标主体至 1.1x，保持深色背景和安全边距，不引入白边。
+
+## 修复
+
+- 修复首页筛选中部分操作符重新打开后显示/映射错误的问题。
+- 修复空条件组状态不发射导致预览/筛选状态可能卡住的问题。
+- 修复布尔条件和标题条件重新打开时未保留已保存状态的问题。
+- 修复搜索候选过滤使用旧输入值导致候选不稳定的问题。
+- 修复应用内更新流程中无 APK 资源或异常时更新锁不释放的问题。
+- 修复启动更新弹窗“稍后”版本判断逻辑，避免不必要的重复弹窗。
 
 ## 说明
 
-这是 `0.1.0` 首发后的紧急修复版本，建议所有 Android 用户升级。
+- 应用内更新仍使用 GitHub Release 的 `latest` APK，并通过 Android 系统 PackageInstaller 安装确认。
+- 本地环境缺少 Java/JDK，无法在本机完成 Gradle 编译；本版本依赖 GitHub Actions 进行正式 APK 构建和签名。

@@ -1,6 +1,7 @@
 package io.github.vivitoto.vanga.ui
 
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,7 @@ import io.github.vivitoto.vanga.AppNotifications
 import io.github.vivitoto.vanga.KomgaAuthenticationState
 import io.github.vivitoto.vanga.KomgaAuthenticationState.DataState.AuthenticationRequired
 import io.github.vivitoto.vanga.KomgaAuthenticationState.DataState.Loaded
+import io.github.vivitoto.vanga.settings.model.AppTheme
 import io.github.vivitoto.vanga.ui.Theme.Companion.toTheme
 import io.github.vivitoto.vanga.ui.Theme.ThemeType
 import io.github.vivitoto.vanga.ui.common.components.LoadingMaxSizeIndicator
@@ -67,9 +69,11 @@ fun MainView(
     platformType: PlatformType,
     keyEvents: SharedFlow<KeyEvent>
 ) {
-    var theme by rememberSaveable { mutableStateOf(Theme.DARK) }
+    val systemInDarkTheme = isSystemInDarkTheme()
+    var appTheme by rememberSaveable { mutableStateOf(AppTheme.SYSTEM) }
+    val theme = appTheme.toTheme(systemInDarkTheme)
     LaunchedEffect(dependencies) {
-        dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { theme = it.toTheme() }
+        dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { appTheme = it }
     }
 
     MaterialTheme(colorScheme = theme.colorScheme) {

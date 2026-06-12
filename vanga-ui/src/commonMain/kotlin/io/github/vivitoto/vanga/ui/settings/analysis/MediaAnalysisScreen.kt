@@ -31,7 +31,7 @@ class MediaAnalysisScreen : Screen {
         SettingsScreenContainer("媒体管理") {
             when (val state = vm.state.collectAsState().value) {
                 Uninitialized, Loading -> LoadingMaxSizeIndicator()
-                is Error -> Text(state.exception.message ?: "Error")
+                is Error -> Text(state.exception.message ?: "错误")
                 is Success -> MediaAnalysisContent(
                     books = vm.books,
                     onBookClick = {

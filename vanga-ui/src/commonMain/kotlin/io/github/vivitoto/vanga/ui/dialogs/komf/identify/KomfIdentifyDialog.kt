@@ -74,7 +74,7 @@ fun KomfIdentifyDialog(
 
     AppDialog(
         modifier = Modifier.widthIn(max = 840.dp),
-        header = { DialogSimpleHeader("Identify") },
+        header = { DialogSimpleHeader("识别") },
         content = {
             Box(
                 modifier = Modifier.fillMaxSize().padding(vertical = 10.dp),
@@ -115,7 +115,7 @@ fun IdentifyConfigContent(state: ConfigState) {
             TextField(
                 value = state.searchName,
                 onValueChange = state::searchName::set,
-                label = { Text("Title") },
+                label = { Text("标题") },
                 modifier = Modifier.weight(1f)
             )
 
@@ -131,7 +131,7 @@ fun IdentifyConfigContent(state: ConfigState) {
                 enabled = !isLoading.value,
             ) {
                 if (isLoading.value && searchInProgress) CircularProgressIndicator(Modifier.size(25.dp))
-                else Text("Search")
+                else Text("搜索")
             }
         }
     }
@@ -207,7 +207,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
 
             when (progress.status) {
                 ProgressStatus.COMPLETED -> {
-                    Text("Completed")
+                    Text("已完成")
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
@@ -252,7 +252,7 @@ private fun ProcessingProgressCard() {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            Text("Processing")
+            Text("处理中")
             Spacer(Modifier.weight(1f))
         }
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -272,7 +272,7 @@ fun IdentifyConfigButtons(state: ConfigState) {
             onClick = state.onDismiss,
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Cancel")
+            Text("取消")
         }
 
         FilledTonalButton(
@@ -287,7 +287,7 @@ fun IdentifyConfigButtons(state: ConfigState) {
             modifier = Modifier.cursorForHand()
         ) {
             if (isLoading.value && autoIdentifyProgress) CircularProgressIndicator(Modifier.size(25.dp))
-            else Text("Auto-Identify")
+            else Text("自动识别")
         }
     }
 }
@@ -295,7 +295,7 @@ fun IdentifyConfigButtons(state: ConfigState) {
 @Composable
 fun IdentifySearchResultsButtons(state: SearchResultsState) {
     ControlButtons(
-        confirmationText = "Confirm",
+        confirmationText = "确认",
         onConfirm = { state.onResultConfirm() },
         onDismissRequest = state.onDismiss
     )
@@ -311,7 +311,7 @@ fun IdentificationProgressButtons(
         modifier = Modifier.cursorForHand()
     ) {
         if (isLoading) Text("在后台运行")
-        else Text("Confirm")
+        else Text("确认")
     }
 }
 
@@ -331,7 +331,7 @@ private fun ControlButtons(
             onClick = onDismissRequest,
             modifier = Modifier.cursorForHand()
         ) {
-            Text("Cancel")
+            Text("取消")
         }
 
         FilledTonalButton(

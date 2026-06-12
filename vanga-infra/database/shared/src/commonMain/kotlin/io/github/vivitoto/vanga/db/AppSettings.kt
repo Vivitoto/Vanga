@@ -15,7 +15,7 @@ data class AppSettings(
     val seriesPageLoadSize: Int = 20,
     val bookPageLoadSize: Int = 20,
     val bookListLayout: BooksLayout = BooksLayout.GRID,
-    val appTheme: AppTheme = AppTheme.DARK,
+    val appTheme: AppTheme = AppTheme.SYSTEM,
 
     val checkForUpdatesOnStartup: Boolean = true,
     val updateLastCheckedTimestamp: Instant? = null,

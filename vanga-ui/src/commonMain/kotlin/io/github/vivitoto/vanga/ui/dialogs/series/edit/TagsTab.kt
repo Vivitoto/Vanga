@@ -22,7 +22,7 @@ internal class TagsTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "TAGS",
+        title = "标签",
         icon = Icons.Default.LocalOffer
     )
 
@@ -52,7 +52,7 @@ private fun TagsContent(
         LockableChipTextFieldWithSuggestions(
             values = tags.value,
             onValuesChange = { tags.setValue(it) },
-            label = "Tags",
+            label = "标签",
             suggestions = remember(allTags) { allTags.map { stringEntry(it) } },
             locked = tagsLock.value,
             onLockChange = { tagsLock.setValue(it) }
@@ -60,7 +60,7 @@ private fun TagsContent(
         LockableChipTextFieldWithSuggestions(
             values = genres.value,
             onValuesChange = { genres.setValue(it) },
-            label = "Genres",
+            label = "流派",
             suggestions = remember(allGenres) { allGenres.map { stringEntry(it) } },
             locked = genresLock.value,
             onLockChange = { genresLock.setValue(it) }

@@ -60,8 +60,8 @@ fun SeriesConditionContent(
         PageSettingsContent(
             pageSize = state.pageSize.collectAsState().value,
             onPageSizeChange = state::onPagSizeChange,
-            sort = remember(sort) { LabeledEntry(sort, sort.name) },
-            sortOptions = remember { SeriesSort.entries.map { LabeledEntry(it, it.name) } },
+            sort = remember(sort) { LabeledEntry(sort, sort.label()) },
+            sortOptions = remember { SeriesSort.entries.map { LabeledEntry(it, it.label()) } },
             onSortChange = state::onSortChange,
             sortDirection = state.sortDirection.collectAsState().value,
             onSortDirectionChange = state::onSortDirectionChange
@@ -94,8 +94,8 @@ fun SeriesMatchConditionContent(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val type = state.matchType.collectAsState().value
                 DropdownChoiceMenu(
-                    selectedOption = LabeledEntry(type, type.name),
-                    options = MatchType.entries.map { LabeledEntry(it, it.name) },
+                    selectedOption = LabeledEntry(type, type.label()),
+                    options = MatchType.entries.map { LabeledEntry(it, it.label()) },
                     onOptionChange = { state.setMatchType(it.value) }
                 )
                 IconButton(onClick = onConditionRemove) {
@@ -108,7 +108,7 @@ fun SeriesMatchConditionContent(
 
         }
         ConditionAddButton(
-            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
+            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.label()) } },
             onConditionAdd = state::addCondition,
         )
     }
@@ -153,7 +153,7 @@ private fun ConditionContent(
     when (condition) {
         is SeriesMatchConditionState -> SeriesMatchConditionContent(condition, onConditionRemove)
         null -> ConditionAddButton(
-            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
+            conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.label()) } },
             onConditionAdd = onConditionAdd,
         )
 
@@ -270,8 +270,8 @@ private fun SeriesConditionLayout(
     content: @Composable RowScope.() -> Unit
 ) {
     SimpleConditionLayout(
-        conditionType = remember { LabeledEntry(type, type.name) },
-        options = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.name) } },
+        conditionType = remember { LabeledEntry(type, type.label()) },
+        options = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.label()) } },
         onConditionTypeChange = onTypeChange,
         onConditionRemove = onConditionRemove
     ) {
@@ -454,7 +454,7 @@ private fun SeriesGenreConditionContent(
         EqualityNullableOpDropdownSearchContent(
             state = state,
             options = state.genres.collectAsState(emptyList()).value,
-            label = "Genre"
+            label = "类型"
         )
     }
 }
@@ -473,7 +473,7 @@ private fun SeriesLanguageConditionContent(
         EqualityOpDropdownSearchContent(
             state = state,
             options = state.languages.collectAsState(emptyList()).value,
-            label = "Language"
+            label = "语言"
         )
     }
 }
@@ -492,7 +492,7 @@ private fun SeriesPublisherConditionContent(
         EqualityOpDropdownSearchContent(
             state = state,
             options = state.publishers.collectAsState(emptyList()).value,
-            label = "Publisher"
+            label = "出版社"
         )
     }
 }
@@ -512,8 +512,8 @@ fun SeriesStatusConditionContent(
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-            valueOptions = remember { KomgaSeriesStatus.entries.map { LabeledEntry(it, it.name) } },
+            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.label()) } },
+            valueOptions = remember { KomgaSeriesStatus.entries.map { LabeledEntry(it, it.label()) } },
             onValueChange = state::setValue
         )
     }
@@ -533,17 +533,17 @@ fun SeriesAgeRatingConditionContent(
     ) {
         val operator = state.operator.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = NumericNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = LabeledEntry(operator, operator.label()),
+            options = NumericNullableOpState.Op.entries.map { LabeledEntry(it, it.label()) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text("操作") }
         )
         if (operator != NumericNullableOpState.Op.IsNull && operator != NumericNullableOpState.Op.IsNotNull)
             IntTextField(
                 value = state.value.collectAsState().value,
                 onValueChange = state::setValue,
-                label = "Age",
+                label = "年龄",
             )
     }
 }
@@ -562,18 +562,18 @@ fun CollectionIdConditionContent(
         val options = state.collectionsSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = LabeledEntry(operator, operator.label()),
+            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text("操作") }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,
             onSearchTextChange = state::onSearchTextChange,
             options = remember(options) { options.map { LabeledEntry(it, it.name) } },
             onValueChange = state::onCollectionSelect,
-            label = "Collection"
+            label = "合集"
         )
     }
 }

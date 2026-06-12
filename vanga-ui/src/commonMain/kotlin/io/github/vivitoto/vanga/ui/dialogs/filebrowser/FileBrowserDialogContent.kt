@@ -110,7 +110,7 @@ private fun DirectoryListing(
         if (parent != null) {
             DirectoryListingItem(
                 icon = Icons.Default.ChevronLeft,
-                title = "Parent",
+                title = "上级目录",
                 onClick = { onDirectoryClick(parent) }
             )
         }
@@ -155,7 +155,7 @@ private fun DialogControlButtons(
 
         Spacer(Modifier.weight(1f))
         TextButton(onClick = onDismissRequest) {
-            Text("CANCEL")
+            Text("取消")
         }
         Spacer(Modifier.size(10.dp))
 
@@ -163,7 +163,7 @@ private fun DialogControlButtons(
             onDirectoryChoice(currentPath)
             onDismissRequest()
         }) {
-            Text("CHOOSE")
+            Text("选择")
         }
     }
 }

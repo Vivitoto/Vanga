@@ -27,7 +27,7 @@ fun SeriesEditDialog(
             title = "编辑 ${series.metadata.title}",
             currentTab = vm.currentTab,
             tabs = vm.tabs,
-            confirmationText = "Save",
+            confirmationText = "保存",
             onConfirm = { coroutineScope.launch { vm.saveChanges() } },
             onTabChange = { vm.currentTab = it },
             onDismissRequest = { onDismissRequest() }

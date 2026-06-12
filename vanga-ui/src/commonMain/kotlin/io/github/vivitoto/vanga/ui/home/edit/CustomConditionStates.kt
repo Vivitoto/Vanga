@@ -272,7 +272,8 @@ class SeriesIdConditionState(
 }
 
 class DeletedConditionState(
-) : BooleanOpState(), SeriesConditionState, BookConditionState {
+    initial: KomgaSearchOperator.Boolean? = null
+) : BooleanOpState(initial), SeriesConditionState, BookConditionState {
     override val bookChangeFlow = combine(this.operator) { this.toBookCondition() }
     override val seriesChangeFlow = combine(this.operator) { this.toSeriesCondition() }
     override fun toSeriesCondition(): SeriesCondition {
@@ -284,14 +285,18 @@ class DeletedConditionState(
     }
 }
 
-class CompleteConditionState() : BooleanOpState(), SeriesConditionState {
+class CompleteConditionState(
+    initial: KomgaSearchOperator.Boolean? = null
+) : BooleanOpState(initial), SeriesConditionState {
     override val seriesChangeFlow = combine(this.operator) { this.toSeriesCondition() }
     override fun toSeriesCondition(): SeriesCondition {
         return KomgaSearchCondition.Complete(toSearchOperator())
     }
 }
 
-class OneShotConditionState() : BooleanOpState(), BookConditionState, SeriesConditionState {
+class OneShotConditionState(
+    initial: KomgaSearchOperator.Boolean? = null
+) : BooleanOpState(initial), BookConditionState, SeriesConditionState {
     override val seriesChangeFlow = combine(this.operator) { this.toSeriesCondition() }
     override val bookChangeFlow = combine(this.operator) { this.toBookCondition() }
 
@@ -306,7 +311,7 @@ class OneShotConditionState() : BooleanOpState(), BookConditionState, SeriesCond
 
 class TitleConditionState(
     val initial: KomgaSearchCondition.Title?
-) : StringOpState(), SeriesConditionState, BookConditionState {
+) : StringOpState(initial?.operator), SeriesConditionState, BookConditionState {
     override val bookChangeFlow = combine(this.operator, this.value) { _, _ -> this.toBookCondition() }
     override val seriesChangeFlow = combine(this.operator, this.value) { _, _ -> this.toSeriesCondition() }
 
@@ -576,7 +581,7 @@ fun BookCondition.toBookConditionState(
         is KomgaSearchCondition.LibraryId -> LibraryConditionState(options.map { it.libraries }, this)
         is KomgaSearchCondition.ReadStatus -> ReadStatusConditionState(this)
         is KomgaSearchCondition.Author -> AuthorConditionState(options.map { it.authors }, this)
-        is KomgaSearchCondition.Deleted -> DeletedConditionState()
+        is KomgaSearchCondition.Deleted -> DeletedConditionState(this.operator)
         is KomgaSearchCondition.MediaProfile -> MediaProfileConditionState(this)
         is KomgaSearchCondition.MediaStatus -> MediaStatusConditionState(this)
         is KomgaSearchCondition.NumberSort -> NumberSortConditionState(this)
@@ -597,7 +602,7 @@ fun BookCondition.toBookConditionState(
         )
 
         is KomgaSearchCondition.Title -> TitleConditionState(this)
-        is KomgaSearchCondition.OneShot -> OneShotConditionState()
+        is KomgaSearchCondition.OneShot -> OneShotConditionState(this.operator)
     }
 }
 
@@ -631,10 +636,10 @@ fun SeriesCondition.toSeriesConditionState(
         is KomgaSearchCondition.LibraryId -> LibraryConditionState(options.map { it.libraries }, this)
         is KomgaSearchCondition.ReadStatus -> ReadStatusConditionState(this)
         is KomgaSearchCondition.Author -> AuthorConditionState(options.map { it.authors }, this)
-        is KomgaSearchCondition.Deleted -> DeletedConditionState()
+        is KomgaSearchCondition.Deleted -> DeletedConditionState(this.operator)
         is KomgaSearchCondition.ReleaseDate -> ReleaseDateConditionState(this)
         is KomgaSearchCondition.Title -> TitleConditionState(this)
-        is KomgaSearchCondition.OneShot -> OneShotConditionState()
+        is KomgaSearchCondition.OneShot -> OneShotConditionState(this.operator)
         is KomgaSearchCondition.AgeRating -> AgeRatingConditionState(this)
         is KomgaSearchCondition.CollectionId -> CollectionIdConditionState(
             initial = this,
@@ -643,7 +648,7 @@ fun SeriesCondition.toSeriesConditionState(
             coroutineScope = coroutineScope
         )
 
-        is KomgaSearchCondition.Complete -> CompleteConditionState()
+        is KomgaSearchCondition.Complete -> CompleteConditionState(this.operator)
         is KomgaSearchCondition.Genre -> GenreConditionState(this, options.map { it.genres })
         is KomgaSearchCondition.Language -> LanguageConditionState(this, options.map { it.languages })
         is KomgaSearchCondition.Publisher -> PublisherConditionState(this, options.map { it.publishers })

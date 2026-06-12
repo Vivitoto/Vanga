@@ -31,7 +31,7 @@ class ReadListEditDialogViewModel(
     private var readLists by mutableStateOf<List<KomgaReadList>>(emptyList())
     val nameValidationError by derivedStateOf {
         when {
-            name.isBlank() -> "Required"
+            name.isBlank() -> "必填"
             name != readList.name && readLists.any { it.name == this.name } -> "已存在同名阅读清单"
             else -> null
         }

@@ -88,7 +88,7 @@ fun <T> SimpleConditionLayout(
                 conditionType,
                 options = options,
                 onOptionChange = { onConditionTypeChange(it.value) },
-                label = { Text("Condition") },
+                label = { Text("条件") },
                 inputFieldModifier = Modifier.widthIn(conditionInputMinWidth)
             )
             content()
@@ -101,7 +101,7 @@ fun TagConditionContent(state: TagConditionState) {
     EqualityNullableOpDropdownSearchContent(
         state,
         state.tags.collectAsState(emptyList()).value,
-        "Tag"
+        "标签"
     )
 }
 
@@ -111,8 +111,8 @@ fun RowScope.ReadStatusConditionContent(state: ReadStatusConditionState) {
     EqualityOpDropDownContent(
         operator = state.operator.collectAsState().value,
         onOpChange = state::setOp,
-        selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-        valueOptions = remember { KomgaReadStatus.entries.map { LabeledEntry(it, it.name) } },
+        selectedValue = remember(value) { value?.let { LabeledEntry(it, it.label()) } },
+        valueOptions = remember { KomgaReadStatus.entries.map { LabeledEntry(it, it.label()) } },
         onValueChange = state::setValue
     )
 }
@@ -158,24 +158,24 @@ fun RowScope.AuthorConditionContent(
     val nameOptions = state.nameOptions.collectAsState(emptyList()).value
     val currentValue = state.value.collectAsState().value
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     DropdownChoiceMenu(
         selectedOption = remember(currentValue) {
-            LabeledEntry(currentValue?.role, currentValue?.role ?: "Any")
+            LabeledEntry(currentValue?.role, currentValue?.role ?: "任意")
         },
         options = remember(roleOptions) {
-            listOf(LabeledEntry<String?>(null, "Any"))
+            listOf(LabeledEntry<String?>(null, "任意"))
                 .plus(roleOptions.map { LabeledEntry(it, it) })
         },
         onOptionChange = { state.setRoleValue(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Role") }
+        label = { Text("角色") }
     )
 
     SearchableOptionSelectionField(
@@ -183,7 +183,7 @@ fun RowScope.AuthorConditionContent(
         onSearchTextChange = state::setSearchText,
         options = nameOptions.map { LabeledEntry.stringEntry(it) },
         onValueChange = { state.setNameValue(it) },
-        label = "Author"
+        label = "作者"
     )
 }
 
@@ -229,11 +229,11 @@ fun RowScope.EqualityNullableOpContent(
     val operator = state.operator.collectAsState().value
     var value by remember { mutableStateOf(state.value.value ?: "") }
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     if (operator != EqualityNullableOpState.Op.IsNull && operator != EqualityNullableOpState.Op.IsNotNull)
@@ -253,11 +253,11 @@ fun RowScope.BooleanOpContent(
     onOperatorChange: (BooleanOpState.Op) -> Unit,
 ) {
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = BooleanOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = BooleanOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 }
 
@@ -270,11 +270,11 @@ fun <T> RowScope.EqualityOpDropDownContent(
     onValueChange: (T) -> Unit,
 ) {
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { onOpChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     DropdownChoiceMenu(
@@ -282,7 +282,7 @@ fun <T> RowScope.EqualityOpDropDownContent(
         options = valueOptions,
         onOptionChange = { onValueChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Value") }
+        label = { Text("值") }
     )
 }
 
@@ -355,7 +355,8 @@ fun <T> SearchableOptionSelectionField(
     val focused = interactionSource.collectIsFocusedAsState().value
     var textFieldText by remember { mutableStateOf(searchText) }
     val suggestedOptions = remember(options, textFieldText) {
-        options.filter { it.label.lowercase().contains(searchText) }.take(50)
+        val query = textFieldText.lowercase()
+        options.filter { it.label.lowercase().contains(query) }.take(50)
     }
 
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -406,11 +407,11 @@ fun RowScope.StringOpContent(
     onValueChange: (String) -> Unit,
 ) {
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = StringOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = StringOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     var textValue by remember { mutableStateOf(value ?: "") }
@@ -437,11 +438,11 @@ private fun RowScope.DateOpContent(
     onDurationChange: (Duration?) -> Unit,
 ) {
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = DateOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = DateOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { onOperatorChange(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     when (operator) {
@@ -517,7 +518,7 @@ private fun DatePickerField(
     TextField(
         value = currentDate?.toLocalDateTime(TimeZone.currentSystemDefault())?.toString() ?: "",
         onValueChange = { },
-        placeholder = { Text("MM/DD/YYYY") },
+        placeholder = { Text("选择日期") },
         trailingIcon = {
             Icon(Icons.Default.DateRange, null)
         },
@@ -545,12 +546,12 @@ private fun DatePickerField(
                     }
                     showDatePicker = false
                 }) {
-                    Text("OK")
+                    Text("确定")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text("取消")
                 }
             }
         ) {
@@ -582,7 +583,7 @@ private fun PeriodPickerField(
                 }
 
             },
-            label = { Text("Days") },
+            label = { Text("天数") },
             modifier = Modifier.width(100.dp),
         )
     }
@@ -641,11 +642,11 @@ fun EqualityNullableOpDropdownSearchContent(
     val operator = state.operator.collectAsState().value
     val value = state.value.collectAsState().value
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = EqualityNullableOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     if (operator != EqualityNullableOpState.Op.IsNull && operator != EqualityNullableOpState.Op.IsNotNull) {
@@ -673,11 +674,11 @@ fun EqualityOpDropdownSearchContent(
     val operator = state.operator.collectAsState().value
     val value = state.value.collectAsState().value
     DropdownChoiceMenu(
-        selectedOption = LabeledEntry(operator, operator.name),
-        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+        selectedOption = LabeledEntry(operator, operator.label()),
+        options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
         onOptionChange = { state.setOp(it.value) },
         inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-        label = { Text("Operator") }
+        label = { Text("操作") }
     )
 
     var searchText by remember { mutableStateOf(value ?: "") }
@@ -711,14 +712,14 @@ fun <T> PageSettingsContent(
             selectedOption = sort,
             options = sortOptions,
             onOptionChange = { onSortChange(it.value) },
-            label = { Text("Sort") },
+            label = { Text("排序") },
             inputFieldModifier = Modifier.widthIn(min = 150.dp)
         )
         DropdownChoiceMenu(
-            selectedOption = remember(sortDirection) { LabeledEntry(sortDirection, sortDirection.name) },
-            options = remember { KomgaSort.Direction.entries.map { LabeledEntry(it, it.name) } },
+            selectedOption = remember(sortDirection) { LabeledEntry(sortDirection, sortDirection.label()) },
+            options = remember { KomgaSort.Direction.entries.map { LabeledEntry(it, it.label()) } },
             onOptionChange = { onSortDirectionChange(it.value) },
-            label = { Text("Direction") },
+            label = { Text("方向") },
             inputFieldModifier = Modifier.widthIn(min = 60.dp)
         )
         PageSizeSettingsContent(pageSize, onPageSizeChange)
@@ -742,7 +743,7 @@ fun PageSizeSettingsContent(pageSize: Int, onPageSizeChange: (Int) -> Unit) {
                 }
             }
         },
-        label = { Text("Limit") },
+        label = { Text("数量") },
         modifier = Modifier.width(70.dp),
     )
 

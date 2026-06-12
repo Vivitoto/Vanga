@@ -26,7 +26,7 @@ internal class GeneralTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "GENERAL",
+        title = "基本信息",
         icon = Icons.Default.FormatAlignCenter
     )
 

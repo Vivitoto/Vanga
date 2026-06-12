@@ -12,7 +12,7 @@ class LinksTab(
     private val vm: BookEditMetadataState
 ) : DialogTab {
     override fun options() = TabItem(
-        title = "LINKS",
+        title = "链接",
         icon = Icons.Default.Link
     )
 

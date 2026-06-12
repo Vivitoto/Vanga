@@ -39,7 +39,7 @@ class AuthorsTab(
     private val vm: BookBulkEditDialogViewModel
 ) : DialogTab {
     override fun options() = TabItem(
-        title = "AUTHORS",
+        title = "作者",
         icon = Icons.Default.People
     )
 

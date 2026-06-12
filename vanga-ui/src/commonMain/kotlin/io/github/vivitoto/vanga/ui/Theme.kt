@@ -12,114 +12,114 @@ enum class Theme(
 ) {
     DARK(
         darkColorScheme(
-            primary = Color.White,
-            onPrimary = Color.Black,
-            primaryContainer = Color(red = 212, green = 212, blue = 212),
-            onPrimaryContainer = Color(red = 62, green = 64, blue = 64),
+            primary = VangaBrand.ChampagneDark,
+            onPrimary = VangaBrand.Ink,
+            primaryContainer = Color(0xFF2A2316),
+            onPrimaryContainer = Color(0xFFF1E2C2),
 
-            secondary = Color(red = 87, green = 131, blue = 212),
-            onSecondary = Color.White,
-            secondaryContainer = Color(red = 50, green = 70, blue = 120),
-            onSecondaryContainer = Color(red = 230, green = 230, blue = 230),
+            secondary = Color(0xFFD0CAB7),
+            onSecondary = Color(0xFF1B1D22),
+            secondaryContainer = Color(0xFF302B22),
+            onSecondaryContainer = Color(0xFFF5F1E8),
 
-            tertiary = Color(red = 249, green = 168, blue = 37),
-            onTertiary = Color.White,
-            tertiaryContainer = Color(red = 181, green = 130, blue = 49),
-            onTertiaryContainer = Color.White,
+            tertiary = VangaBrand.ChampagneLight,
+            onTertiary = VangaBrand.Ink,
+            tertiaryContainer = Color(0xFF3A2A12),
+            onTertiaryContainer = Color(0xFFF4E6CB),
 
-            background = Color(red = 113, green = 116, blue = 118),
-            onBackground = Color(red = 202, green = 196, blue = 208),
+            background = VangaBrand.Ink,
+            onBackground = Color(0xFFF5F1E8),
 
-            surface = Color(red = 15, green = 15, blue = 15),
-            onSurface = Color(red = 237, green = 235, blue = 235),
+            surface = VangaBrand.Ink,
+            onSurface = Color(0xFFF5F1E8),
 
-            surfaceVariant = Color(red = 43, green = 43, blue = 43),
-            surfaceContainerLow = Color(red = 43, green = 43, blue = 43),
-            surfaceContainerHighest = Color(red = 43, green = 43, blue = 43),
-            onSurfaceVariant = Color(red = 202, green = 196, blue = 208),
+            surfaceVariant = Color(0xFF1B1D22),
+            surfaceContainerLow = Color(0xFF121318),
+            surfaceContainerHighest = Color(0xFF24221E),
+            onSurfaceVariant = Color(0xFFB4AC9A),
 
-            surfaceDim = Color(red = 32, green = 31, blue = 35),
-            surfaceBright = Color(red = 113, green = 116, blue = 118),
+            surfaceDim = Color(0xFF08090B),
+            surfaceBright = Color(0xFF2A2D34),
 
-            error = Color(red = 240, green = 70, blue = 60),
-            onError = Color.White,
-            errorContainer = Color(red = 140, green = 29, blue = 24),
-            onErrorContainer = Color.White
+            error = Color(0xFFFFB4AB),
+            onError = VangaBrand.Ink,
+            errorContainer = Color(0xFF7A211C),
+            onErrorContainer = Color(0xFFFFDAD6)
         ),
         ThemeType.DARK
     ),
     LIGHT(
         lightColorScheme(
-            primary = Color.Black,
+            primary = VangaBrand.ChampagneLight,
             onPrimary = Color.White,
-            primaryContainer = Color(red = 212, green = 212, blue = 212),
-            onPrimaryContainer = Color(red = 62, green = 64, blue = 64),
+            primaryContainer = Color(0xFFF4E6CB),
+            onPrimaryContainer = Color(0xFF3B2A10),
 
-            secondary = Color(red = 87, green = 131, blue = 212),
+            secondary = Color(0xFF6F685C),
             onSecondary = Color.White,
-            secondaryContainer = Color(red = 70, green = 100, blue = 160),
-            onSecondaryContainer = Color.White,
+            secondaryContainer = Color(0xFFE9E0D0),
+            onSecondaryContainer = Color(0xFF252018),
 
-            tertiary = Color(red = 232, green = 156, blue = 35),
+            tertiary = VangaBrand.ChampagneLight,
             onTertiary = Color.White,
-            tertiaryContainer = Color(red = 181, green = 130, blue = 49),
-            onTertiaryContainer = Color.White,
+            tertiaryContainer = Color(0xFFF4E6CB),
+            onTertiaryContainer = Color(0xFF3B2A10),
 
-            background = Color(red = 254, green = 247, blue = 255),
-            onBackground = Color(red = 29, green = 27, blue = 32),
+            background = Color(0xFFF7F3EA),
+            onBackground = Color(0xFF1C1A16),
 
-            surface = Color(red = 254, green = 247, blue = 255),
-            onSurface = Color(red = 29, green = 27, blue = 32),
+            surface = Color(0xFFFFFCF6),
+            onSurface = Color(0xFF1C1A16),
 
-            surfaceVariant = Color(red = 231, green = 224, blue = 236),
-            surfaceContainerHighest = Color(red = 230, green = 224, blue = 233),
-            onSurfaceVariant = Color(red = 73, green = 69, blue = 79),
+            surfaceVariant = Color(0xFFF0E8D7),
+            surfaceContainerHighest = Color(0xFFE8DDCB),
+            onSurfaceVariant = Color(0xFF6F685C),
 
-            surfaceDim = Color(red = 222, green = 216, blue = 225),
-            surfaceBright = Color(red = 180, green = 180, blue = 180),
+            surfaceDim = Color(0xFFE8DDCB),
+            surfaceBright = Color(0xFFFFFFFF),
 
-            error = Color(red = 240, green = 70, blue = 60),
+            error = Color(0xFFBA1A1A),
             onError = Color.White,
-            errorContainer = Color(red = 195, green = 65, blue = 60),
-            onErrorContainer = Color.White
+            errorContainer = Color(0xFFFFDAD6),
+            onErrorContainer = Color(0xFF410002)
         ),
         ThemeType.LIGHT
     ),
 
     DARKER(
         darkColorScheme(
-            primary = Color.White,
-            onPrimary = Color.Black,
-            primaryContainer = Color.Black,
-            onPrimaryContainer = Color.White,
+            primary = VangaBrand.ChampagneDark,
+            onPrimary = Color(0xFF000106),
+            primaryContainer = Color(0xFF201A10),
+            onPrimaryContainer = Color(0xFFF1E2C2),
 
-            secondary = Color(red = 75, green = 125, blue = 205),
-            onSecondary = Color.White,
-            secondaryContainer = Color(red = 50, green = 70, blue = 120),
-            onSecondaryContainer = Color(red = 230, green = 230, blue = 230),
+            secondary = Color(0xFFCFC7BA),
+            onSecondary = Color(0xFF000106),
+            secondaryContainer = Color(0xFF211E18),
+            onSecondaryContainer = Color(0xFFF4EFE3),
 
-            tertiary = Color(red = 193, green = 127, blue = 31),
-            onTertiary = Color.White,
-            tertiaryContainer = Color(red = 115, green = 84, blue = 10),
-            onTertiaryContainer = Color.White,
+            tertiary = VangaBrand.ChampagneLight,
+            onTertiary = Color(0xFF000106),
+            tertiaryContainer = Color(0xFF2B1F0F),
+            onTertiaryContainer = Color(0xFFF4E6CB),
 
-            background = Color.Black,
-            onBackground = Color.White,
+            background = Color(0xFF000106),
+            onBackground = Color(0xFFF4EFE3),
 
-            surface = Color.Black,
-            onSurface = Color.White,
+            surface = Color(0xFF000106),
+            onSurface = Color(0xFFF4EFE3),
 
-            surfaceVariant = Color(red = 30, green = 30, blue = 30),
-            surfaceContainerHighest = Color(red = 30, green = 30, blue = 30),
-            onSurfaceVariant = Color.White,
+            surfaceVariant = Color(0xFF121210),
+            surfaceContainerHighest = Color(0xFF1B1A17),
+            onSurfaceVariant = Color(0xFFB7B0A7),
 
-            surfaceDim = Color(red = 25, green = 25, blue = 25),
-            surfaceBright = Color(red = 65, green = 65, blue = 65),
+            surfaceDim = Color(0xFF000106),
+            surfaceBright = Color(0xFF24221E),
 
-            error = Color(red = 240, green = 70, blue = 60),
-            onError = Color.White,
-            errorContainer = Color(red = 140, green = 29, blue = 24),
-            onErrorContainer = Color.White
+            error = Color(0xFFFFB4AB),
+            onError = Color(0xFF000106),
+            errorContainer = Color(0xFF7A211C),
+            onErrorContainer = Color(0xFFFFDAD6)
         ),
         ThemeType.DARK
     );
@@ -130,7 +130,19 @@ enum class Theme(
     }
 
     companion object {
-        fun AppTheme.toTheme() = valueOf(this.name)
+        fun AppTheme.toTheme(isSystemInDarkTheme: Boolean) = when (this) {
+            AppTheme.SYSTEM -> if (isSystemInDarkTheme) DARK else LIGHT
+            AppTheme.DARK -> DARK
+            AppTheme.LIGHT -> LIGHT
+            AppTheme.DARKER -> DARK
+        }
+
         fun Theme.toAppTheme() = AppTheme.valueOf(this.name)
     }
+}
+
+object VangaBrand {
+    val Ink = Color(0xFF0E0F12)
+    val ChampagneDark = Color(0xFFD6B981)
+    val ChampagneLight = Color(0xFFB88945)
 }

@@ -20,9 +20,9 @@ fun LibraryEditDialogs(
     val title = if (library != null) "编辑书库" else "添加书库"
     val confirmationText = remember(library, vm.currentTab) {
         when {
-            library != null -> "Edit"
-            vm.currentTab is MetadataTab -> "Add"
-            else -> "Next"
+            library != null -> "保存"
+            vm.currentTab is MetadataTab -> "添加"
+            else -> "下一步"
         }
     }
 

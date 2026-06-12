@@ -48,7 +48,7 @@ fun LinksEditContent(
                     TextField(
                         value = link.label,
                         onValueChange = { onLinkChange(index, link.copy(label = it)) },
-                        label = { Text("Label") },
+                        label = { Text("标签") },
                         maxLines = 2,
                         modifier = Modifier.widthIn(min = 100.dp).withTextFieldNavigation()
                     )

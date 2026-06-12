@@ -59,8 +59,8 @@ fun BookConditionContent(
         PageSettingsContent(
             pageSize = state.pageSize.collectAsState().value,
             onPageSizeChange = state::onPagSizeChange,
-            sort = remember(sort) { LabeledEntry(sort, sort.name) },
-            sortOptions = remember { BookSort.entries.map { LabeledEntry(it, it.name) } },
+            sort = remember(sort) { LabeledEntry(sort, sort.label()) },
+            sortOptions = remember { BookSort.entries.map { LabeledEntry(it, it.label()) } },
             onSortChange = state::onSortChange,
             sortDirection = state.sortDirection.collectAsState().value,
             onSortDirectionChange = state::onSortDirectionChange
@@ -94,8 +94,8 @@ fun BookMatchConditionContent(
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 val type = state.matchType.collectAsState().value
                 DropdownChoiceMenu(
-                    selectedOption = LabeledEntry(type, type.name),
-                    options = MatchType.entries.map { LabeledEntry(it, it.name) },
+                    selectedOption = LabeledEntry(type, type.label()),
+                    options = MatchType.entries.map { LabeledEntry(it, it.label()) },
                     onOptionChange = { state.setMatchType(it.value) }
                 )
                 IconButton(onClick = onConditionRemove) {
@@ -108,7 +108,7 @@ fun BookMatchConditionContent(
         }
 
         ConditionAddButton(
-            conditions = remember { BookConditionType.entries.map { LabeledEntry(it, it.name) } },
+            conditions = remember { BookConditionType.entries.map { LabeledEntry(it, it.label()) } },
             onConditionAdd = state::addCondition,
         )
     }
@@ -242,7 +242,7 @@ private fun ConditionContent(
 
         null -> {
             ConditionAddButton(
-                conditions = remember { BookConditionType.entries.map { LabeledEntry(it, it.name) } },
+                conditions = remember { BookConditionType.entries.map { LabeledEntry(it, it.label()) } },
                 onConditionAdd = onConditionAdd,
             )
         }
@@ -258,8 +258,8 @@ private fun BookConditionLayout(
     content: @Composable RowScope.() -> Unit
 ) {
     SimpleConditionLayout(
-        conditionType = remember { LabeledEntry(type, type.name) },
-        options = remember { BookConditionType.entries.map { LabeledEntry(it, it.name) } },
+        conditionType = remember { LabeledEntry(type, type.label()) },
+        options = remember { BookConditionType.entries.map { LabeledEntry(it, it.label()) } },
         onConditionTypeChange = onTypeChange,
         onConditionRemove = onConditionRemove
     ) {
@@ -334,11 +334,11 @@ fun SeriesIdConditionContent(
         val options = state.seriesSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = LabeledEntry(operator, operator.label()),
+            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text("操作") }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,
@@ -378,8 +378,8 @@ fun MediaProfileConditionContent(
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-            valueOptions = remember { MediaProfile.entries.map { LabeledEntry(it, it.name) } },
+            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.label()) } },
+            valueOptions = remember { MediaProfile.entries.map { LabeledEntry(it, it.label()) } },
             onValueChange = state::setValue
         )
     }
@@ -400,8 +400,8 @@ fun MediaStatusConditionContent(
         EqualityOpDropDownContent(
             operator = state.operator.collectAsState().value,
             onOpChange = state::setOp,
-            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.name) } },
-            valueOptions = remember { KomgaMediaStatus.entries.map { LabeledEntry(it, it.name) } },
+            selectedValue = remember(value) { value?.let { LabeledEntry(it, it.label()) } },
+            valueOptions = remember { KomgaMediaStatus.entries.map { LabeledEntry(it, it.label()) } },
             onValueChange = state::setValue
         )
     }
@@ -420,16 +420,16 @@ fun NumberSortConditionContent(
     ) {
         val operator = state.operator.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = NumericOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = LabeledEntry(operator, operator.label()),
+            options = NumericOpState.Op.entries.map { LabeledEntry(it, it.label()) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text("操作") }
         )
         FloatTextField(
             value = state.value.collectAsState().value,
             onValueChange = state::setValue,
-            label = "Number",
+            label = "序号",
         )
     }
 }
@@ -448,51 +448,48 @@ fun PosterConditionContent(
         val operator = state.operator.collectAsState().value
         val currentValue = state.value.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = LabeledEntry(operator, operator.label()),
+            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text("操作") }
         )
 
         DropdownChoiceMenu(
             selectedOption = remember(currentValue) {
                 LabeledEntry(
                     currentValue?.type,
-                    currentValue?.type?.name ?: "Any"
+                    currentValue?.type.label()
                 )
             },
             options = remember {
                 listOf(
-                    LabeledEntry<PosterMatch.Type?>(
-                        null,
-                        "Any"
-                    )
-                ).plus(PosterMatch.Type.entries.map { LabeledEntry(it, it.name) }
+                    LabeledEntry<PosterMatch.Type?>(null, (null as PosterMatch.Type?).label())
+                ).plus(PosterMatch.Type.entries.map { LabeledEntry(it, it.label()) }
                 )
             },
             onOptionChange = { state.setType(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Type") }
+            label = { Text("类型") }
         )
 
         DropdownChoiceMenu(
             selectedOption = remember(currentValue) {
                 LabeledEntry(
                     currentValue?.selected,
-                    currentValue?.selected?.toString() ?: "Any"
+                    currentValue?.selected.anyLabel()
                 )
             },
             options = remember {
                 listOf(
-                    LabeledEntry(null, "Any"),
-                    LabeledEntry(true, "True"),
-                    LabeledEntry(false, "False"),
+                    LabeledEntry(null, (null as Boolean?).anyLabel()),
+                    LabeledEntry(true, true.anyLabel()),
+                    LabeledEntry(false, false.anyLabel()),
                 )
             },
             onOptionChange = { state.setSelected(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Selected") }
+            label = { Text("已选") }
         )
 
     }
@@ -512,11 +509,11 @@ fun ReadListConditionContent(
         val options = state.readListSuggestions.collectAsState(emptyList()).value
         val operator = state.operator.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(operator, operator.name),
-            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.name) },
+            selectedOption = LabeledEntry(operator, operator.label()),
+            options = EqualityOpState.Op.entries.map { LabeledEntry(it, it.label()) },
             onOptionChange = { state.setOp(it.value) },
             inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
-            label = { Text("Operator") }
+            label = { Text("操作") }
         )
         SearchableOptionSelectionField(
             searchText = state.searchText.collectAsState().value,

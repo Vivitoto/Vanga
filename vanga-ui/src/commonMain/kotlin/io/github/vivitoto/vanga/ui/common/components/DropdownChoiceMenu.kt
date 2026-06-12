@@ -137,7 +137,7 @@ fun <T> DropdownMultiChoiceMenu(
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "Any" },
+            value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "任意" },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
@@ -234,7 +234,7 @@ fun <T> DropdownChoiceMenuWithSearch(
         onExpandedChange = { isExpanded = it },
     ) {
         InputField(
-            value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "Any" },
+            value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "任意" },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
                 .then(textFieldModifier),
@@ -254,7 +254,7 @@ fun <T> DropdownChoiceMenuWithSearch(
             val focusRequester = remember { FocusRequester() }
             NoPaddingTextField(
                 text = searchText,
-                placeholder = "Search",
+                placeholder = "搜索",
                 onTextChange = { searchText = it },
                 modifier = Modifier
                     .padding(horizontal = 10.dp)

@@ -21,7 +21,7 @@ internal class GeneralTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "GENERAL",
+        title = "基本信息",
         icon = Icons.Default.FormatAlignCenter
     )
 
@@ -33,7 +33,7 @@ internal class GeneralTab(
             TextField(
                 value = vm.name,
                 onValueChange = vm::name::set,
-                label = { Text("Name") },
+                label = { Text("名称") },
                 supportingText = {
                     vm.nameValidationError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 },
@@ -45,7 +45,7 @@ internal class GeneralTab(
             TextField(
                 value = vm.summary,
                 onValueChange = vm::summary::set,
-                label = { Text("Summary") },
+                label = { Text("简介") },
                 minLines = 6,
                 maxLines = 12,
                 modifier = Modifier.fillMaxWidth()

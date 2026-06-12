@@ -20,7 +20,7 @@ internal class MetadataTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "METADATA",
+        title = "元数据",
         icon = Icons.Default.Book
     )
 
@@ -91,7 +91,7 @@ private fun ComicInfoSettings(
 ) {
     Column {
         ChildSwitchingCheckboxWithLabel(
-            label = { Text("Import metadata for CBR/CBZ containing a ComicInfo.xml file") },
+            label = { Text("从包含 ComicInfo.xml 的 CBR/CBZ 导入元数据") },
             children = listOf(
                 importComicInfoBook,
                 importComicInfoSeries,
@@ -122,7 +122,7 @@ private fun ComicInfoSettings(
             )
 
             CheckboxWithLabel(
-                label = { Text("Collections") },
+                label = { Text("合集") },
                 checked = importComicInfoCollection.value,
                 onCheckedChange = importComicInfoCollection.setValue,
             )

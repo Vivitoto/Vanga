@@ -70,7 +70,7 @@ fun UserEditDialog(
 
 class UserRolesTab(private val vm: UserEditDialogViewModel) : DialogTab {
     override fun options() = TabItem(
-        title = "Roles",
+        title = "角色",
         icon = Icons.Default.RecentActors
     )
 
@@ -97,7 +97,7 @@ class UserRolesTab(private val vm: UserEditDialogViewModel) : DialogTab {
             CheckboxWithLabel(
                 checked = administrator.value,
                 onCheckedChange = { administrator.setValue(it) },
-                label = { Text("Administrator") }
+                label = { Text("管理员") }
             )
             CheckboxWithLabel(
                 checked = pageStreaming.value,

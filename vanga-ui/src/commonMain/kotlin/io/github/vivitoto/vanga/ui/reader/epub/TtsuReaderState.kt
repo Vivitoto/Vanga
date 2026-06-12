@@ -463,7 +463,7 @@ class TtsuReaderState(
                             startCharacter = currentCharCount,
                             characters = chapterCharCount,
                             parentChapter = null,
-                            label = "Preface",
+                label = "前言",
                         )
                     )
                     currentMainChapterIndex = sectionData.size - 1

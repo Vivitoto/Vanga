@@ -102,7 +102,7 @@ fun UserAddDialog(
                 TextField(
                     value = email,
                     onValueChange = onEmailChange,
-                    label = { Text("Email") },
+                    label = { Text("邮箱") },
                     supportingText = {
                         if (emailValidation != null)
                             Text(text = emailValidation, color = MaterialTheme.colorScheme.error)
@@ -113,19 +113,19 @@ fun UserAddDialog(
                 PasswordTextField(
                     value = password,
                     onValueChange = onPasswordChange,
-                    label = { Text("Password") },
+                    label = { Text("密码") },
                     isError = passwordValidation != null,
                     supportingText = { passwordValidation?.let { Text(it) } },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Column {
-                    Text("Roles")
+                    Text("角色")
 
                     CheckboxWithLabel(
                         checked = administratorRole,
                         onCheckedChange = onAdministratorRoleChange,
-                        label = { Text("Administrator") }
+                        label = { Text("管理员") }
                     )
 
                     CheckboxWithLabel(
@@ -153,7 +153,7 @@ fun UserAddDialog(
                     onClick = onDismissRequest,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Cancel")
+                    Text("取消")
                 }
 
                 FilledTonalButton(
@@ -166,7 +166,7 @@ fun UserAddDialog(
                     enabled = isValid,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Add")
+                    Text("添加")
                 }
             }
         }

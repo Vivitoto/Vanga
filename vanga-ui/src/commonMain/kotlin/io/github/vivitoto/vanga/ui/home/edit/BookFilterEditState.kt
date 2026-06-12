@@ -389,8 +389,12 @@ class BookMatchConditionState(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val bookChangeFlow = conditions.flatMapLatest { conditions ->
-        combine(conditions.map { it.bookChangeFlow }) { conditions ->
-            toBookCondition(conditions.filterNotNull().toList())
+        if (conditions.isEmpty()) {
+            flowOf(toBookCondition(emptyList()))
+        } else {
+            combine(conditions.map { it.bookChangeFlow }) { conditions ->
+                toBookCondition(conditions.filterNotNull().toList())
+            }
         }
     }
 

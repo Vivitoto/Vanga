@@ -217,7 +217,7 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
         onExpandedChange = { showDropdown = it },
     ) {
         BulkActionButton(
-            description = "More",
+            description = "更多",
             icon = if (compact) Icons.Default.MoreHoriz else Icons.Default.MoreVert,
             onClick = { showDropdown = true },
             compact = compact

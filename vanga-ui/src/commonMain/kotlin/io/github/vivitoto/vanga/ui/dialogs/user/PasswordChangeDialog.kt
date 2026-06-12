@@ -111,7 +111,7 @@ fun PasswordChangeDialog(
                     onClick = onDismiss,
                     modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
                 ) {
-                    Text("Cancel")
+                    Text("取消")
                 }
 
                 FilledTonalButton(

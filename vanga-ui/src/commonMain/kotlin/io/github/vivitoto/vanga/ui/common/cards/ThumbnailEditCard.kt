@@ -191,7 +191,7 @@ private fun ThumbnailCardContent(
             }
 
             if (onDelete != null)
-                IconWithTooltip(tooltip = "Delete") {
+                IconWithTooltip(tooltip = "删除") {
                     IconButton(onClick = onDelete) {
                         Icon(
                             Icons.Default.Delete,

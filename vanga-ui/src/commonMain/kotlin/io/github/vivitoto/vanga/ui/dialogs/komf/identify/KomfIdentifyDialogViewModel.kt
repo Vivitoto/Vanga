@@ -139,7 +139,7 @@ class KomfIdentifyDialogViewModel(
                             is ProviderBookEvent -> providersProgress.addOrReplace(
                                 ProviderProgressStatus(
                                     provider = event.provider,
-                                    message = "Retrieving book data: ${event.bookProgress}/${event.totalBooks}",
+                            message = "正在获取单本数据：${event.bookProgress}/${event.totalBooks}",
                                     totalProgress = event.totalBooks,
                                     currentProgress = event.bookProgress,
                                     status = ProgressStatus.RUNNING,

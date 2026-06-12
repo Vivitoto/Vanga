@@ -23,7 +23,7 @@ class GeneralTab(
     private val vm: BookEditMetadataState
 ) : DialogTab {
     override fun options() = TabItem(
-        title = "GENERAL",
+        title = "基本信息",
         icon = Icons.Default.FormatAlignCenter
     )
 
@@ -68,7 +68,7 @@ private fun GeneralTabContent(
             text = title.value,
             onTextChange = title.setValue,
             errorMessage = title.errorMessage,
-            label = "Title",
+            label = "标题",
             lock = titleLock,
             modifier = Modifier.fillMaxWidth()
         )
@@ -78,7 +78,7 @@ private fun GeneralTabContent(
                 text = number.value,
                 onTextChange = number.setValue,
                 errorMessage = number.errorMessage,
-                label = "Number",
+                label = "编号",
                 lock = numberLock,
                 modifier = Modifier.weight(.5f)
             )
@@ -110,7 +110,7 @@ private fun GeneralTabContent(
             text = summary.value,
             onTextChange = summary.setValue,
             errorMessage = summary.errorMessage,
-            label = "Summary",
+            label = "简介",
             lock = summaryLock,
             minLines = 6,
             maxLines = 12,

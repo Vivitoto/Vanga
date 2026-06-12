@@ -106,7 +106,7 @@ private fun DialogContent(
             FilledTonalButton(
                 onClick = { coroutineScope.launch { onCreateNewCollection(query) } },
                 enabled = query.isNotBlank() && !collectionExistsForQuery.value,
-                content = { Text("Create") },
+                content = { Text("新建") },
             )
         }
 

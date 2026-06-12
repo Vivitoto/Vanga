@@ -36,7 +36,7 @@ fun OneshotEditDialog(
             title = "编辑 ${loadState.value.seriesMetadataState.series.metadata.title}",
             currentTab = loadState.value.currentTab,
             tabs = loadState.value.tabs,
-            confirmationText = "Save",
+            confirmationText = "保存",
             onConfirm = { coroutineScope.launch { vm.saveChanges() } },
             onTabChange = { loadState.value.currentTab = it },
             onDismissRequest = onDismissRequest

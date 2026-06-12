@@ -33,7 +33,7 @@ class AuthorsTab(
     private val vm: BookEditMetadataState
 ) : DialogTab {
     override fun options() = TabItem(
-        title = "AUTHORS",
+        title = "作者",
         icon = Icons.Default.People
     )
 

@@ -106,7 +106,7 @@ class ServerSettingsViewModel(
             )
             appNotifications.runCatchingToNotifications {
                 settingsApi.updateSettings(request)
-                appNotifications.add(AppNotification.Success("Updated Server Settings"))
+                appNotifications.add(AppNotification.Success("服务器设置已更新"))
                 loadSettings()
             }
         }
@@ -153,7 +153,7 @@ class ServerSettingsViewModel(
 
     fun onRememberMeDurationDaysChange(days: Int?) {
         isChanged.value = true
-        if (days == null) rememberMeDurationDaysValidationMessage.value = "Required"
+        if (days == null) rememberMeDurationDaysValidationMessage.value = "必填"
         else rememberMeDurationDaysValidationMessage.value = null
         this.rememberMeDurationDays.value = days
 
@@ -161,7 +161,7 @@ class ServerSettingsViewModel(
 
     fun onTaskPoolSizeChange(taskPoolSize: Int?) {
         isChanged.value = true
-        if (taskPoolSize == null) taskPoolSizeValidationMessage.value = "Required"
+        if (taskPoolSize == null) taskPoolSizeValidationMessage.value = "必填"
         else taskPoolSizeValidationMessage.value = null
         this.taskPoolSize.value = taskPoolSize
     }
@@ -181,14 +181,14 @@ class ServerSettingsViewModel(
     fun onScanAllLibraries(deep: Boolean) {
         appNotifications.runCatchingToNotifications(screenModelScope) {
             libraries.value.forEach { libraryApi.scan(it.id, deep) }
-            appNotifications.add(AppNotification.Success("Launched scan for all libraries"))
+            appNotifications.add(AppNotification.Success("已开始扫描所有书库"))
         }
     }
 
     fun onEmptyTrashForAllLibraries() {
         appNotifications.runCatchingToNotifications(screenModelScope) {
             libraries.value.forEach { libraryApi.emptyTrash(it.id) }
-            appNotifications.add(AppNotification.Success("Emptied trash for all libraries"))
+            appNotifications.add(AppNotification.Success("已清空所有书库的回收站"))
         }
     }
 
@@ -197,9 +197,9 @@ class ServerSettingsViewModel(
             val cancelledTasks = taskApi.emptyTaskQueue()
 
             if (cancelledTasks == 0)
-                appNotifications.add(AppNotification.Normal("No tasks to cancel"))
+                appNotifications.add(AppNotification.Normal("没有可取消的任务"))
             else
-                appNotifications.add(AppNotification.Success("$cancelledTasks tasks cancelled"))
+                appNotifications.add(AppNotification.Success("已取消 $cancelledTasks 个任务"))
         }
     }
 

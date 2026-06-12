@@ -41,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipDefaults.rememberTooltipPositionProvider
 import androidx.compose.runtime.Composable
@@ -51,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -79,7 +81,7 @@ fun NavBarContent(
     onSettingsClick: () -> Unit,
     taskQueueStatus: TaskQueueStatus?,
 ) {
-    Surface(Modifier.width(230.dp)) {
+    Surface(Modifier.width(230.dp), color = MaterialTheme.colorScheme.surfaceDim) {
         NavMenu(
             currentScreen = currentScreen,
             libraries = libraries,
@@ -107,7 +109,7 @@ fun LibrariesNavBarContent(
     onLibrariesClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
-    Surface(Modifier.width(230.dp)) {
+    Surface(Modifier.width(230.dp), color = MaterialTheme.colorScheme.surfaceDim) {
         val scrollState: ScrollState = rememberScrollState()
         Column(
             modifier = modifier
@@ -272,7 +274,11 @@ private fun NavButton(
     TextButton(
         onClick = onClick,
         contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.textButtonColors(
+            contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+        ),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 2.dp)
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
@@ -280,9 +286,10 @@ private fun NavButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp)
+                .clip(RoundedCornerShape(14.dp))
                 .background(
-                    if (isSelected) MaterialTheme.colorScheme.surfaceVariant
-                    else MaterialTheme.colorScheme.surface
+                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = .16f)
+                    else MaterialTheme.colorScheme.surface.copy(alpha = 0f)
                 )
         ) {
 

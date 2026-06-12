@@ -38,6 +38,7 @@ message AppearanceSettings{
   enum PBAppTheme{
     DARK = 0;
     LIGHT = 1;
+    SYSTEM = 2;
   }
 }
 

@@ -19,7 +19,7 @@ class AppSettingsViewModel(
     private val settingsRepository: CommonSettingsRepository,
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
     var cardWidth by mutableStateOf(defaultCardWidth.dp)
-    var currentTheme by mutableStateOf(AppTheme.DARK)
+    var currentTheme by mutableStateOf(AppTheme.SYSTEM)
 
     suspend fun initialize() {
         if (state.value !is LoadState.Uninitialized) return

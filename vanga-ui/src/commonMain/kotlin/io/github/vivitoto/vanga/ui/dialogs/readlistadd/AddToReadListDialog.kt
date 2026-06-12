@@ -106,7 +106,7 @@ private fun DialogContent(
             FilledTonalButton(
                 onClick = { coroutineScope.launch { onCreateNewReadList(query) } },
                 enabled = query.isNotBlank() && !readListExistsForQuery.value,
-                content = { Text("Create") },
+                content = { Text("新建") },
             )
         }
 

@@ -90,7 +90,7 @@ class LibraryEditDialogViewModel(
 
     fun setLibraryName(name: String) {
         libraryNameError =
-            if (name.isBlank()) "Required"
+            if (name.isBlank()) "必填"
             else null
 
         libraryName.value = name
@@ -98,7 +98,7 @@ class LibraryEditDialogViewModel(
 
     fun setRootFolder(path: String) {
         rootFolderError =
-            if (path.isBlank()) "Required"
+            if (path.isBlank()) "必填"
             else null
 
         rootFolder.value = path
@@ -110,10 +110,10 @@ class LibraryEditDialogViewModel(
 
 
         if (!validLibraryName) {
-            libraryNameError = "Required"
+            libraryNameError = "必填"
         }
         if (!validRootFolder) {
-            rootFolderError = "Required"
+            rootFolderError = "必填"
         }
 
         return validLibraryName && validRootFolder

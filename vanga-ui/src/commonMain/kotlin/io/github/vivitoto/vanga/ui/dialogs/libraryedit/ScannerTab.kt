@@ -39,7 +39,7 @@ internal class ScannerTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "SCANNER",
+        title = "扫描器",
         icon = Icons.AutoMirrored.Filled.ManageSearch
     )
 

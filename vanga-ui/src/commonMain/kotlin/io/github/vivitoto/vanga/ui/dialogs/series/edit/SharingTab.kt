@@ -13,7 +13,7 @@ internal class SharingTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "SHARING",
+        title = "共享",
         icon = Icons.Default.People
     )
 
@@ -33,7 +33,7 @@ private fun SharingContent(
 ) {
     LockableChipTextField(
         values = labels,
-        label = "Labels",
+        label = "标签",
         lock = labelsLock
     )
 }

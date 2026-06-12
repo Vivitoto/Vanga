@@ -58,7 +58,7 @@ import kotlin.math.roundToInt
 class PosterTab(private val state: PosterEditState) : DialogTab {
 
     override fun options() = TabItem(
-        title = "POSTER",
+        title = "封面",
         icon = Icons.Default.Image,
     )
 

@@ -126,7 +126,7 @@ private fun Toolbar(
             onClick = { onEditEnd() },
             modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
         ) {
-            Text("Done")
+            Text("完成")
             Icon(Icons.Default.Check, null)
         }
 
@@ -208,7 +208,7 @@ fun AddConditionButton(
         ) {
             FilterEditViewModel.FilterType.entries.forEach {
                 DropdownMenuItem(
-                    text = { Text(it.name) },
+                    text = { Text(it.label()) },
                     onClick = {
                         dropDownExpanded = false
                         onConditionAdd(it)
@@ -273,7 +273,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 if (showEdit) {
                     OutlinedTextField(
                         value = labelText,
-                        label = { Text("Label") },
+                        label = { Text("名称") },
                         onValueChange = {
                             labelText = it
                             filterState.label.value = it
@@ -295,7 +295,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 onClick = { showEdit = !showEdit },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Edit")
+                Text(if (showEdit) "收起" else "编辑")
                 Icon(
                     imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = null,
@@ -308,7 +308,7 @@ private fun ReorderableCollectionItemScope.FilterContent(
                 },
                 modifier = Modifier.cursorForHand()
             ) {
-                Text("Delete")
+                Text("删除")
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = null,
@@ -339,8 +339,8 @@ private fun BookFilterEditContent(state: BookFilterEditState) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, type.name),
-            options = remember { BookFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
+            selectedOption = LabeledEntry(type, type.label()),
+            options = remember { BookFilterEditState.FilterType.entries.map { LabeledEntry(it, it.label()) } },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 
@@ -371,8 +371,8 @@ private fun SeriesFilterEditContent(state: SeriesFilterEditState) {
         val filter = state.filter.collectAsState().value
         val type = state.type.collectAsState().value
         DropdownChoiceMenu(
-            selectedOption = LabeledEntry(type, type.name),
-            options = remember { SeriesFilterEditState.FilterType.entries.map { LabeledEntry(it, it.name) } },
+            selectedOption = LabeledEntry(type, type.label()),
+            options = remember { SeriesFilterEditState.FilterType.entries.map { LabeledEntry(it, it.label()) } },
             onOptionChange = { state.onTypeChange(it.value) },
         )
 

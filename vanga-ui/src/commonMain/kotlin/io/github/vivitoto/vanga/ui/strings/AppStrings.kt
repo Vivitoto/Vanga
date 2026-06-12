@@ -372,9 +372,9 @@ data class SettingsStrings(
     val serverSettingsSave: String,
 
     val appTheme: String,
+    val appThemeSystem: String,
     val appThemeDark: String,
     val appThemeLight: String,
-    val appThemeOled: String,
     val imageCardSize: String,
     val decoder: String,
 
@@ -392,9 +392,10 @@ data class SettingsStrings(
 
     fun forAppTheme(theme: AppTheme): String {
         return when (theme) {
+            AppTheme.SYSTEM -> appThemeSystem
             AppTheme.DARK -> appThemeDark
             AppTheme.LIGHT -> appThemeLight
-            AppTheme.DARKER -> appThemeOled
+            AppTheme.DARKER -> appThemeDark
         }
     }
 

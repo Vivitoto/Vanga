@@ -42,7 +42,7 @@ class UserAddDialogViewModel(
     }
 
     fun onPasswordChange(password: String) {
-        passwordValidationError = if (password.isBlank()) "Required" else null
+        passwordValidationError = if (password.isBlank()) "必填" else null
         this.password = password
     }
 

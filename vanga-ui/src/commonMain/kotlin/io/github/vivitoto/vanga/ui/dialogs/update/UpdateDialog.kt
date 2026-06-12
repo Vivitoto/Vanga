@@ -85,15 +85,14 @@ private fun ControlButtons(
         TextButton(
             onClick = onDismiss,
             modifier = Modifier.cursorForHand(),
-            content = { Text("Dismiss") }
+            content = { Text("稍后") }
         )
 
         FilledTonalButton(
             onClick = onConfirm,
             modifier = Modifier.cursorForHand(),
         ) {
-            Text("Update")
+            Text("更新")
         }
     }
 }
-

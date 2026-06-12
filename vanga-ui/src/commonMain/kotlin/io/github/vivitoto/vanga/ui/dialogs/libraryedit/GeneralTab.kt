@@ -27,7 +27,7 @@ class GeneralTab(
     private val vm: LibraryEditDialogViewModel,
 ) : DialogTab {
     override fun options() = TabItem(
-        title = "GENERAL",
+        title = "基本信息",
         icon = Icons.Default.Category
     )
 
@@ -54,7 +54,7 @@ private fun GeneralTabContent(
         TextField(
             value = name.value,
             onValueChange = name.setValue,
-            label = { Text("Name") },
+            label = { Text("名称") },
             isError = name.errorMessage != null,
             supportingText = { name.errorMessage?.let { Text(it) } },
             modifier = Modifier.fillMaxWidth()
@@ -74,7 +74,7 @@ private fun GeneralTabContent(
                 onClick = { showFileBrowserDialog = true },
                 modifier = Modifier.padding(horizontal = 10.dp),
             ) {
-                Text("Browse")
+                Text("浏览")
             }
         }
     }

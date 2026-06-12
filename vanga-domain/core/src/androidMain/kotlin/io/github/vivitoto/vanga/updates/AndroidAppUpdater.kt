@@ -33,27 +33,40 @@ class AndroidAppUpdater(
 
     override fun updateTo(release: AppRelease): Flow<UpdateProgress>? {
         if (!inProgress.compareAndSet(false, true)) return null
-        if (release.assetUrl == null) return null
+        val assetUrl = release.assetUrl
+        if (assetUrl == null) {
+            inProgress.set(false)
+            return null
+        }
 
         return flow {
-            emit(UpdateProgress(0, 0))
-            val sessionParams = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
-            val packageInstaller = context.packageManager.packageInstaller
-            val sessionId = packageInstaller.createSession(sessionParams)
-            val session = packageInstaller.openSession(sessionId)
+            var sessionId: Int? = null
+            try {
+                emit(UpdateProgress(0, 0))
+                val sessionParams = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
+                val packageInstaller = context.packageManager.packageInstaller
+                val createdSessionId = packageInstaller.createSession(sessionParams)
+                sessionId = createdSessionId
+                val session = packageInstaller.openSession(createdSessionId)
 
-            githubClient.streamFile(release.assetUrl) { response -> streamToSession(response, session) }
+                session.use {
+                    githubClient.streamFile(assetUrl) { response -> streamToSession(response, it) }
 
-            val receiverIntent = Intent(context, PackageInstallerStatusReceiver::class.java)
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
+                    val receiverIntent = Intent(context, PackageInstallerStatusReceiver::class.java)
+                    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    } else {
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    }
+                    val receiverPendingIntent = PendingIntent.getBroadcast(context, 0, receiverIntent, flags)
+                    it.commit(receiverPendingIntent.intentSender)
+                }
+            } catch (e: Exception) {
+                sessionId?.let { context.packageManager.packageInstaller.abandonSession(it) }
+                throw e
+            } finally {
+                inProgress.set(false)
             }
-            val receiverPendingIntent = PendingIntent.getBroadcast(context, 0, receiverIntent, flags)
-            session.commit(receiverPendingIntent.intentSender)
-            session.close()
-            inProgress.set(false)
         }
     }
 

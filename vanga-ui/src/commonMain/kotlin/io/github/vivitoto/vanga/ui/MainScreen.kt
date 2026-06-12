@@ -29,7 +29,6 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -275,8 +274,8 @@ class MainScreen(
         Surface(
             modifier = modifier,
             contentColor =
-                if (isSelected) MaterialTheme.colorScheme.secondary
-                else contentColorFor(MaterialTheme.colorScheme.surfaceVariant)
+                if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant
         ) {
             Column(
                 modifier = Modifier

@@ -13,7 +13,7 @@ internal class LinksTab(
 ) : DialogTab {
 
     override fun options() = TabItem(
-        title = "Links",
+        title = "链接",
         icon = Icons.Default.Link
     )
 

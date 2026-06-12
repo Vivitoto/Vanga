@@ -42,7 +42,7 @@ fun KomfNavigationContent(
         HorizontalDivider(Modifier.padding(vertical = 10.dp))
         Text("Komf 设置", style = MaterialTheme.typography.titleSmall)
         NavigationButton(
-            label = "Connection",
+            label = "连接",
             onClick = { onNavigation(KomfSettingsScreen(integrationToggleEnabled = false, showKavitaSettings = true)) },
             isSelected = currentScreen is KomfSettingsScreen,
             color = contentColor,
@@ -60,13 +60,13 @@ fun KomfNavigationContent(
             color = contentColor,
         )
         NavigationButton(
-            label = "Providers",
+            label = "数据源",
             onClick = { onNavigation(KomfProvidersSettingsScreen()) },
             isSelected = currentScreen is KomfProvidersSettingsScreen,
             color = contentColor,
         )
         NavigationButton(
-            label = "Notifications",
+            label = "通知",
             onClick = { onNavigation(KomfNotificationSettingsScreen()) },
             isSelected = currentScreen is KomfNotificationSettingsScreen,
             color = contentColor,

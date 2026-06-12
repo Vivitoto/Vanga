@@ -41,6 +41,7 @@ import io.github.vivitoto.vanga.ui.platform.PlatformType
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 
 const val defaultCardWidth = 240
+private val itemCardShape = RoundedCornerShape(18.dp)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -53,7 +54,7 @@ fun ItemCard(
     content: @Composable ColumnScope.() -> Unit = {},
 ) {
     Card(
-        shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+        shape = itemCardShape,
         modifier = modifier
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onLongClick)
             .then(if (onClick != null || onLongClick != null) Modifier.cursorForHand() else Modifier),
@@ -71,7 +72,7 @@ fun ItemCardWithContent(
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp),
+        shape = itemCardShape,
         modifier = modifier
     ) {
         Box(modifier = Modifier.aspectRatio(0.703f)) { image() }
@@ -97,7 +98,7 @@ fun CardGradientOverlay() {
 
 @Composable
 fun overlayBorderModifier() =
-    Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.tertiary), RoundedCornerShape(5.dp))
+    Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.primary), itemCardShape)
 
 
 @Composable

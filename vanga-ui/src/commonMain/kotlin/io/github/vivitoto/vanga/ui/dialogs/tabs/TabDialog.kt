@@ -213,7 +213,7 @@ private fun TabColumnDialog(
         controlButtons = {
             DialogConfirmCancelButtons(
                 confirmText = confirmationText,
-                cancelText = "Cancel",
+                cancelText = "取消",
                 onConfirm = onConfirm,
                 confirmEnabled = canConfirm,
                 showCancelButton = showCancelButton,

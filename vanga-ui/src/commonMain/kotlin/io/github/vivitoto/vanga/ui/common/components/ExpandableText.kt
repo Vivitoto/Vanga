@@ -60,7 +60,7 @@ fun ExpandableText(
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
             ) {
                 Text(
-                    text = (if (isExpanded) "Collapse" else "Expand").uppercase()
+                    text = (if (isExpanded) "收起" else "展开")
                 )
             }
         }

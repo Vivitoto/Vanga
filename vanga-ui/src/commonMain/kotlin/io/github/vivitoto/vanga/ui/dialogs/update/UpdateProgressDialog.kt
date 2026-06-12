@@ -24,7 +24,7 @@ fun UpdateProgressDialog(
         modifier = Modifier.widthIn(max = 600.dp),
         header = {
             Text(
-                "Updating",
+                "正在更新",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(10.dp)
             )
@@ -33,7 +33,7 @@ fun UpdateProgressDialog(
             FilledTonalButton(
                 onClick = onCancel,
                 modifier = Modifier.cursorForHand().padding(10.dp),
-                content = { Text("Cancel") }
+                content = { Text("取消") }
             )
         },
         content = { DialogContent(totalSize, downloadedSize) },
