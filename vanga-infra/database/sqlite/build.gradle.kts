@@ -54,6 +54,8 @@ android {
     namespace = "io.github.vivitoto.vanga.infra.database.sqlite"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    sourceSets["main"].jniLibs.srcDir(layout.buildDirectory.dir("generated/sqliteJniLibs"))
+
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
     }
@@ -63,40 +65,32 @@ android {
     }
 }
 
-val sqliteExtract: Configuration by configurations.creating
+val sqliteExtract: Configuration by configurations.creating {
+    isTransitive = false
+}
 dependencies { sqliteExtract(libs.sqlite.xerial.jdbc) }
-tasks.register<Sync>("android-arm64-ExtractSqliteLib") {
-    val sqliteJar = configurations.getByName("sqliteExtract").first()
-    val file = zipTree(sqliteJar.absolutePath)
-        .matching { include("org/sqlite/native/Linux-Android/aarch64/libsqlitejdbc.so") }
-        .singleFile
-    from(file)
-    into("$projectDir/src/androidMain/jniLibs/arm64-v8a")
+
+fun TaskProvider<Sync>.extractSqliteNativeLib(jarPath: String, abi: String) = configure {
+    from({
+        val sqliteJar = sqliteExtract.singleFile
+        zipTree(sqliteJar.absolutePath)
+            .matching { include(jarPath) }
+            .singleFile
+    })
+    into(layout.buildDirectory.dir("generated/sqliteJniLibs/$abi"))
 }
 
-tasks.register<Sync>("android-armv7a-ExtractSqliteLib") {
-    val sqliteJar = configurations.getByName("sqliteExtract").first()
-    val file = zipTree(sqliteJar.absolutePath)
-        .matching { include("org/sqlite/native/Linux-Android/arm/libsqlitejdbc.so") }
-        .singleFile
-    from(file)
-    into("$projectDir/src/androidMain/jniLibs/armeabi-v7a")
-}
+val extractSqliteAndroidLibs = listOf(
+    tasks.register<Sync>("android-arm64-ExtractSqliteLib")
+        .also { it.extractSqliteNativeLib("org/sqlite/native/Linux-Android/aarch64/libsqlitejdbc.so", "arm64-v8a") },
+    tasks.register<Sync>("android-armv7a-ExtractSqliteLib")
+        .also { it.extractSqliteNativeLib("org/sqlite/native/Linux-Android/arm/libsqlitejdbc.so", "armeabi-v7a") },
+    tasks.register<Sync>("android-x86_64-ExtractSqliteLib")
+        .also { it.extractSqliteNativeLib("org/sqlite/native/Linux-Android/x86_64/libsqlitejdbc.so", "x86_64") },
+    tasks.register<Sync>("android-x86-ExtractSqliteLib")
+        .also { it.extractSqliteNativeLib("org/sqlite/native/Linux-Android/x86/libsqlitejdbc.so", "x86") },
+)
 
-tasks.register<Sync>("android-x86_64-ExtractSqliteLib") {
-    val sqliteJar = configurations.getByName("sqliteExtract").first()
-    val file = zipTree(sqliteJar.absolutePath)
-        .matching { include("org/sqlite/native/Linux-Android/x86_64/libsqlitejdbc.so") }
-        .singleFile
-    from(file)
-    into("$projectDir/src/androidMain/jniLibs/x86_64")
-}
-
-tasks.register<Sync>("android-x86-ExtractSqliteLib") {
-    val sqliteJar = configurations.getByName("sqliteExtract").first()
-    val file = zipTree(sqliteJar.absolutePath)
-        .matching { include("org/sqlite/native/Linux-Android/x86/libsqlitejdbc.so") }
-        .singleFile
-    from(file)
-    into("$projectDir/src/androidMain/jniLibs/x86")
+tasks.matching { it.name == "preBuild" }.configureEach {
+    dependsOn(extractSqliteAndroidLibs)
 }

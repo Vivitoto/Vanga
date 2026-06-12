@@ -1,6 +1,6 @@
 #include "vips_common_jni.h"
 
-JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_vipsInit() {
+JNIEXPORT void JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_vipsInit() {
   VIPS_INIT("vanga");
   vips_cache_set_max(0);
 }
@@ -11,7 +11,7 @@ int boxed_int_to_int(JNIEnv *env, jobject boxed) {
   return (*env)->CallIntMethod(env, boxed, int_method);
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_decode(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_decode(JNIEnv *env,
                                                                   jobject this,
                                                                   jbyteArray encoded,
                                                                   jobject n_pages) {
@@ -45,7 +45,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_decode(JNIEnv *env,
   return jvm_image;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_decodeFromFile(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_decodeFromFile(JNIEnv *env,
                                                                           jobject this,
                                                                           jstring path,
                                                                           jobject n_pages) {
@@ -73,7 +73,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_decodeFromFile(JNIEnv *
   return jvm_handle;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_thumbnail(
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_thumbnail(
     JNIEnv *env, jobject this, jstring path, jint scaleWidth, jint scaleHeight, jboolean crop) {
   const char *path_chars = (*env)->GetStringUTFChars(env, path, nullptr);
   VipsImage *thumbnail = nullptr;
@@ -98,7 +98,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_thumbnail(
   return jvm_handle;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_thumbnailBuffer(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_thumbnailBuffer(JNIEnv *env,
                                                                            jobject this,
                                                                            jbyteArray encoded,
                                                                            jint scaleWidth,
@@ -136,7 +136,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_thumbnailBuffer(JNIEnv 
   return jvm_handle;
 }
 
-JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_encodeToFile(JNIEnv *env,
+JNIEXPORT void JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_encodeToFile(JNIEnv *env,
                                                                      jobject this,
                                                                      jstring path) {
   VipsImage *image = vanga_from_jvm_handle(env, this);
@@ -156,7 +156,7 @@ JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_encodeToFile(JNIEnv *env,
   vips_thread_shutdown();
 }
 
-JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_encodeToFilePng(JNIEnv *env,
+JNIEXPORT void JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_encodeToFilePng(JNIEnv *env,
                                                                         jobject this,
                                                                         jstring path) {
   VipsImage *image = vanga_from_jvm_handle(env, this);
@@ -176,7 +176,7 @@ JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_encodeToFilePng(JNIEnv *en
   vips_thread_shutdown();
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_getDimensions(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_getDimensions(JNIEnv *env,
                                                                          jobject this,
                                                                          jbyteArray encoded) {
   jsize input_len = (*env)->GetArrayLength(env, encoded);
@@ -190,7 +190,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_getDimensions(JNIEnv *e
     return nullptr;
   }
 
-  jclass jvm_vips_class = (*env)->FindClass(env, "snd/vanga/image/ImageDimensions");
+  jclass jvm_vips_class = (*env)->FindClass(env, "io/github/vivitoto/vanga/image/ImageDimensions");
   jmethodID constructor = (*env)->GetMethodID(env, jvm_vips_class, "<init>", "(III)V");
   jobject jvm_dimensions =
       (*env)->NewObject(env, jvm_vips_class, constructor, vips_image_get_width(decoded),
@@ -202,7 +202,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_getDimensions(JNIEnv *e
   return jvm_dimensions;
 }
 
-JNIEXPORT jbyteArray JNICALL Java_snd_vanga_image_VipsImage_getBytes(JNIEnv *env, jobject this) {
+JNIEXPORT jbyteArray JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_getBytes(JNIEnv *env, jobject this) {
   VipsImage *image = vanga_from_jvm_handle(env, this);
   if (image == nullptr)
     return nullptr;
@@ -241,7 +241,7 @@ VipsRect to_vips_rect(JNIEnv *env, jobject jvm_rect) {
   return vipsRect;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_extractArea(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_extractArea(JNIEnv *env,
                                                                        jobject this,
                                                                        jobject rect) {
   VipsImage *input_image = vanga_from_jvm_handle(env, this);
@@ -262,7 +262,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_extractArea(JNIEnv *env
   return jvm_image;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_resize(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_resize(JNIEnv *env,
                                                                   jobject this,
                                                                   jint target_width,
                                                                   jint target_height,
@@ -317,7 +317,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_resize(JNIEnv *env,
   return jvm_image;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_shrink(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_shrink(JNIEnv *env,
                                                                   jobject this,
                                                                   jdouble factor) {
   VipsImage *image = vanga_from_jvm_handle(env, this);
@@ -340,12 +340,12 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_shrink(JNIEnv *env,
 }
 
 jobject jvm_rect(JNIEnv *env, int left, int top, int width, int height) {
-  jclass jvm_vips_class = (*env)->FindClass(env, "snd/vanga/image/ImageRect");
+  jclass jvm_vips_class = (*env)->FindClass(env, "io/github/vivitoto/vanga/image/ImageRect");
   jmethodID constructor = (*env)->GetMethodID(env, jvm_vips_class, "<init>", "(IIII)V");
   return (*env)->NewObject(env, jvm_vips_class, constructor, left, top, width + left, height + top);
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_findTrim(JNIEnv *env, jobject this) {
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_findTrim(JNIEnv *env, jobject this) {
   VipsImage *image = vanga_from_jvm_handle(env, this);
   if (image == nullptr)
     return nullptr;
@@ -355,13 +355,13 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_findTrim(JNIEnv *env, j
   return jvm_rect(env, left, top, width, height);
 }
 
-JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_gObjectUnref(JNIEnv *env,
+JNIEXPORT void JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_gObjectUnref(JNIEnv *env,
                                                                      jobject this,
                                                                      jlong ptr) {
   g_object_unref((VipsImage *)ptr);
 }
 
-JNIEXPORT void JNICALL Java_snd_vanga_image_VipsImage_free(JNIEnv *env,
+JNIEXPORT void JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_free(JNIEnv *env,
                                                              jobject this,
                                                              jlong bytes) {
   free((void *)bytes);
@@ -380,7 +380,7 @@ void add_to_jvm_list(JNIEnv *env, jobject list, jobject new_item) {
   (*env)->CallBooleanMethod(env, list, array_list_add, new_item);
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_makeHistogram(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_makeHistogram(JNIEnv *env,
                                                                          jobject this) {
   VipsImage *image = vanga_from_jvm_handle(env, this);
   if (image == nullptr)
@@ -416,7 +416,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_makeHistogram(JNIEnv *e
   return jvm_image;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_VipsImage_mapLookupTable(JNIEnv *env,
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_VipsImage_mapLookupTable(JNIEnv *env,
                                                                           jobject this,
                                                                           jarray jvm_lut) {
   VipsImage *image = vanga_from_jvm_handle(env, this);

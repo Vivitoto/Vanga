@@ -30,6 +30,29 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      - name: Build Android native library image
+        run: docker build -t vanga-build-android . -f ./cmake/android.Dockerfile
+
+      - name: Build Android native libraries
+        run: |
+          set -euo pipefail
+          for arch in aarch64 armv7a x86_64 x86; do
+            docker run --rm \
+              --user "$(id -u):$(id -g)" \
+              -e HOME=/tmp \
+              -v "$PWD:/build" \
+              vanga-build-android "$arch"
+          done
+
+      - name: Copy Android native libraries
+        run: |
+          ./gradlew \
+            android-arm64_copyJniLibs \
+            android-armv7a_copyJniLibs \
+            android-x86_64_copyJniLibs \
+            android-x86_copyJniLibs \
+            --stacktrace
+
       - name: Restore release signing key
         env:
           VANGA_KEYSTORE_B64: ${{ secrets.VANGA_KEYSTORE_B64 }}
@@ -44,6 +67,22 @@ jobs:
 
       - name: Build unsigned release APK
         run: ./gradlew :vanga-app:assembleRelease --stacktrace
+
+      - name: Verify Android native libraries are packaged
+        run: |
+          set -euo pipefail
+          APK=$(find vanga-app/build/outputs/apk/release -name '*release-unsigned.apk' -type f | head -1)
+          test -n "$APK"
+          missing=0
+          for abi in arm64-v8a armeabi-v7a x86 x86_64; do
+            for lib in libsqlitejdbc.so libvanga_vips.so libvanga_android_bitmap.so; do
+              if ! unzip -l "$APK" | grep -q "lib/${abi}/${lib}"; then
+                echo "Missing lib/${abi}/${lib} in $APK"
+                missing=1
+              fi
+            done
+          done
+          exit "$missing"
 
       - name: Rename and sign APK
         env:

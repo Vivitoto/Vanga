@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 void vanga_throw_jvm_vips_exception_message(JNIEnv *env, const char *message) {
-  (*env)->ThrowNew(env, (*env)->FindClass(env, "snd/vanga/image/VipsException"), message);
+  (*env)->ThrowNew(env, (*env)->FindClass(env, "io/github/vivitoto/vanga/image/VipsException"), message);
 }
 void vanga_throw_jvm_vips_exception(JNIEnv *env) {
   vanga_throw_jvm_vips_exception_message(env, vips_error_buffer());
@@ -27,9 +27,9 @@ jobject get_jvm_enum_type(JNIEnv *env, VipsImage *image) {
     return nullptr;
   }
 
-  jclass enum_class = (*env)->FindClass(env, "snd/vanga/image/ImageFormat");
+  jclass enum_class = (*env)->FindClass(env, "io/github/vivitoto/vanga/image/ImageFormat");
   jfieldID enum_field =
-      (*env)->GetStaticFieldID(env, enum_class, enum_field_name, "Lsnd/vanga/image/ImageFormat;");
+      (*env)->GetStaticFieldID(env, enum_class, enum_field_name, "Lio/github/vivitoto/vanga/image/ImageFormat;");
   return (*env)->GetStaticObjectField(env, enum_class, enum_field);
 }
 
@@ -101,9 +101,9 @@ vanga_to_jvm_handle(JNIEnv *env, VipsImage *image, const unsigned char *external
     g_object_unref(image);
   }
 
-  jclass jvm_vips_class = (*env)->FindClass(env, "snd/vanga/image/VipsImage");
+  jclass jvm_vips_class = (*env)->FindClass(env, "io/github/vivitoto/vanga/image/VipsImage");
   jmethodID constructor = (*env)->GetMethodID(env, jvm_vips_class, "<init>",
-                                              "(IIIIII[ILsnd/vanga/image/ImageFormat;JJ)V");
+                                              "(IIIIII[ILio/github/vivitoto/vanga/image/ImageFormat;JJ)V");
 
   jobject jvm_type_enum = get_jvm_enum_type(env, transformed);
 

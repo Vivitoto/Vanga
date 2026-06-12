@@ -9,7 +9,7 @@ void freeData(void *data, void *) {
     free(data);
 }
 
-extern "C" JNIEXPORT jobject JNICALL Java_snd_vanga_image_SkiaBitmap_directCopyToSkiaBitmap(
+extern "C" JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_SkiaBitmap_directCopyToSkiaBitmap(
         JNIEnv *env,
         jobject thisObject,
         jobject jvm_image

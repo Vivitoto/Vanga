@@ -1,18 +1,16 @@
-# Vanga 0.1.0
+# Vanga 0.1.1
 
-首个 Vanga 发布版本。
+Android 启动崩溃修复版本。
 
-## 更新内容
+## 修复内容
 
-- 完成 Vanga 项目独立化：应用名、包名、命名空间、模块名和原生库名称均切换为 Vanga。
-- Android 包名更新为 `io.github.vivitoto.vanga`，可作为全新应用安装。
-- 保留 Android、桌面端和 Web 多平台构建目标。
-- 保留 Komga 媒体库连接、漫画 / 图书阅读、下载、收藏、阅读进度和 Komf 集成能力。
-- 移除浏览器扩展模块，Vanga 主项目不再包含 Komf Chrome extension。
-- GitHub Actions 发布结构调整为：
-  - `latest` release 始终放最新 APK。
-  - `vX.Y.Z` release 保留对应历史版本 APK。
+- 修复 Android APK 启动时找不到 `libsqlitejdbc.so` 导致的崩溃：
+  - `java.lang.UnsatisfiedLinkError: dlopen failed: library "libsqlitejdbc.so" not found`
+- 将 SQLite JDBC 的 Android native library 自动解包到 Gradle 生成目录，并接入 Android `jniLibs` 打包流程。
+- CI 发布流程会构建并打包 Android 图片解码所需 native libraries，并校验 APK 中包含关键 `.so` 文件。
+- 修正图片解码 native JNI 符号的包名，避免 Vanga 包名迁移后调用不到旧命名空间下的 JNI 方法。
+- 调整 Android / 桌面 / metadata 图标留白比例，避免启动器裁切导致图标显示不全；背景保持深色，不引入白边。
 
 ## 说明
 
-这是 Vanga 的初始公开版本。由于包名已更换，它不会覆盖或升级其他应用，需要作为新应用安装。
+这是 `0.1.0` 首发后的紧急修复版本，建议所有 Android 用户升级。

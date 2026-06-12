@@ -35,7 +35,7 @@ int convert_to_rgba(JNIEnv *env, VipsImage *input, VipsImage **output) {
   return 0;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_AndroidBitmap_createHardwareBuffer(
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_AndroidBitmap_createHardwareBuffer(
     JNIEnv *env, jobject this, jobject jvm_image) {
   VipsImage *image = vanga_from_jvm_handle(env, jvm_image);
   if (image == nullptr)
@@ -113,7 +113,7 @@ JNIEXPORT jobject JNICALL Java_snd_vanga_image_AndroidBitmap_createHardwareBuffe
   return jvm_buffer;
 }
 
-JNIEXPORT jobject JNICALL Java_snd_vanga_image_AndroidBitmap_createSoftwareBitmap(
+JNIEXPORT jobject JNICALL Java_io_github_vivitoto_vanga_image_AndroidBitmap_createSoftwareBitmap(
     JNIEnv *env, jobject this, jobject jvm_image) {
   VipsImage *image = vanga_from_jvm_handle(env, jvm_image);
   VipsImage *processed_image = nullptr;
