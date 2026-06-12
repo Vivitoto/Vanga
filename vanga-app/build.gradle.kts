@@ -61,6 +61,7 @@ kotlin {
             implementation(libs.androidx.workManager)
             implementation(libs.androidx.workManager.ktx)
             implementation(projects.vangaInfra.database.sqlite)
+            implementation(projects.vangaInfra.imageDecoder.vips)
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs)
         }
