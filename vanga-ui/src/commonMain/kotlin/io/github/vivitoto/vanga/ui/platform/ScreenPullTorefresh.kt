@@ -1,0 +1,14 @@
+package io.github.vivitoto.vanga.ui.platform
+
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.runtime.Composable
+import kotlinx.coroutines.flow.Flow
+import io.github.vivitoto.vanga.ui.LoadState
+
+@Composable
+expect fun ScreenPullToRefreshBox(
+    screenState: Flow<LoadState<*>>,
+    onRefresh: () -> Unit,
+    minLoadDuration: Long = 700,
+    content: @Composable BoxScope.() -> Unit,
+)

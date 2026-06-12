@@ -1,0 +1,235 @@
+#include "../vanga_webview.h"
+#include "../vanga_callbacks.h"
+#include <gtk/gtk.h>
+#include <gtk/gtkx.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
+#include <jni.h>
+#include <jawt.h>
+#include <jawt_md.h>
+#include <X11/X.h>
+#include <webkit2/webkit2.h>
+#include <webview/webview.h>
+
+// webview library initializes webkit webview with default context
+// That context is stored in static variable and is reused when new webview is created
+//
+// there's no way to unregister uri handler
+// registering uri scheme second time will cause error
+// use static variable to use it inside callback
+static request_interceptor *static_interceptor = NULL;
+static gboolean scheme_is_registered = false;
+static GMutex mutex;
+
+typedef struct {
+    webview_t webview;
+    JavaVM *jvm;
+    GHashTable *bind_callbacks;
+    request_interceptor *interceptor;
+    GtkWidget *gtk_toplevel;
+} webkit2gtk_data;
+
+static char *extensions_dir = NULL;
+
+static void vanga_uri_scheme_request_cb(WebKitURISchemeRequest *request, gpointer) {
+    const gchar *uri = webkit_uri_scheme_request_get_uri(request);
+    if (static_interceptor == NULL) {
+        GError *error = g_error_new(WEBKIT_NETWORK_ERROR,
+                                    WEBKIT_NETWORK_ERROR_FAILED,
+                                    "interceptor is not initialized");
+        webkit_uri_scheme_request_finish_error(request, error);
+        g_error_free(error);
+        return;
+    }
+
+
+    load_result_t *result = NULL;
+    if (strncmp("vanga", uri, 7) == 0) {
+        char *normalized_uri = malloc(sizeof(char) * (strlen(uri) + 10));
+        strcpy(normalized_uri, "http");
+        strcat(normalized_uri, uri + 7);
+        result = vanga_interceptor_run(static_interceptor, normalized_uri);
+        free(normalized_uri);
+    } else {
+        result = vanga_interceptor_run(static_interceptor, uri);
+    }
+
+    if (result == NULL) {
+        GError *error = g_error_new(WEBKIT_NETWORK_ERROR, WEBKIT_NETWORK_ERROR_FAILED,
+                                    "Invalid result");
+        webkit_uri_scheme_request_finish_error(request, error);
+        g_error_free(error);
+        return;
+    }
+
+
+    GInputStream *stream = g_memory_input_stream_new_from_data(result->data, result->size, g_free);
+    webkit_uri_scheme_request_finish(request, stream, result->size, result->content_type);
+
+    g_object_unref(stream);
+    free(result->content_type);
+    free(result);
+}
+
+GtkWidget *xembed_gtk_plug(JNIEnv *env, jobject awt_component) {
+    Window awt_xwindow = 0;
+    JAWT_DrawingSurface *ds;
+    JAWT_DrawingSurfaceInfo *dsi;
+    jint lock;
+    JAWT awt;
+    awt.version = JAWT_VERSION_9;
+
+    if (!JAWT_GetAWT(env, &awt)) {
+        vanga_throw_jvm_exception(env, "Can't load JAWT");
+        return NULL;
+    }
+
+    ds = awt.GetDrawingSurface(env, awt_component);
+    if (ds == NULL) {
+        vanga_throw_jvm_exception(env, "Can't get drawing surface");
+        return NULL;
+    }
+
+    lock = ds->Lock(ds);
+    if ((lock & JAWT_LOCK_ERROR) != 0) {
+        awt.FreeDrawingSurface(ds);
+        vanga_throw_jvm_exception(env, "Can't get drawing surface lock");
+        return NULL;
+    }
+
+    dsi = ds->GetDrawingSurfaceInfo(ds);
+    if (dsi == NULL) {
+        vanga_throw_jvm_exception(env, "Can't get drawing surface info");
+    } else {
+        JAWT_X11DrawingSurfaceInfo *xdsi = dsi->platformInfo;
+        if (xdsi != NULL) {
+            awt_xwindow = xdsi->drawable;
+        } else {
+            vanga_throw_jvm_exception(env, "Can't get X11 platform info");
+        }
+        ds->FreeDrawingSurfaceInfo(dsi);
+    }
+    ds->Unlock(ds);
+    awt.FreeDrawingSurface(ds);
+
+    if (awt_xwindow == 0) {
+        vanga_throw_jvm_exception(env, "Can't get awt X11 window");
+        return NULL;
+    }
+    return gtk_plug_new(awt_xwindow);
+}
+
+static void
+initialize_web_extensions(WebKitWebContext *context, gpointer) {
+    if (extensions_dir == NULL) {
+        const gchar *tmp_dir = g_get_tmp_dir();
+        extensions_dir = malloc(sizeof(char) * (strlen(tmp_dir) + 32));
+        strcpy(extensions_dir, tmp_dir);
+        strcat(extensions_dir, "/vanga/libs/webkit");
+    }
+
+    webkit_web_context_set_web_extensions_directory(context, extensions_dir);
+}
+
+void vanga_register_request_interceptor(vanga_webview_t webview, request_interceptor *interceptor) {
+    g_mutex_lock(&mutex);
+
+    webkit2gtk_data *webview_data = webview;
+    if (webview_data->interceptor != NULL) {
+        vanga_interceptor_destroy(webview_data->interceptor);
+    }
+    webview_data->interceptor = interceptor;
+
+    static_interceptor = interceptor;
+
+    if (scheme_is_registered) {
+        g_mutex_unlock(&mutex);
+        return;
+    }
+
+    webkit_web_context_register_uri_scheme(
+        webkit_web_context_get_default(),
+        "vanga",
+        vanga_uri_scheme_request_cb,
+        NULL,
+        NULL
+    );
+
+    webkit_web_context_register_uri_scheme(
+        webkit_web_context_get_default(),
+        "vangas",
+        vanga_uri_scheme_request_cb,
+        NULL,
+        NULL
+    );
+
+    scheme_is_registered = true;
+    g_mutex_unlock(&mutex);
+}
+
+vanga_webview_t vanga_webview_create(JNIEnv *env, jobject awt_window) {
+    gtk_init_check(0, NULL);
+    gdk_set_allowed_backends("x11");
+    g_signal_connect(webkit_web_context_get_default (),
+                     "initialize-web-extensions",
+                     G_CALLBACK (initialize_web_extensions),
+                     NULL);
+    GtkWidget *gtk_plug = xembed_gtk_plug(env, awt_window);
+    if (gtk_plug == NULL) return NULL;
+
+    webkit2gtk_data *webview_data = malloc(sizeof(webkit2gtk_data));
+    (*env)->GetJavaVM(env, &webview_data->jvm);
+    webview_data->bind_callbacks = g_hash_table_new_full(g_str_hash,
+                                                         g_str_equal,
+                                                         NULL,
+                                                         vanga_bind_callback_destroy);
+    webview_data->interceptor = NULL;
+
+
+    webview_data->gtk_toplevel = gtk_plug;
+
+    gtk_widget_show(gtk_plug);
+    webview_t webview = webview_create(0, gtk_plug);
+
+    WebKitWebView *webkit_webview = webview_get_native_handle(webview, WEBVIEW_NATIVE_HANDLE_KIND_BROWSER_CONTROLLER);
+    WebKitSettings *setting = webkit_web_view_get_settings(webkit_webview);
+    webkit_settings_set_enable_developer_extras(setting, true);
+
+    // WebKitWebInspector *inspector = webkit_web_view_get_inspector(webkit_webview);
+    // webkit_web_inspector_show(WEBKIT_WEB_INSPECTOR(inspector));
+
+    webview_data->webview = webview;
+    return webview_data;
+}
+
+webview_t vanga_webview_get_webview(vanga_webview_t data) {
+    return ((webkit2gtk_data *) data)->webview;
+}
+
+JavaVM *vanga_webview_get_jvm(vanga_webview_t data) {
+    return ((webkit2gtk_data *) data)->jvm;
+}
+
+void vanga_webview_bind(vanga_webview_t webview, bind_callback_t *callback) {
+    webkit2gtk_data *webview_data = webview;
+    g_hash_table_insert(webview_data->bind_callbacks, callback->name_chars, callback);
+    webview_bind(webview_data->webview, callback->name_chars, vanga_bind_callback_run, callback);
+}
+
+void vanga_destroy_callback(webview_t webview, void *data) {
+    webkit2gtk_data *webview_data = data;
+    if (webview_data->interceptor != NULL) {
+        vanga_interceptor_destroy(webview_data->interceptor);
+    }
+    g_hash_table_destroy(webview_data->bind_callbacks);
+
+    webview_terminate(webview);
+    webview_destroy(webview);
+    gtk_window_close(GTK_WINDOW(webview_data->gtk_toplevel));
+    free(webview_data);
+}
+
+void vanga_webview_destroy(vanga_webview_t data) {
+    webkit2gtk_data *webview_data = data;
+    webview_dispatch(webview_data->webview, vanga_destroy_callback, data);
+}

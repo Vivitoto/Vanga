@@ -1,0 +1,10 @@
+package io.github.vivitoto.vanga.db.tables
+
+import org.jetbrains.exposed.v1.core.Table
+
+object UserFontsTable : Table("UserFonts") {
+    val name = text("name")
+    val path = text("path")
+
+    override val primaryKey = PrimaryKey(name)
+}

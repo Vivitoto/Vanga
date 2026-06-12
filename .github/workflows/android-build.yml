@@ -1,0 +1,139 @@
+name: Build Vanga APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Restore release signing key
+        env:
+          VANGA_KEYSTORE_B64: ${{ secrets.VANGA_KEYSTORE_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p vanga-app/keystore
+          test -n "$VANGA_KEYSTORE_B64"
+          echo "$VANGA_KEYSTORE_B64" | base64 -d > vanga-app/keystore/release.p12
+
+      - name: Build debug APK
+        run: ./gradlew :vanga-app:assembleDebug --stacktrace
+
+      - name: Build unsigned release APK
+        run: ./gradlew :vanga-app:assembleRelease --stacktrace
+
+      - name: Rename and sign APK
+        env:
+          VANGA_STORE_PASSWORD: ${{ secrets.VANGA_STORE_PASSWORD }}
+          VANGA_KEY_ALIAS: ${{ secrets.VANGA_KEY_ALIAS }}
+          VANGA_KEY_PASSWORD: ${{ secrets.VANGA_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          test -n "$VANGA_STORE_PASSWORD"
+          test -n "$VANGA_KEY_ALIAS"
+          test -n "$VANGA_KEY_PASSWORD"
+          mkdir -p output
+          VERSION=$(grep -E '^[[:space:]]*app-version[[:space:]]*=' gradle/libs.versions.toml | sed -E 's/.*"([^"]+)".*/\1/')
+          VERSION_SUFFIX=$(echo "$VERSION" | sed -E 's/[^A-Za-z0-9]+/_/g; s/^_+|_+$//g')
+          UNSIGNED_APK=$(find vanga-app/build/outputs/apk/release -name '*release-unsigned.apk' -type f | head -1)
+          test -n "$UNSIGNED_APK"
+          ALIGNED_APK="output/vanga-v${VERSION_SUFFIX}-aligned.apk"
+          SIGNED_APK="output/vanga-v${VERSION_SUFFIX}.apk"
+          BUILD_TOOLS=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/* | sort -V | tail -1)
+          "$BUILD_TOOLS/zipalign" -f -p 4 "$UNSIGNED_APK" "$ALIGNED_APK"
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks vanga-app/keystore/release.p12 \
+            --ks-type PKCS12 \
+            --ks-pass pass:"$VANGA_STORE_PASSWORD" \
+            --key-pass pass:"$VANGA_KEY_PASSWORD" \
+            --ks-key-alias "$VANGA_KEY_ALIAS" \
+            --out "$SIGNED_APK" \
+            "$ALIGNED_APK"
+          rm -f "$ALIGNED_APK"
+          ls -lh output/
+
+      - name: Verify APK signature
+        run: |
+          BUILD_TOOLS=$(ls -d "$ANDROID_SDK_ROOT"/build-tools/* | sort -V | tail -1)
+          "$BUILD_TOOLS/apksigner" verify -v output/vanga-v*.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanga-release-apk
+          path: output/vanga-v*.apk
+          if-no-files-found: error
+
+      - name: Prepare release metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          VERSION=$(grep -E '^[[:space:]]*app-version[[:space:]]*=' gradle/libs.versions.toml | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version_tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Release historical version
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.version_tag }}
+          name: Vanga ${{ steps.meta.outputs.version_tag }}
+          body_path: RELEASE_NOTES.md
+          files: output/vanga-v*.apk
+          overwrite_files: true
+          draft: false
+          prerelease: false
+          make_latest: 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove old APK assets from latest release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view latest >/dev/null 2>&1; then
+            gh release view latest --json assets --jq '.assets[].name | select(endswith(".apk"))' | while read -r asset; do
+              if [ -n "$asset" ]; then
+                gh release delete-asset latest "$asset" --yes
+              fi
+            done
+          fi
+
+      - name: Release APK to latest
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Vanga (latest)
+          body_path: RELEASE_NOTES.md
+          files: output/vanga-v*.apk
+          overwrite_files: true
+          draft: false
+          prerelease: false
+          make_latest: 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

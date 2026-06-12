@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS BookColorLevels;
+DROP TABLE IF EXISTS BookColorCurves;
+DROP TABLE IF EXISTS BookColorCorrection;
+DROP TABLE IF EXISTS ColorLevelsPresets;
+DROP TABLE IF EXISTS ColorCurvePresets;

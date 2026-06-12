@@ -1,0 +1,3 @@
+Vanga is a cross-platform client for Komga media libraries.
+
+Browse your comic, manga, book and EPUB collections, manage series and books, keep reading progress, and read with the built-in image and EPUB readers.

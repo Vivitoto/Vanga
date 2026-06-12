@@ -1,0 +1,64 @@
+package io.github.vivitoto.vanga.image
+
+interface VangaImage : AutoCloseable {
+    val width: Int
+    val height: Int
+    val bands: Int
+    val type: ImageFormat
+
+    val pagesLoaded: Int
+    val pagesTotal: Int
+    val pageHeight: Int
+    val pageDelays: IntArray?
+
+
+    suspend fun extractArea(rect: ImageRect): VangaImage
+    suspend fun resize(
+        scaleWidth: Int,
+        scaleHeight: Int,
+        linear: Boolean = false,
+        kernel: ReduceKernel = ReduceKernel.DEFAULT
+    ): VangaImage
+
+    suspend fun shrink(factor: Double): VangaImage
+    suspend fun findTrim(): ImageRect
+
+    suspend fun makeHistogram(): VangaImage
+    suspend fun mapLookupTable(table: ByteArray): VangaImage
+
+    suspend fun getBytes(): ByteArray
+}
+
+data class ImageDimensions(
+    val width: Int,
+    val height: Int,
+    val bands: Int,
+)
+
+enum class ImageFormat {
+    GRAYSCALE_8,
+    RGBA_8888,
+    HISTOGRAM,
+}
+
+data class ImageRect(
+    val left: Int,
+    val top: Int,
+    val right: Int,
+    val bottom: Int
+) {
+    val width = right - left
+    val height = bottom - top
+}
+
+enum class ReduceKernel {
+    NEAREST,
+    LINEAR,
+    CUBIC,
+    MITCHELL,
+    LANCZOS2,
+    LANCZOS3,
+    MKS2013,
+    MKS2021,
+    DEFAULT,
+}
