@@ -182,6 +182,7 @@ abstract class AppModule {
             isOffline = isOffline,
             komfClientFactory = komfClientFactory,
             appNotifications = appNotifications,
+            webDavHttpClient = ktorWithoutCache.config { expectSuccess = false },
             komgaSharedState = komgaSharedState,
             komgaEvents = komgaEvents,
             appUpdater = createAppUpdater(updateClient),

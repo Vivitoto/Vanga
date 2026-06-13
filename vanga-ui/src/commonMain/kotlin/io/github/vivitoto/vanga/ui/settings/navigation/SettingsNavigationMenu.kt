@@ -16,6 +16,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Cached
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Extension
@@ -60,6 +61,7 @@ import io.github.vivitoto.vanga.ui.settings.announcements.AnnouncementsScreen
 import io.github.vivitoto.vanga.ui.settings.appearance.AppSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.authactivity.AuthenticationActivityScreen
 import io.github.vivitoto.vanga.ui.settings.epub.EpubReaderSettingsScreen
+import io.github.vivitoto.vanga.ui.settings.favoritesync.FavoriteSyncSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.imagereader.ImageReaderSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.general.KomfSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.jobs.KomfJobsScreen
@@ -115,6 +117,15 @@ fun SettingsNavigationMenu(
                 icon = Icons.Default.RecentActors,
                 onClick = { onNavigation(AuthenticationActivityScreen(true)) },
                 isSelected = currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
+                color = contentColor,
+            )
+
+            NavigationButton(
+                label = "收藏同步",
+                description = "用 WebDAV 在多设备间同步本机收藏",
+                icon = Icons.Default.CloudSync,
+                onClick = { onNavigation(FavoriteSyncSettingsScreen()) },
+                isSelected = currentScreen is FavoriteSyncSettingsScreen,
                 color = contentColor,
             )
 

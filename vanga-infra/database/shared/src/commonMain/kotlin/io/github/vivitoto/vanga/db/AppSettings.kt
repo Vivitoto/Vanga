@@ -8,8 +8,8 @@ import kotlin.time.Instant
 
 @Serializable
 data class AppSettings(
-    val username: String = "admin@example.org",
-    val serverUrl: String = "http://localhost:25600",
+    val username: String = "",
+    val serverUrl: String = "",
 
     val cardWidth: Int = 170,
     val seriesPageLoadSize: Int = 20,

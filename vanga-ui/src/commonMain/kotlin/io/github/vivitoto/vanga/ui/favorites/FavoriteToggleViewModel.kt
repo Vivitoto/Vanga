@@ -1,10 +1,13 @@
 package io.github.vivitoto.vanga.ui.favorites
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import io.github.vivitoto.vanga.AppNotification
 import io.github.vivitoto.vanga.AppNotifications
 import io.github.vivitoto.vanga.favorites.FavoriteCollectionService
 import io.github.vivitoto.vanga.favorites.FavoriteReadListService
+import io.github.vivitoto.vanga.favorites.FavoriteSyncResult
+import io.github.vivitoto.vanga.favorites.FavoriteWebDavSyncService
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.user.KomgaUser
@@ -12,13 +15,14 @@ import snd.komga.client.user.KomgaUser
 class FavoriteToggleViewModel(
     private val favoriteCollectionService: FavoriteCollectionService,
     private val favoriteReadListService: FavoriteReadListService,
+    private val favoriteSyncService: FavoriteWebDavSyncService,
     private val currentUserProvider: () -> KomgaUser?,
     private val appNotifications: AppNotifications,
     private val onFavoritesChanged: () -> Unit,
 ) : ScreenModel {
 
     val canWriteFavorites: Boolean
-        get() = currentUserProvider()?.roleAdmin() ?: true
+        get() = currentUserProvider() != null
 
     suspend fun isSeriesFavorite(seriesId: KomgaSeriesId): Boolean =
         appNotifications.runCatchingToNotifications { favoriteCollectionService.isFavorite(seriesId) }
@@ -27,7 +31,10 @@ class FavoriteToggleViewModel(
     suspend fun toggleSeriesFavorite(seriesId: KomgaSeriesId): Boolean {
         if (!canWriteFavoritesNow()) return isSeriesFavorite(seriesId)
         return appNotifications.runCatchingToNotifications { favoriteCollectionService.toggleFavorite(seriesId) }
-            .onSuccess { onFavoritesChanged() }
+            .onSuccess {
+                onFavoritesChanged()
+                syncFavoritesInBackground()
+            }
             .getOrElse { isSeriesFavorite(seriesId) }
     }
 
@@ -38,7 +45,10 @@ class FavoriteToggleViewModel(
     suspend fun toggleBookFavorite(bookId: KomgaBookId): Boolean {
         if (!canWriteFavoritesNow()) return isBookFavorite(bookId)
         return appNotifications.runCatchingToNotifications { favoriteReadListService.toggleFavorite(bookId) }
-            .onSuccess { onFavoritesChanged() }
+            .onSuccess {
+                onFavoritesChanged()
+                syncFavoritesInBackground()
+            }
             .getOrElse { isBookFavorite(bookId) }
     }
 
@@ -50,12 +60,19 @@ class FavoriteToggleViewModel(
                 false
             }
 
-            !user.roleAdmin() -> {
-                appNotifications.add(AppNotification.Error("收藏同步需要 Komga 管理员权限"))
-                false
-            }
-
             else -> true
+        }
+    }
+
+    private fun syncFavoritesInBackground() {
+        appNotifications.runCatchingToNotifications(screenModelScope) {
+            when (favoriteSyncService.syncNow()) {
+                FavoriteSyncResult.Disabled,
+                FavoriteSyncResult.NotConfigured,
+                is FavoriteSyncResult.ConnectionOk -> Unit
+
+                is FavoriteSyncResult.Success -> onFavoritesChanged()
+            }
         }
     }
 }

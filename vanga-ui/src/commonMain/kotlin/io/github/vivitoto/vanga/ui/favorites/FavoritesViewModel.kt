@@ -14,22 +14,21 @@ import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.AppNotifications
 import io.github.vivitoto.vanga.favorites.FavoriteCollectionService
 import io.github.vivitoto.vanga.favorites.FavoriteReadListService
-import io.github.vivitoto.vanga.komga.api.KomgaCollectionsApi
-import io.github.vivitoto.vanga.komga.api.KomgaReadListApi
+import io.github.vivitoto.vanga.favorites.FavoriteWebDavSyncService
+import io.github.vivitoto.vanga.komga.api.KomgaBookApi
+import io.github.vivitoto.vanga.komga.api.KomgaSeriesApi
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.common.cards.defaultCardWidth
-import snd.komga.client.collection.KomgaCollection
-import snd.komga.client.common.KomgaPageRequest
-import snd.komga.client.readlist.KomgaReadList
 import snd.komga.client.series.KomgaSeries
 import snd.komga.client.user.KomgaUser
 
 class FavoritesViewModel(
     private val favoriteCollectionService: FavoriteCollectionService,
     private val favoriteReadListService: FavoriteReadListService,
-    private val collectionsApi: KomgaCollectionsApi,
-    private val readListApi: KomgaReadListApi,
+    private val favoriteSyncService: FavoriteWebDavSyncService,
+    private val seriesApi: KomgaSeriesApi,
+    private val bookApi: KomgaBookApi,
     private val currentUser: StateFlow<KomgaUser?>,
     private val appNotifications: AppNotifications,
     cardWidthFlow: Flow<androidx.compose.ui.unit.Dp>,
@@ -37,17 +36,13 @@ class FavoritesViewModel(
 
     val cardWidth = cardWidthFlow.stateIn(screenModelScope, SharingStarted.Eagerly, defaultCardWidth.dp)
 
-    var favoriteSeriesCollection by mutableStateOf<KomgaCollection?>(null)
-        private set
-    var favoriteBooksReadList by mutableStateOf<KomgaReadList?>(null)
-        private set
     var favoriteSeries by mutableStateOf<List<KomgaSeries>>(emptyList())
         private set
     var favoriteBooks by mutableStateOf<List<VangaBook>>(emptyList())
         private set
 
     val canWriteFavorites: Boolean
-        get() = currentUser.value?.roleAdmin() ?: true
+        get() = currentUser.value != null
 
     fun initialize() {
         if (state.value != LoadState.Uninitialized) return
@@ -68,28 +63,14 @@ class FavoritesViewModel(
     }
 
     private suspend fun loadFavorites() {
-        val collections = favoriteCollectionService.getFavoriteCollections(forceRefresh = true)
-        val readLists = favoriteReadListService.getFavoriteReadLists(forceRefresh = true)
+        runCatching { favoriteSyncService.syncNow() }
+        val favoriteSeriesIds = favoriteCollectionService.getFavoriteSeriesIds()
+        val favoriteBookIds = favoriteReadListService.getFavoriteBookIds()
 
-        favoriteSeriesCollection = collections.firstOrNull()
-        favoriteBooksReadList = readLists.firstOrNull()
+        favoriteSeries = favoriteSeriesIds
+            .mapNotNull { id -> runCatching { seriesApi.getOneSeries(id) }.getOrNull() }
 
-        favoriteSeries = collections
-            .flatMap {
-                collectionsApi.getSeriesForCollection(
-                    id = it.id,
-                    pageRequest = KomgaPageRequest(unpaged = true)
-                ).content
-            }
-            .distinctBy { it.id }
-
-        favoriteBooks = readLists
-            .flatMap {
-                readListApi.getBooksForReadList(
-                    id = it.id,
-                    pageRequest = KomgaPageRequest(unpaged = true)
-                ).content
-            }
-            .distinctBy { it.id }
+        favoriteBooks = favoriteBookIds
+            .mapNotNull { id -> runCatching { bookApi.getOne(id) }.getOrNull() }
     }
 }

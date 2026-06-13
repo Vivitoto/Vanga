@@ -15,6 +15,7 @@ import io.github.vivitoto.vanga.komga.api.KomgaApi
 import io.github.vivitoto.vanga.offline.OfflineDependencies
 import io.github.vivitoto.vanga.ui.strings.AppStrings
 import io.github.vivitoto.vanga.updates.AppUpdater
+import io.ktor.client.HttpClient
 import snd.komf.client.KomfClientFactory
 
 data class DependencyContainer(
@@ -25,6 +26,7 @@ data class DependencyContainer(
     val isOffline: StateFlow<Boolean>,
     val komfClientFactory: KomfClientFactory,
     val appNotifications: AppNotifications,
+    val webDavHttpClient: HttpClient,
     val komgaSharedState: KomgaAuthenticationState,
     val komgaEvents: ManagedKomgaEvents,
     val appUpdater: AppUpdater?,

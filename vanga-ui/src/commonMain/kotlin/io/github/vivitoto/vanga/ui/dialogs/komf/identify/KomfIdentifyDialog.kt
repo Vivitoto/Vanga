@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -47,6 +45,7 @@ import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
 import io.github.vivitoto.vanga.ui.common.cards.KomfResultCard
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
 import io.github.vivitoto.vanga.ui.dialogs.DialogSimpleHeader
 import io.github.vivitoto.vanga.ui.dialogs.komf.identify.KomfIdentifyDialogViewModel.ConfigState
@@ -130,7 +129,7 @@ fun IdentifyConfigContent(state: ConfigState) {
                 },
                 enabled = !isLoading.value,
             ) {
-                if (isLoading.value && searchInProgress) CircularProgressIndicator(Modifier.size(25.dp))
+                if (isLoading.value && searchInProgress) AppCircularProgressIndicator(size = 25.dp, strokeWidth = 2.5.dp)
                 else Text("搜索")
             }
         }
@@ -286,7 +285,7 @@ fun IdentifyConfigButtons(state: ConfigState) {
             enabled = !isLoading.value,
             modifier = Modifier.cursorForHand()
         ) {
-            if (isLoading.value && autoIdentifyProgress) CircularProgressIndicator(Modifier.size(25.dp))
+            if (isLoading.value && autoIdentifyProgress) AppCircularProgressIndicator(size = 25.dp, strokeWidth = 2.5.dp)
             else Text("自动识别")
         }
     }
@@ -344,7 +343,7 @@ private fun ControlButtons(
             },
             modifier = Modifier.cursorForHand()
         ) {
-            if (isLoading) CircularProgressIndicator(Modifier.size(25.dp))
+            if (isLoading) AppCircularProgressIndicator(size = 25.dp, strokeWidth = 2.5.dp)
             else Text(confirmationText)
         }
     }

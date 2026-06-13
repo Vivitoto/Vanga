@@ -24,6 +24,8 @@ import io.github.vivitoto.vanga.db.VangaDatabase
 import io.github.vivitoto.vanga.db.KomfSettings
 import io.github.vivitoto.vanga.db.OfflineSettings
 import io.github.vivitoto.vanga.db.SettingsStateWrapper
+import io.github.vivitoto.vanga.db.favorites.ExposedFavoriteSyncSettingsRepository
+import io.github.vivitoto.vanga.db.favorites.ExposedLocalFavoritesRepository
 import io.github.vivitoto.vanga.db.fonts.ExposedUserFontsRepository
 import io.github.vivitoto.vanga.db.homescreen.ExposedHomeScreenFilterRepository
 import io.github.vivitoto.vanga.db.offline.ExposedLogJournalRepository
@@ -163,7 +165,9 @@ class AndroidAppModule(
                         saveSettings = repository::putFilters
                     )
                 )
-            }
+            },
+            localFavoritesRepository = ExposedLocalFavoritesRepository(databases.app),
+            favoriteSyncSettingsRepository = ExposedFavoriteSyncSettingsRepository(databases.app),
         )
     }
 

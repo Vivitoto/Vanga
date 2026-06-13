@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -57,6 +56,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.format
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.dateTimeFormat
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.common.components.AppFilterChipDefaults
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
@@ -105,7 +105,7 @@ fun KomfJobsContent(
             animationSpec = tween(500),
         ) { loading ->
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (loading) CircularProgressIndicator()
+                if (loading) AppCircularProgressIndicator(size = 32.dp, strokeWidth = 3.dp)
                 else if (jobs.isEmpty()) {
                     Text("暂无内容")
                 } else {
@@ -324,7 +324,7 @@ private fun SeriesTooltip(
                 .padding(15.dp)
                 .border(1.dp, MaterialTheme.colorScheme.primary)
         ) {
-            if (loading) CircularProgressIndicator()
+            if (loading) AppCircularProgressIndicator(size = 32.dp, strokeWidth = 3.dp)
             else {
                 Spacer(Modifier.weight(1f))
                 Text("未知作品")

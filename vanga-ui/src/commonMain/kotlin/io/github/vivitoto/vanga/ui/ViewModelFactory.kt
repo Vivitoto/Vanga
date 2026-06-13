@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import io.github.vivitoto.vanga.favorites.FavoriteCollectionService
 import io.github.vivitoto.vanga.favorites.FavoriteReadListService
+import io.github.vivitoto.vanga.favorites.FavoriteWebDavSyncService
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.book.BookViewModel
 import io.github.vivitoto.vanga.ui.collection.CollectionViewModel
@@ -58,6 +59,7 @@ import io.github.vivitoto.vanga.ui.settings.announcements.AnnouncementsViewModel
 import io.github.vivitoto.vanga.ui.settings.appearance.AppSettingsViewModel
 import io.github.vivitoto.vanga.ui.settings.authactivity.AuthenticationActivityViewModel
 import io.github.vivitoto.vanga.ui.settings.epub.EpubReaderSettingsViewModel
+import io.github.vivitoto.vanga.ui.settings.favoritesync.FavoriteSyncSettingsViewModel
 import io.github.vivitoto.vanga.ui.settings.imagereader.ImageReaderSettingsViewModel
 import io.github.vivitoto.vanga.ui.settings.komf.KomfSharedState
 import io.github.vivitoto.vanga.ui.settings.komf.general.KomfSettingsViewModel
@@ -149,15 +151,19 @@ class ViewModelFactory(
 
     fun getFavoriteToggleViewModel(): FavoriteToggleViewModel {
         val ownerLabelProvider = { dependencies.komgaSharedState.authenticatedUser.value?.email }
+        val serverUrlProvider = { dependencies.komgaSharedState.serverUrl.value }
         return FavoriteToggleViewModel(
             favoriteCollectionService = FavoriteCollectionService(
-                collectionsApi = komgaApi.collectionsApi,
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
                 ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
             ),
             favoriteReadListService = FavoriteReadListService(
-                readListApi = komgaApi.readListApi,
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
                 ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
             ),
+            favoriteSyncService = createFavoriteSyncService(ownerLabelProvider, serverUrlProvider),
             currentUserProvider = { dependencies.komgaSharedState.authenticatedUser.value },
             appNotifications = dependencies.appNotifications,
             onFavoritesChanged = { screenReloadEvents.tryEmit(Unit) },
@@ -166,22 +172,37 @@ class ViewModelFactory(
 
     fun getFavoritesViewModel(): FavoritesViewModel {
         val ownerLabelProvider = { dependencies.komgaSharedState.authenticatedUser.value?.email }
+        val serverUrlProvider = { dependencies.komgaSharedState.serverUrl.value }
         return FavoritesViewModel(
             favoriteCollectionService = FavoriteCollectionService(
-                collectionsApi = komgaApi.collectionsApi,
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
                 ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
             ),
             favoriteReadListService = FavoriteReadListService(
-                readListApi = komgaApi.readListApi,
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
                 ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
             ),
-            collectionsApi = komgaApi.collectionsApi,
-            readListApi = komgaApi.readListApi,
+            favoriteSyncService = createFavoriteSyncService(ownerLabelProvider, serverUrlProvider),
+            seriesApi = komgaApi.seriesApi,
+            bookApi = komgaApi.bookApi,
             currentUser = dependencies.komgaSharedState.authenticatedUser,
             appNotifications = dependencies.appNotifications,
             cardWidthFlow = getGridCardWidth(),
         )
     }
+
+    private fun createFavoriteSyncService(
+        ownerLabelProvider: () -> String?,
+        serverUrlProvider: () -> String?,
+    ): FavoriteWebDavSyncService = FavoriteWebDavSyncService(
+        settingsRepository = appRepositories.favoriteSyncSettingsRepository,
+        localFavoritesRepository = appRepositories.localFavoritesRepository,
+        httpClient = dependencies.webDavHttpClient,
+        serverUrlProvider = serverUrlProvider,
+        ownerLabelProvider = ownerLabelProvider,
+    )
 
     fun getFilterEditViewModel(homeFilters: List<HomeFilterData>?): FilterEditViewModel {
         return FilterEditViewModel(
@@ -506,6 +527,18 @@ class ViewModelFactory(
             updater = dependencies.appUpdater,
             settings = appRepositories.settingsRepository,
             notifications = dependencies.appNotifications,
+        )
+    }
+
+    fun getFavoriteSyncSettingsViewModel(): FavoriteSyncSettingsViewModel {
+        val ownerLabelProvider = { dependencies.komgaSharedState.authenticatedUser.value?.email }
+        val serverUrlProvider = { dependencies.komgaSharedState.serverUrl.value }
+        return FavoriteSyncSettingsViewModel(
+            settingsRepository = appRepositories.favoriteSyncSettingsRepository,
+            syncService = createFavoriteSyncService(ownerLabelProvider, serverUrlProvider),
+            notifications = dependencies.appNotifications,
+            serverUrlProvider = serverUrlProvider,
+            ownerLabelProvider = ownerLabelProvider,
         )
     }
 

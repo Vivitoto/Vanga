@@ -18,7 +18,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -49,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.LocalPlatform
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.common.components.OutlinedHttpTextField
 import io.github.vivitoto.vanga.ui.common.components.withTextFieldNavigation
 import io.github.vivitoto.vanga.ui.platform.PlatformType
@@ -226,8 +226,7 @@ fun ColumnScope.LoginForm(
             .withTextFieldNavigation()
             .focusRequester(first)
             .focusProperties { next = second },
-        placeholder = { Text("komga.example.com 或 192.168.1.10:25600") },
-        supportingText = { Text("填写你的 Komga 服务访问地址；手机访问时不要填 localhost。左侧可切换 http / https。") },
+        placeholder = { Text("komga.example.com") },
         singleLine = true,
     )
 
@@ -239,7 +238,7 @@ fun ColumnScope.LoginForm(
             .withTextFieldNavigation()
             .focusRequester(second)
             .focusProperties { next = third },
-        supportingText = { Text("使用你的 Komga 账号登录，Vanga 不单独注册账号。") },
+        placeholder = { Text("admin@example.org") },
         singleLine = true,
     )
 
@@ -248,6 +247,7 @@ fun ColumnScope.LoginForm(
         onValueChange = onPasswordChange,
         visualTransformation = PasswordVisualTransformation(),
         label = { Text("密码") },
+        placeholder = { Text("••••••••") },
         modifier = textFieldsModifier
             .withTextFieldNavigation(
                 onEnterPress = { coroutineScope.launch { onLogin() } }
@@ -288,7 +288,7 @@ fun LoginLoadingContent(onCancel: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        CircularProgressIndicator()
+        AppCircularProgressIndicator(size = 32.dp, strokeWidth = 3.dp)
         if (showCancelButton) {
             Spacer(Modifier.height(100.dp))
             Button(onClick = onCancel) { Text("取消登录") }

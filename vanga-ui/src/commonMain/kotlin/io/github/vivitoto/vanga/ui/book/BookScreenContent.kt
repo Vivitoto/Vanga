@@ -51,6 +51,7 @@ import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.common.BookReadButton
+import io.github.vivitoto.vanga.ui.common.cards.coverShape
 import io.github.vivitoto.vanga.ui.common.components.ExpandableText
 import io.github.vivitoto.vanga.ui.common.images.BookThumbnail
 import io.github.vivitoto.vanga.ui.common.menus.BookActionsMenu
@@ -223,13 +224,21 @@ private fun BookHero(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        BookThumbnail(
-            book.id,
+        Surface(
             modifier = Modifier
                 .heightIn(min = 180.dp, max = 380.dp)
                 .widthIn(min = coverMinWidth, max = 320.dp)
-                .animateContentSize()
-        )
+                .animateContentSize(),
+            shape = coverShape,
+            tonalElevation = 1.dp,
+            shadowElevation = 2.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
+        ) {
+            BookThumbnail(
+                book.id,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
         Text(
             text = book.metadata.title,
             style = MaterialTheme.typography.headlineSmall,
@@ -324,7 +333,7 @@ fun DownloadButton(
                     CircularProgressIndicator(
                         progress = { event.completed / event.total.toFloat() },
                         color = MaterialTheme.colorScheme.tertiary,
-                        trackColor = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .45f),
                         strokeWidth = 2.dp,
                         modifier = Modifier.size(24.dp),
                     )

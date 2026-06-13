@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.ui.series.view
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.collection.SeriesCollectionsContent
 import io.github.vivitoto.vanga.ui.collection.SeriesCollectionsState
 import io.github.vivitoto.vanga.ui.common.TagList
+import io.github.vivitoto.vanga.ui.common.cards.coverShape
 import io.github.vivitoto.vanga.ui.common.components.AppFilterChipDefaults
 import io.github.vivitoto.vanga.ui.common.components.DescriptionChips
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
@@ -304,14 +306,22 @@ fun Series(
             COMPACT, MEDIUM -> 0.dp
             else -> 300.dp
         }
-        SeriesThumbnail(
-            seriesId = series.id,
+        Surface(
             modifier = Modifier
                 .animateContentSize()
                 .heightIn(min = 190.dp, max = 400.dp)
                 .widthIn(min = thumbnailMinWidth, max = 320.dp),
-            contentScale = ContentScale.Fit
-        )
+            shape = coverShape,
+            tonalElevation = 1.dp,
+            shadowElevation = 2.dp,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
+        ) {
+            SeriesThumbnail(
+                seriesId = series.id,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit,
+            )
+        }
 
         Text(
             text = series.metadata.title,

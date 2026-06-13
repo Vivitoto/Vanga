@@ -8,11 +8,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
@@ -29,6 +27,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.platform.VerticalScrollbar
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import kotlin.math.roundToInt
@@ -209,7 +208,7 @@ fun DialogConfirmCancelButtons(
             enabled = confirmEnabled,
             modifier = Modifier.cursorForHand()
         ) {
-            if (isLoading) CircularProgressIndicator(Modifier.size(25.dp))
+            if (isLoading) AppCircularProgressIndicator(size = 25.dp, strokeWidth = 2.5.dp)
             else Text(confirmText)
         }
     }

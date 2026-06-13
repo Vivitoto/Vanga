@@ -6,14 +6,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +41,7 @@ import io.github.vivitoto.vanga.ui.LocalKeyEvents
 import io.github.vivitoto.vanga.ui.LocalWindowState
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.ReloadableScreen
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
 import io.github.vivitoto.vanga.ui.platform.PlatformTitleBar
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.FULL
@@ -185,10 +184,7 @@ private fun RefreshIndicator(
                 contentAlignment = Alignment.Center,
             ) {
                 if (refreshing) {
-                    CircularProgressIndicator(
-                        strokeWidth = 2.5.dp,
-                        modifier = Modifier.size(17.dp)
-                    )
+                    AppCircularProgressIndicator(size = 17.dp, strokeWidth = 2.5.dp)
                 } else {
                     Icon(Icons.Default.Refresh, null)
                 }

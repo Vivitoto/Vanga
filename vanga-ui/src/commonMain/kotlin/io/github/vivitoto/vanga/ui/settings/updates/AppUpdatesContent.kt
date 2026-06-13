@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +22,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateFormat
 import io.github.vivitoto.vanga.ui.LocalPlatform
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.update.UpdateProgressDialog
 import io.github.vivitoto.vanga.ui.platform.PlatformType
@@ -161,7 +161,7 @@ private fun VersionDetails(
                 }
 
                 if (versionCheckInProgress) {
-                    CircularProgressIndicator()
+                    AppCircularProgressIndicator(size = 20.dp, strokeWidth = 2.dp)
                 }
             }
         }

@@ -1,6 +1,8 @@
 package io.github.vivitoto.vanga
 
 import io.github.vivitoto.vanga.fonts.UserFontsRepository
+import io.github.vivitoto.vanga.favorites.FavoriteSyncSettingsRepository
+import io.github.vivitoto.vanga.favorites.LocalFavoritesRepository
 import io.github.vivitoto.vanga.homefilters.HomeScreenFilterRepository
 import io.github.vivitoto.vanga.offline.OfflineModule
 import io.github.vivitoto.vanga.settings.CommonSettingsRepository
@@ -23,4 +25,6 @@ data class AppRepositories(
     val secretsRepository: SecretsRepository,
     val komfSettingsRepository: KomfSettingsRepository,
     val homeScreenFilterRepository: HomeScreenFilterRepository,
+    val localFavoritesRepository: LocalFavoritesRepository,
+    val favoriteSyncSettingsRepository: FavoriteSyncSettingsRepository,
 )

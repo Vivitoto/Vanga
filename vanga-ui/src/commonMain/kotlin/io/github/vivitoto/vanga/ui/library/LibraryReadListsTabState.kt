@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.AppNotifications
-import io.github.vivitoto.vanga.favorites.FavoriteContainerNames
 import io.github.vivitoto.vanga.komga.api.KomgaReadListApi
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LoadState.Loading
@@ -91,7 +90,6 @@ class LibraryReadListsTabState(
             val pageRequest = KomgaPageRequest(unpaged = true)
             val visibleReadLists = readListApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
                 .content
-                .filterNot { FavoriteContainerNames.isBookFavoritesContainer(it.name) }
             val visibleTotalPages = ((visibleReadLists.size + pageSize - 1) / pageSize).coerceAtLeast(1)
             val visiblePage = page.coerceIn(1, visibleTotalPages)
 

@@ -240,7 +240,7 @@ private fun BookDownloadCardOverlay(book: VangaBook) {
                 CircularProgressIndicator(
                     progress = { event.completed / event.total.toFloat() },
                     color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .45f),
                 )
             }
         }

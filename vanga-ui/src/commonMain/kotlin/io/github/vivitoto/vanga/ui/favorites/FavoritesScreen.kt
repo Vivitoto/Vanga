@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import io.github.vivitoto.vanga.ui.BookSiblingsContext
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalReloadEvents
@@ -69,20 +68,8 @@ class FavoritesScreen : ReloadableScreen {
             cardWidth = vm.cardWidth.collectAsState().value,
             onRetry = vm::reload,
             onSeriesClick = { navigator.push(seriesScreen(it)) },
-            onBookClick = { book ->
-                val readList = vm.favoriteBooksReadList
-                navigator.push(
-                    if (readList != null) bookScreen(book, BookSiblingsContext.ReadList(readList.id))
-                    else bookScreen(book)
-                )
-            },
-            onBookReadClick = { book, markProgress ->
-                val readList = vm.favoriteBooksReadList
-                navigator.push(
-                    if (readList != null) readerScreen(book, markProgress, BookSiblingsContext.ReadList(readList.id))
-                    else readerScreen(book, markProgress)
-                )
-            },
+            onBookClick = { book -> navigator.push(bookScreen(book)) },
+            onBookReadClick = { book, markProgress -> navigator.push(readerScreen(book, markProgress)) },
         )
     }
 }
@@ -109,13 +96,13 @@ private fun FavoritesContent(
         ) {
             Text("我的收藏", style = MaterialTheme.typography.headlineMedium)
             Text(
-                "收藏会同步到你的 Komga 服务器。",
+                "收藏保存在本机；启用 WebDAV 后会按服务器和账号同步。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (!canWriteFavorites) {
                 Text(
-                    "当前账号可以查看收藏，但添加或移除收藏需要 Komga 管理员权限。",
+                    "用户信息加载中，暂时不能修改收藏。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
                 )

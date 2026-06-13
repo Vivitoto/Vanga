@@ -1,10 +1,8 @@
 package io.github.vivitoto.vanga.ui.favorites
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -21,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
+import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.series.KomgaSeriesId
@@ -103,7 +102,7 @@ private fun FavoriteButton(
         }
     ) {
         if (isLoading) {
-            CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+            AppCircularProgressIndicator(size = 20.dp, strokeWidth = 2.dp)
         } else {
             Icon(
                 imageVector = if (isFavorite) Icons.Default.Star else Icons.Outlined.StarBorder,
@@ -111,7 +110,7 @@ private fun FavoriteButton(
                     isFavorite -> "取消收藏"
                     isOffline -> "离线模式下无法同步收藏"
                     vm.canWriteFavorites -> contentDescription
-                    else -> "收藏需要 Komga 管理员权限"
+                    else -> "用户信息加载中，暂时不能修改收藏"
                 },
                 tint = when {
                     isFavorite -> MaterialTheme.colorScheme.primary
