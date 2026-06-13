@@ -243,28 +243,31 @@ private fun FlowRowScope.BookMainInfo(
             onSeriesButtonClick = onSeriesParentSeriesPress,
         )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-
-            if (!book.deleted && !library.unavailable) {
-                if (readIsSupported(book)) {
-                    BookReadButton(
-                        onRead = { onBookReadPress(true) },
-                        onIncognitoRead = { onBookReadPress(false) },
-                    )
-                }
-                if (!book.downloaded || book.isLocalFileOutdated) {
+            if (!book.deleted && !library.unavailable && readIsSupported(book)) {
+                BookReadButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onRead = { onBookReadPress(true) },
+                    onIncognitoRead = { onBookReadPress(false) },
+                )
+            }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (!book.deleted && !library.unavailable && (!book.downloaded || book.isLocalFileOutdated)) {
                     DownloadButton(book, onDownload)
                 }
-            }
-            if (book.downloaded) {
-                ElevatedButton(
-                    onClick = onDownloadDelete,
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
-                ) {
-                    Text("删除已下载")
+                if (book.downloaded) {
+                    ElevatedButton(
+                        onClick = onDownloadDelete,
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Text("删除已下载")
+                    }
                 }
             }
         }

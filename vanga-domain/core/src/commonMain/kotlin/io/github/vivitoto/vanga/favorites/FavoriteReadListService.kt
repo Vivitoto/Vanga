@@ -105,13 +105,17 @@ class FavoriteReadListService(
     private suspend fun findFavoritesReadList(forceRefresh: Boolean = false): KomgaReadList? {
         if (cacheLoaded && !forceRefresh) return cachedReadList
 
-        val name = favoritesName()
+        val names = FavoriteContainerNames.bookFavoriteCandidates(ownerLabelProvider())
+        val preferredName = names.first()
         val matches = readListApi
-            .getAll(search = name, pageRequest = KomgaPageRequest(unpaged = true))
+            .getAll(search = FavoriteContainerNames.BOOK_FAVORITES_PREFIX, pageRequest = KomgaPageRequest(unpaged = true))
             .content
-            .filter { it.name == name }
+            .filter { it.name in names }
+            .sortedWith(
+                compareByDescending<KomgaReadList> { it.bookIds.isNotEmpty() }
+                    .thenByDescending { it.name == preferredName }
+            )
 
-        if (matches.size > 1) throw FavoriteSyncError.ContainerConflict(name)
         return matches.firstOrNull().also {
             cachedReadList = it
             cacheLoaded = true

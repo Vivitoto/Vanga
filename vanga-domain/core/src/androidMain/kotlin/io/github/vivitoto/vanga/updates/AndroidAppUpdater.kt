@@ -1,19 +1,15 @@
 package io.github.vivitoto.vanga.updates
 
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
+import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageInstaller
-import android.content.pm.PackageInstaller.STATUS_PENDING_USER_ACTION
-import android.content.pm.PackageInstaller.SessionParams.MODE_FULL_INSTALL
-import android.os.Build
-import io.ktor.client.statement.*
-import io.ktor.utils.io.*
+import android.database.Cursor
+import android.net.Uri
+import android.os.Environment
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
-import kotlinx.io.readByteArray
 import java.util.concurrent.atomic.AtomicBoolean
 
 class AndroidAppUpdater(
@@ -40,58 +36,78 @@ class AndroidAppUpdater(
         }
 
         return flow {
-            var sessionId: Int? = null
+            val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            var downloadId: Long? = null
+            var downloadCompleted = false
             try {
-                emit(UpdateProgress(0, 0))
-                val sessionParams = PackageInstaller.SessionParams(MODE_FULL_INSTALL)
-                val packageInstaller = context.packageManager.packageInstaller
-                val createdSessionId = packageInstaller.createSession(sessionParams)
-                sessionId = createdSessionId
-                val session = packageInstaller.openSession(createdSessionId)
-
-                session.use {
-                    githubClient.streamFile(assetUrl) { response -> streamToSession(response, it) }
-
-                    val receiverIntent = Intent(context, PackageInstallerStatusReceiver::class.java)
-                    val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                    } else {
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                    }
-                    val receiverPendingIntent = PendingIntent.getBroadcast(context, 0, receiverIntent, flags)
-                    it.commit(receiverPendingIntent.intentSender)
-                }
-            } catch (e: Exception) {
-                sessionId?.let { context.packageManager.packageInstaller.abandonSession(it) }
-                throw e
+                emit(UpdateProgress(0, 0, "准备下载更新"))
+                val createdDownloadId = downloadManager.enqueue(release.toDownloadRequest(assetUrl))
+                downloadId = createdDownloadId
+                val downloadedUri = waitForDownload(downloadManager, createdDownloadId)
+                downloadCompleted = true
+                emit(UpdateProgress(1, 1, "下载完成，准备安装"))
+                openDownloadedApk(downloadedUri)
             } finally {
+                if (!downloadCompleted) downloadId?.let { downloadManager.remove(it) }
                 inProgress.set(false)
             }
         }
     }
 
-    private suspend fun FlowCollector<UpdateProgress>.streamToSession(
-        response: HttpResponse,
-        session: PackageInstaller.Session
-    ) {
-        val length = response.headers["Content-Length"]?.toLong() ?: 0L
-        emit(UpdateProgress(length, 0))
-        val channel = response.bodyAsChannel().counted()
-        val sessionStream = session.openWrite("vanga", 0, -1)
-        sessionStream.buffered().use { bufferedSessionStream ->
-            while (!channel.isClosedForRead) {
+    private fun AppRelease.toDownloadRequest(assetUrl: String): DownloadManager.Request {
+        val outputName = assetName ?: "vanga-v${version.toString().replace('.', '_')}.apk"
+        return DownloadManager.Request(Uri.parse(assetUrl))
+            .setTitle(outputName)
+            .setDescription("Vanga ${version} 更新包")
+            .setMimeType(APK_MIME_TYPE)
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            .setAllowedOverMetered(true)
+            .setAllowedOverRoaming(true)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, outputName)
+    }
 
-                val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
-                while (!packet.exhausted()) {
-                    val bytes = packet.readByteArray()
-                    bufferedSessionStream.write(bytes)
+    private suspend fun FlowCollector<UpdateProgress>.waitForDownload(
+        downloadManager: DownloadManager,
+        downloadId: Long,
+    ): Uri {
+        val query = DownloadManager.Query().setFilterById(downloadId)
+        while (true) {
+            downloadManager.query(query).use { cursor ->
+                if (!cursor.moveToFirst()) throw IllegalStateException("更新下载任务不存在")
+
+                val downloaded = cursor.longValue(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR).coerceAtLeast(0)
+                val total = cursor.longValue(DownloadManager.COLUMN_TOTAL_SIZE_BYTES).coerceAtLeast(0)
+                emit(UpdateProgress(total, downloaded, "正在下载更新"))
+
+                when (cursor.intValue(DownloadManager.COLUMN_STATUS)) {
+                    DownloadManager.STATUS_SUCCESSFUL -> {
+                        return downloadManager.getUriForDownloadedFile(downloadId)
+                            ?: throw IllegalStateException("无法打开已下载的更新包")
+                    }
+
+                    DownloadManager.STATUS_FAILED -> {
+                        val reason = cursor.intValue(DownloadManager.COLUMN_REASON)
+                        throw IllegalStateException("更新下载失败：$reason")
+                    }
                 }
-                emit(UpdateProgress(length, channel.totalBytesRead))
             }
-            bufferedSessionStream.flush()
-            session.fsync(sessionStream)
+            delay(500)
         }
     }
+
+    private fun openDownloadedApk(uri: Uri) {
+        val intent = Intent(Intent.ACTION_VIEW)
+            .setDataAndType(uri, APK_MIME_TYPE)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        context.startActivity(intent)
+    }
+
+    private fun Cursor.intValue(columnName: String): Int =
+        getInt(getColumnIndexOrThrow(columnName))
+
+    private fun Cursor.longValue(columnName: String): Long =
+        getLong(getColumnIndexOrThrow(columnName))
 
     private fun GithubRelease.toAppRelease(): AppRelease {
         val asset = assets.firstOrNull { it.name.endsWith(".apk") }
@@ -105,19 +121,8 @@ class AndroidAppUpdater(
             assetUrl = asset?.browserDownloadUrl
         )
     }
-}
 
-class PackageInstallerStatusReceiver : BroadcastReceiver() {
-    override fun onReceive(context: Context, intent: Intent) {
-        when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)) {
-            STATUS_PENDING_USER_ACTION -> {
-                val confirmationIntent = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
-                if (confirmationIntent != null) {
-                    context.startActivity(confirmationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                }
-            }
-
-            else -> {}
-        }
+    private companion object {
+        const val APK_MIME_TYPE = "application/vnd.android.package-archive"
     }
 }

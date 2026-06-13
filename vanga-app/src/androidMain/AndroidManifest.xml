@@ -33,10 +33,6 @@
                 android:exported="false"
                 android:process=":error_handler"/>
 
-        <receiver
-                android:name="io.github.vivitoto.vanga.updates.PackageInstallerStatusReceiver"
-                android:exported="false"/>
-
 
         <provider
                 android:name="androidx.startup.InitializationProvider"

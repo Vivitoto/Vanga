@@ -161,20 +161,6 @@ fun SettingsNavigationMenu(
             color = contentColor,
         )
 
-        if (updatesEnabled) {
-            HorizontalDivider(Modifier.padding(vertical = 10.dp))
-            Text("应用", style = MaterialTheme.typography.titleSmall)
-            NavigationButton(
-                label = "版本更新",
-                description = "检查 Vanga 新版本",
-                icon = Icons.Default.Cached,
-                onClick = { onNavigation(AppUpdatesScreen()) },
-                isSelected = currentScreen is AppUpdatesScreen,
-                error = newVersionIsAvailable,
-                color = contentColor,
-            )
-        }
-
         if (!isOffline) {
             HorizontalDivider(Modifier.padding(vertical = 10.dp))
             if (isAdmin) {
@@ -284,6 +270,20 @@ fun SettingsNavigationMenu(
                 }
                 HorizontalDivider(Modifier.padding(vertical = 10.dp))
             }
+        }
+
+        if (updatesEnabled) {
+            HorizontalDivider(Modifier.padding(vertical = 10.dp))
+            Text("应用", style = MaterialTheme.typography.titleSmall)
+            NavigationButton(
+                label = "版本更新",
+                description = "检查 Vanga 新版本",
+                icon = Icons.Default.Cached,
+                onClick = { onNavigation(AppUpdatesScreen()) },
+                isSelected = currentScreen is AppUpdatesScreen,
+                error = newVersionIsAvailable,
+                color = contentColor,
+            )
         }
 
         var showLogoutConfirmation by remember { mutableStateOf(false) }

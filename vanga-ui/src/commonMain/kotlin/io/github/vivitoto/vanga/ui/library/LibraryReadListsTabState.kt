@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.AppNotifications
+import io.github.vivitoto.vanga.favorites.FavoriteContainerNames
 import io.github.vivitoto.vanga.komga.api.KomgaReadListApi
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LoadState.Loading
@@ -87,13 +88,17 @@ class LibraryReadListsTabState(
 
             val library = this.library?.value
             val libraryIds = if (library != null) listOf(library.id) else emptyList()
-            val pageRequest = KomgaPageRequest(pageIndex = page - 1, size = pageSize)
-            val readListsPage = readListApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
+            val pageRequest = KomgaPageRequest(unpaged = true)
+            val visibleReadLists = readListApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
+                .content
+                .filterNot { FavoriteContainerNames.isBookFavoritesContainer(it.name) }
+            val visibleTotalPages = ((visibleReadLists.size + pageSize - 1) / pageSize).coerceAtLeast(1)
+            val visiblePage = page.coerceIn(1, visibleTotalPages)
 
-            currentPage = readListsPage.number + 1
-            totalPages = readListsPage.totalPages
-            totalReadLists = readListsPage.totalElements
-            readLists = readListsPage.content
+            currentPage = visiblePage
+            totalPages = visibleTotalPages
+            totalReadLists = visibleReadLists.size
+            readLists = visibleReadLists.drop((visiblePage - 1) * pageSize).take(pageSize)
             mutableState.value = LoadState.Success(Unit)
 
         }.onFailure { mutableState.value = LoadState.Error(it) }

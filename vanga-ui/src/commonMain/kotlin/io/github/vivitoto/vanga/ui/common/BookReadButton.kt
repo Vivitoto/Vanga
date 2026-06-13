@@ -52,8 +52,8 @@ fun BookReadButton(
     onIncognitoRead: () -> Unit,
     onDropdownOpenChange: (Boolean) -> Unit = {}
 ) {
-    val containerColor = MaterialTheme.colorScheme.tertiaryContainer
-    val contentColor = MaterialTheme.colorScheme.onTertiary
+    val containerColor = MaterialTheme.colorScheme.primary
+    val contentColor = MaterialTheme.colorScheme.onPrimary
     Surface(
         shape = CircleShape,
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),
@@ -69,7 +69,7 @@ fun BookReadButton(
                 modifier = Modifier.defaultMinSize(minHeight = 48.dp).padding(horizontal = 12.dp).fillMaxHeight(),
                 onRead = onRead,
             )
-            VerticalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
+            VerticalDivider(color = contentColor.copy(alpha = 0.32f))
             IncognitoDropDown(
                 modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).fillMaxHeight(),
                 onIncognitoRead = onIncognitoRead,

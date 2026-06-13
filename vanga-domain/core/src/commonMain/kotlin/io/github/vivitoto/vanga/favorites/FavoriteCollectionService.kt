@@ -104,13 +104,17 @@ class FavoriteCollectionService(
     private suspend fun findFavoritesCollection(forceRefresh: Boolean = false): KomgaCollection? {
         if (cacheLoaded && !forceRefresh) return cachedCollection
 
-        val name = favoritesName()
+        val names = FavoriteContainerNames.seriesFavoriteCandidates(ownerLabelProvider())
+        val preferredName = names.first()
         val matches = collectionsApi
-            .getAll(search = name, pageRequest = KomgaPageRequest(unpaged = true))
+            .getAll(search = FavoriteContainerNames.SERIES_FAVORITES_PREFIX, pageRequest = KomgaPageRequest(unpaged = true))
             .content
-            .filter { it.name == name }
+            .filter { it.name in names }
+            .sortedWith(
+                compareByDescending<KomgaCollection> { it.seriesIds.isNotEmpty() }
+                    .thenByDescending { it.name == preferredName }
+            )
 
-        if (matches.size > 1) throw FavoriteSyncError.ContainerConflict(name)
         return matches.firstOrNull().also {
             cachedCollection = it
             cacheLoaded = true

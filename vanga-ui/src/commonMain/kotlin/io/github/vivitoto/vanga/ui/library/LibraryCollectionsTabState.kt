@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.AppNotifications
+import io.github.vivitoto.vanga.favorites.FavoriteContainerNames
 import io.github.vivitoto.vanga.komga.api.KomgaCollectionsApi
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LoadState.Loading
@@ -87,14 +88,18 @@ class LibraryCollectionsTabState(
 
             if (totalCollections > pageSize) mutableState.value = Loading
 
-            val pageRequest = KomgaPageRequest(pageIndex = page - 1, size = pageSize)
+            val pageRequest = KomgaPageRequest(unpaged = true)
             val libraryIds = listOfNotNull(library.value?.id)
-            val collectionsPage = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
+            val visibleCollections = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
+                .content
+                .filterNot { FavoriteContainerNames.isSeriesFavoritesContainer(it.name) }
+            val visibleTotalPages = ((visibleCollections.size + pageSize - 1) / pageSize).coerceAtLeast(1)
+            val visiblePage = page.coerceIn(1, visibleTotalPages)
 
-            currentPage = collectionsPage.number + 1
-            totalPages = collectionsPage.totalPages
-            totalCollections = collectionsPage.totalElements
-            collections = collectionsPage.content
+            currentPage = visiblePage
+            totalPages = visibleTotalPages
+            totalCollections = visibleCollections.size
+            collections = visibleCollections.drop((visiblePage - 1) * pageSize).take(pageSize)
             mutableState.value = Success(Unit)
 
         }.onFailure {

@@ -26,6 +26,7 @@ import io.github.vivitoto.vanga.komga.api.KomgaLibraryApi
 import io.github.vivitoto.vanga.komga.api.KomgaReadListApi
 import io.github.vivitoto.vanga.komga.api.KomgaReferentialApi
 import io.github.vivitoto.vanga.komga.api.KomgaSeriesApi
+import io.github.vivitoto.vanga.favorites.FavoriteContainerNames
 import io.github.vivitoto.vanga.offline.tasks.OfflineTaskEmitter
 import io.github.vivitoto.vanga.settings.CommonSettingsRepository
 import io.github.vivitoto.vanga.ui.LoadState
@@ -131,10 +132,14 @@ class LibraryViewModel(
 
         appNotifications.runCatchingToNotifications {
             mutableState.value = Loading
-            val pageRequest = KomgaPageRequest(size = 0)
+            val pageRequest = KomgaPageRequest(unpaged = true)
             val libraryIds = listOfNotNull(library.value?.id)
-            collectionsCount = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest).totalElements
-            readListsCount = readListsApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest).totalElements
+            collectionsCount = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
+                .content
+                .count { !FavoriteContainerNames.isSeriesFavoritesContainer(it.name) }
+            readListsCount = readListsApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
+                .content
+                .count { !FavoriteContainerNames.isBookFavoritesContainer(it.name) }
 
             if (collectionsCount == 0 && currentTab == COLLECTIONS) currentTab = SERIES
             if (readListsCount == 0 && currentTab == READ_LISTS) currentTab = SERIES
@@ -182,4 +187,3 @@ enum class LibraryTab {
     COLLECTIONS,
     READ_LISTS
 }
-
