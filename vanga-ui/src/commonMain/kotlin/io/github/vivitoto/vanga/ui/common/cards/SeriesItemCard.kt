@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -137,7 +139,7 @@ private fun SeriesCardHoverOverlay(
 
         if (showOverlay.value) {
             val backgroundModifier =
-                if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .5f))
+                if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
                 else Modifier
             Column(backgroundModifier.fillMaxSize()) {
                 if (onSeriesSelect != null) {
@@ -198,13 +200,20 @@ private fun SeriesImageOverlay(
                 contentAlignment = Alignment.TopEnd
             ) {
                 Box(
-                    modifier = Modifier.size(30.dp).background(MaterialTheme.colorScheme.tertiary),
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .background(
+                            MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = .96f),
+                            RoundedCornerShape(999.dp)
+                        )
+                        .padding(horizontal = 9.dp, vertical = 5.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         "${series.booksUnreadCount}",
-                        color = MaterialTheme.colorScheme.onTertiary,
-                        style = MaterialTheme.typography.labelLarge
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }
@@ -232,7 +241,10 @@ fun SeriesDetailedListCard(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        modifier = modifier
             .cursorForHand()
             .clickable { onClick() }) {
         Row(
@@ -241,7 +253,11 @@ fun SeriesDetailedListCard(
                 .heightIn(max = 200.dp)
                 .padding(10.dp)
         ) {
-            SeriesSimpleImageCard(series, onClick)
+            SeriesSimpleImageCard(
+                series = series,
+                onSeriesClick = onClick,
+                modifier = Modifier.width(104.dp)
+            )
             SeriesDetails(series)
         }
     }

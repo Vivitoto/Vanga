@@ -25,10 +25,7 @@ class FavoriteToggleViewModel(
             .getOrDefault(false)
 
     suspend fun toggleSeriesFavorite(seriesId: KomgaSeriesId): Boolean {
-        if (!canWriteFavorites) {
-            appNotifications.add(AppNotification.Error("收藏同步需要 Komga 管理员权限"))
-            return isSeriesFavorite(seriesId)
-        }
+        if (!canWriteFavoritesNow()) return isSeriesFavorite(seriesId)
         return appNotifications.runCatchingToNotifications { favoriteCollectionService.toggleFavorite(seriesId) }
             .onSuccess { onFavoritesChanged() }
             .getOrElse { isSeriesFavorite(seriesId) }
@@ -39,12 +36,26 @@ class FavoriteToggleViewModel(
             .getOrDefault(false)
 
     suspend fun toggleBookFavorite(bookId: KomgaBookId): Boolean {
-        if (!canWriteFavorites) {
-            appNotifications.add(AppNotification.Error("收藏同步需要 Komga 管理员权限"))
-            return isBookFavorite(bookId)
-        }
+        if (!canWriteFavoritesNow()) return isBookFavorite(bookId)
         return appNotifications.runCatchingToNotifications { favoriteReadListService.toggleFavorite(bookId) }
             .onSuccess { onFavoritesChanged() }
             .getOrElse { isBookFavorite(bookId) }
+    }
+
+    private fun canWriteFavoritesNow(): Boolean {
+        val user = currentUserProvider()
+        return when {
+            user == null -> {
+                appNotifications.add(AppNotification.Error("用户信息加载中，请稍后再试"))
+                false
+            }
+
+            !user.roleAdmin() -> {
+                appNotifications.add(AppNotification.Error("收藏同步需要 Komga 管理员权限"))
+                false
+            }
+
+            else -> true
+        }
     }
 }

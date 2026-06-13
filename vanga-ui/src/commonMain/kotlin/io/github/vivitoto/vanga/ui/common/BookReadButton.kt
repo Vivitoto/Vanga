@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.MenuBook
 import androidx.compose.material.icons.filled.ExpandMore
@@ -38,6 +37,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import snd.komga.client.book.MediaProfile.EPUB
 import io.github.vivitoto.vanga.webview.webviewIsAvailable
@@ -55,7 +55,7 @@ fun BookReadButton(
     val containerColor = MaterialTheme.colorScheme.primary
     val contentColor = MaterialTheme.colorScheme.onPrimary
     Surface(
-        shape = CircleShape,
+        shape = VangaButtonShape,
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),
         color = containerColor,
         contentColor = contentColor,

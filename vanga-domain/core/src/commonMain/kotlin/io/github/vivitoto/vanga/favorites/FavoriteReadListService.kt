@@ -9,74 +9,58 @@ import snd.komga.client.readlist.KomgaReadListCreateRequest
 import snd.komga.client.readlist.KomgaReadListUpdateRequest
 
 /**
- * Server-synced Book favorites backed by a Komga ReadList.
+ * Server-synced Book favorites backed by Komga ReadLists.
  *
- * Komga ReadLists are not native favorites. Vanga treats one named ReadList
- * as the current user's Book favorites container.
+ * Komga ReadLists are not native favorites. Vanga treats a named ReadList as
+ * the current user's Book favorites container, while still reading legacy
+ * unsuffixed containers created before the user label was available.
  */
 class FavoriteReadListService(
     private val readListApi: KomgaReadListApi,
     private val ownerLabelProvider: () -> String?,
 ) {
-    private var cachedReadList: KomgaReadList? = null
-    private var cacheLoaded = false
+    private var cachedReadLists: List<KomgaReadList>? = null
 
     suspend fun getFavoriteReadList(forceRefresh: Boolean = false): KomgaReadList? =
-        findFavoritesReadList(forceRefresh)
+        getFavoriteReadLists(forceRefresh).firstOrNull()
+
+    suspend fun getFavoriteReadLists(forceRefresh: Boolean = false): List<KomgaReadList> =
+        findFavoritesReadLists(forceRefresh)
 
     suspend fun getFavoriteBookIds(): Set<KomgaBookId> =
-        findFavoritesReadList()?.bookIds?.toSet() ?: emptySet()
+        getFavoriteReadLists().flatMap { it.bookIds }.toSet()
 
     suspend fun isFavorite(bookId: KomgaBookId): Boolean =
         bookId in getFavoriteBookIds()
 
     suspend fun addFavorite(bookId: KomgaBookId): KomgaReadList =
-        mutateWithRetry(operation = "add book favorite") { current ->
-            val updated = if (current == null) {
-                readListApi.addOne(
-                    KomgaReadListCreateRequest(
-                        name = favoritesName(),
-                        summary = "Vanga favorite books",
-                        ordered = true,
-                        bookIds = listOf(bookId)
-                    )
-                )
-            } else {
-                val nextIds = (current.bookIds + bookId).distinct()
-                if (nextIds == current.bookIds) current
-                else {
+        mutateWithRetry(operation = "add book favorite") {
+            addFavoriteOnce(bookId)
+        }
+
+    suspend fun removeFavorite(bookId: KomgaBookId): KomgaReadList? =
+        mutateWithRetry(operation = "remove book favorite") {
+            val targets = findFavoritesReadLists(forceRefresh = true)
+                .filter { bookId in it.bookIds }
+            if (targets.isEmpty()) return@mutateWithRetry null
+
+            var firstUpdated: KomgaReadList? = null
+            targets.forEach { current ->
+                val nextIds = current.bookIds.filterNot { it == bookId }
+                val updated = if (nextIds.isEmpty()) {
+                    readListApi.deleteOne(current.id)
+                    null
+                } else {
                     readListApi.updateOne(
                         current.id,
                         KomgaReadListUpdateRequest(bookIds = PatchValue.Some(nextIds))
                     )
                     readListApi.getOne(current.id)
                 }
+                if (firstUpdated == null) firstUpdated = updated
             }
-            cachedReadList = updated
-            cacheLoaded = true
-            updated
-        }
-
-    suspend fun removeFavorite(bookId: KomgaBookId): KomgaReadList? =
-        mutateWithRetry(operation = "remove book favorite") { current ->
-            if (current == null) return@mutateWithRetry null
-
-            val nextIds = current.bookIds.filterNot { it == bookId }
-            if (nextIds == current.bookIds) return@mutateWithRetry current
-
-            val updated = if (nextIds.isEmpty()) {
-                readListApi.deleteOne(current.id)
-                null
-            } else {
-                readListApi.updateOne(
-                    current.id,
-                    KomgaReadListUpdateRequest(bookIds = PatchValue.Some(nextIds))
-                )
-                readListApi.getOne(current.id)
-            }
-            cachedReadList = updated
-            cacheLoaded = true
-            updated
+            refreshCache()
+            firstUpdated
         }
 
     suspend fun toggleFavorite(bookId: KomgaBookId): Boolean {
@@ -90,36 +74,71 @@ class FavoriteReadListService(
         }
     }
 
+    private suspend fun addFavoriteOnce(bookId: KomgaBookId): KomgaReadList {
+        val currentLists = findFavoritesReadLists(forceRefresh = true)
+        currentLists.firstOrNull { bookId in it.bookIds }?.let { return it }
+
+        val preferredName = favoritesName()
+        val preferred = currentLists.firstOrNull { it.name == preferredName }
+        if (preferred != null) return addToExisting(preferred, bookId)
+
+        val created = readListApi.addOne(
+            KomgaReadListCreateRequest(
+                name = preferredName,
+                summary = "Vanga favorite books",
+                ordered = true,
+                bookIds = listOf(bookId)
+            )
+        )
+        refreshCache()
+        return created
+    }
+
+    private suspend fun addToExisting(current: KomgaReadList, bookId: KomgaBookId): KomgaReadList {
+        val nextIds = (current.bookIds + bookId).distinct()
+        if (nextIds == current.bookIds) return current
+
+        readListApi.updateOne(
+            current.id,
+            KomgaReadListUpdateRequest(bookIds = PatchValue.Some(nextIds))
+        )
+        val updated = readListApi.getOne(current.id)
+        refreshCache()
+        return updated
+    }
+
     private suspend fun <T> mutateWithRetry(
         operation: String,
-        block: suspend (KomgaReadList?) -> T,
+        block: suspend () -> T,
     ): T {
         return try {
-            block(findFavoritesReadList(forceRefresh = true))
+            block()
         } catch (_: Throwable) {
-            runCatching { block(findFavoritesReadList(forceRefresh = true)) }
+            cachedReadLists = null
+            runCatching { block() }
                 .getOrElse { second -> throw FavoriteSyncError.SyncFailed(operation, second) }
         }
     }
 
-    private suspend fun findFavoritesReadList(forceRefresh: Boolean = false): KomgaReadList? {
-        if (cacheLoaded && !forceRefresh) return cachedReadList
+    private suspend fun findFavoritesReadLists(forceRefresh: Boolean = false): List<KomgaReadList> {
+        cachedReadLists?.takeIf { !forceRefresh }?.let { return it }
 
         val names = FavoriteContainerNames.bookFavoriteCandidates(ownerLabelProvider())
         val preferredName = names.first()
-        val matches = readListApi
+        return readListApi
             .getAll(search = FavoriteContainerNames.BOOK_FAVORITES_PREFIX, pageRequest = KomgaPageRequest(unpaged = true))
             .content
             .filter { it.name in names }
             .sortedWith(
-                compareByDescending<KomgaReadList> { it.bookIds.isNotEmpty() }
-                    .thenByDescending { it.name == preferredName }
+                compareByDescending<KomgaReadList> { it.name == preferredName }
+                    .thenByDescending { it.bookIds.isNotEmpty() }
             )
+            .also { cachedReadLists = it }
+    }
 
-        return matches.firstOrNull().also {
-            cachedReadList = it
-            cacheLoaded = true
-        }
+    private suspend fun refreshCache() {
+        cachedReadLists = null
+        findFavoritesReadLists(forceRefresh = true)
     }
 
     private fun favoritesName(): String = FavoriteContainerNames.bookFavorites(ownerLabelProvider())

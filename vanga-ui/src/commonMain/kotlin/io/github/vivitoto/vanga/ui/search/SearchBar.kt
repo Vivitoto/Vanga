@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -28,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -147,11 +149,15 @@ private fun ColumnScope.SearchResultsDropDownBox(
                 onDismiss()
                 onSearchAllClick(currentQuery)
             }
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(horizontal = 5.dp),
+            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp))
+            .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
-        Text("搜索全部…")
+        Text(
+            "搜索全部…",
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = MaterialTheme.typography.labelLarge,
+        )
     }
     if (isLoading) LinearProgressIndicator(
         color = MaterialTheme.colorScheme.tertiary,
@@ -163,8 +169,28 @@ private fun ColumnScope.SearchResultsDropDownBox(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         val series = searchResults.series
+        val books = searchResults.books
+        if (!isLoading && series.isEmpty() && books.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 18.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    "没有找到匹配结果",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
         if (series.isNotEmpty()) {
-            Text(text = "漫画系列")
+            Text(
+                text = "漫画系列",
+                modifier = Modifier.padding(start = 4.dp, top = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelLarge,
+            )
             series.forEach {
                 SeriesSearchEntry(
                     series = it,
@@ -176,11 +202,12 @@ private fun ColumnScope.SearchResultsDropDownBox(
                 )
             }
         }
-        val books = searchResults.books
         if (books.isNotEmpty()) {
             Text(
                 text = "单本漫画",
-                modifier = Modifier.padding(5.dp)
+                modifier = Modifier.padding(start = 4.dp, top = 8.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelLarge,
             )
             books.forEach {
                 BookSearchEntry(
@@ -201,16 +228,23 @@ private fun EntryContainer(
     onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    Row(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
             .clickable { onClick() }
-            .cursorForHand()
-            .padding(5.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+            .cursorForHand(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .78f),
     ) {
-        content()
+        Row(
+            modifier = Modifier
+                .height(104.dp)
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            content()
+        }
     }
 }
 
@@ -224,13 +258,22 @@ private fun SeriesSearchEntry(
         SeriesSimpleImageCard(
             series = series,
             onSeriesClick = onSeriesClick,
-            modifier = Modifier
-                .width(70.dp)
-                .height(100.dp)
+            modifier = Modifier.width(72.dp)
         )
-        Column {
-            Text(series.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text("来自 ${library.name}") }
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                series.metadata.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleSmall,
+            )
+            library?.let {
+                Text(
+                    "来自 ${library.name}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         }
     }
 }
@@ -245,13 +288,22 @@ private fun BookSearchEntry(
         BookSimpleImageCard(
             book = book,
             onBookClick = onBookClick,
-            modifier = Modifier
-                .width(70.dp)
-                .height(100.dp)
+            modifier = Modifier.width(72.dp)
         )
-        Column {
-            Text(book.metadata.title, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            library?.let { Text("来自 ${library.name}") }
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                book.metadata.title,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleSmall,
+            )
+            library?.let {
+                Text(
+                    "来自 ${library.name}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         }
     }
 }

@@ -70,7 +70,7 @@ fun ErrorView(
     onRestart: () -> Unit,
     onExit: () -> Unit
 ) {
-    MaterialTheme(colorScheme = Theme.DARK.colorScheme) {
+    MaterialTheme(colorScheme = Theme.DARK.colorScheme, shapes = Theme.DARK.shapes) {
         val clipboardManager = LocalClipboardManager.current
         Surface {
             Column(

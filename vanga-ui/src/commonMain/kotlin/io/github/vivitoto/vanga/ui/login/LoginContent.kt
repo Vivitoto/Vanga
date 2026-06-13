@@ -1,6 +1,8 @@
 package io.github.vivitoto.vanga.ui.login
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,10 +15,13 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -99,31 +104,46 @@ fun LoginContent(
         when (platform) {
             MOBILE, DESKTOP -> Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = 420.dp)
-                    .padding(horizontal = 24.dp),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text("登录 Vanga", style = MaterialTheme.typography.headlineSmall)
-                Text(
-                    "请登录你的 Komga 服务器，填写服务器地址和 Komga 账号密码后继续阅读。",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                )
-                LoginForm(
-                    url = url,
-                    onUrlChange = onUrlChange,
-                    user = user,
-                    onUserChange = onUserChange,
-                    password = password,
-                    onPasswordChange = onPasswordChange,
-                    errorMessage = userLoginError,
-                    onLogin = onLogin,
-                    offlineIsAvailable = offlineIsAvailable,
-                    onOfflineSelect = onOfflineSelect,
-                    textFieldsModifier = Modifier.fillMaxWidth()
-                )
+                Surface(
+                    modifier = Modifier
+                        .widthIn(max = 460.dp)
+                        .padding(horizontal = 24.dp),
+                    shape = RoundedCornerShape(32.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .72f),
+                    tonalElevation = 6.dp,
+                    shadowElevation = 8.dp,
+                ) {
+                    Column(
+                        modifier = Modifier.padding(28.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        VangaLoginMark()
+                        Text("登录 Vanga", style = MaterialTheme.typography.headlineSmall)
+                        Text(
+                            "连接你的 Komga 服务器，继续阅读和管理漫画库。",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                        )
+                        LoginForm(
+                            url = url,
+                            onUrlChange = onUrlChange,
+                            user = user,
+                            onUserChange = onUserChange,
+                            password = password,
+                            onPasswordChange = onPasswordChange,
+                            errorMessage = userLoginError,
+                            onLogin = onLogin,
+                            offlineIsAvailable = offlineIsAvailable,
+                            onOfflineSelect = onOfflineSelect,
+                            textFieldsModifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
 
             PlatformType.WEB_KOMF -> Column(
@@ -162,6 +182,22 @@ fun LoginContent(
 
     }
 
+}
+
+@Composable
+private fun VangaLoginMark() {
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.primaryContainer, CircleShape)
+            .padding(horizontal = 18.dp, vertical = 12.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            "V",
+            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            style = MaterialTheme.typography.headlineMedium,
+        )
+    }
 }
 
 @Composable

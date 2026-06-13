@@ -1,14 +1,28 @@
 package io.github.vivitoto.vanga.ui
 
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.settings.model.AppTheme
+
+val VangaButtonShape = RoundedCornerShape(14.dp)
+
+val VangaShapes = Shapes(
+    extraSmall = RoundedCornerShape(6.dp),
+    small = RoundedCornerShape(10.dp),
+    medium = VangaButtonShape,
+    large = RoundedCornerShape(18.dp),
+    extraLarge = RoundedCornerShape(24.dp),
+)
 
 enum class Theme(
     val colorScheme: ColorScheme,
     val type: ThemeType,
+    val shapes: Shapes = VangaShapes,
 ) {
     DARK(
         darkColorScheme(

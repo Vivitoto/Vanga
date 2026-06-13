@@ -17,7 +17,7 @@ data class AppVersion(
 ) : Comparable<AppVersion> {
 
     companion object {
-        val current = AppVersion(0, 1, 3)
+        val current = AppVersion(0, 1, 4)
 
         private val versionPattern = Regex("v?(\\d+)[._](\\d+)(?:[._](\\d+))?")
 

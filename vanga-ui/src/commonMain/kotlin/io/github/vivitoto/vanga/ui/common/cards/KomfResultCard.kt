@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.LocalStrings
+import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.common.images.ThumbnailImage
 import snd.komf.api.metadata.KomfMetadataSeriesSearchResult
 
@@ -112,7 +113,7 @@ private fun ResultDescriptionContent(result: KomfMetadataSeriesSearchResult) {
         ElevatedButton(
             onClick = { result.url?.let { uriHandler.openUri(it) } },
             enabled = result.url != null,
-            shape = RoundedCornerShape(5.dp)
+            shape = VangaButtonShape
         ) {
             Text(
                 text = strings.forProvider(result.provider),

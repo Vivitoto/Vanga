@@ -41,6 +41,8 @@ import io.github.vivitoto.vanga.ui.platform.PlatformType
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 
 const val defaultCardWidth = 240
+const val coverAspectRatio = 0.703f
+val coverShape = RoundedCornerShape(14.dp)
 private val itemCardShape = RoundedCornerShape(18.dp)
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -55,12 +57,14 @@ fun ItemCard(
 ) {
     Card(
         shape = itemCardShape,
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
         modifier = modifier
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onLongClick)
             .then(if (onClick != null || onLongClick != null) Modifier.cursorForHand() else Modifier),
         colors = CardDefaults.cardColors(containerColor = containerColor),
     ) {
-        Box(modifier = Modifier.aspectRatio(0.703f)) { image() }
+        Box(modifier = Modifier.aspectRatio(coverAspectRatio).clip(coverShape)) { image() }
         content()
     }
 }
@@ -73,9 +77,11 @@ fun ItemCardWithContent(
 ) {
     Card(
         shape = itemCardShape,
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
         modifier = modifier
     ) {
-        Box(modifier = Modifier.aspectRatio(0.703f)) { image() }
+        Box(modifier = Modifier.aspectRatio(coverAspectRatio).clip(coverShape)) { image() }
         content()
     }
 }
@@ -83,10 +89,10 @@ fun ItemCardWithContent(
 @Composable
 fun CardGradientOverlay() {
     val colorStops = arrayOf(
-        0.0f to Color.Black.copy(alpha = .5f),
+        0.0f to Color.Black.copy(alpha = .28f),
         0.10f to Color.Transparent,
         0.6f to Color.Transparent,
-        0.90f to Color.Black.copy(alpha = .8f),
+        0.90f to Color.Black.copy(alpha = .74f),
     )
 
     Box(

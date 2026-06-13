@@ -68,24 +68,28 @@ class FavoritesViewModel(
     }
 
     private suspend fun loadFavorites() {
-        val collection = favoriteCollectionService.getFavoriteCollection(forceRefresh = true)
-        val readList = favoriteReadListService.getFavoriteReadList(forceRefresh = true)
+        val collections = favoriteCollectionService.getFavoriteCollections(forceRefresh = true)
+        val readLists = favoriteReadListService.getFavoriteReadLists(forceRefresh = true)
 
-        favoriteSeriesCollection = collection
-        favoriteBooksReadList = readList
+        favoriteSeriesCollection = collections.firstOrNull()
+        favoriteBooksReadList = readLists.firstOrNull()
 
-        favoriteSeries = collection?.let {
-            collectionsApi.getSeriesForCollection(
-                id = it.id,
-                pageRequest = KomgaPageRequest(unpaged = true)
-            ).content
-        } ?: emptyList()
+        favoriteSeries = collections
+            .flatMap {
+                collectionsApi.getSeriesForCollection(
+                    id = it.id,
+                    pageRequest = KomgaPageRequest(unpaged = true)
+                ).content
+            }
+            .distinctBy { it.id }
 
-        favoriteBooks = readList?.let {
-            readListApi.getBooksForReadList(
-                id = it.id,
-                pageRequest = KomgaPageRequest(unpaged = true)
-            ).content
-        } ?: emptyList()
+        favoriteBooks = readLists
+            .flatMap {
+                readListApi.getBooksForReadList(
+                    id = it.id,
+                    pageRequest = KomgaPageRequest(unpaged = true)
+                ).content
+            }
+            .distinctBy { it.id }
     }
 }

@@ -2,9 +2,6 @@ package io.github.vivitoto.vanga.ui.series.view
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +27,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,10 +39,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.settings.model.BooksLayout
@@ -80,7 +78,6 @@ import io.github.vivitoto.vanga.ui.series.SeriesViewModel.SeriesTab
 import snd.komga.client.collection.KomgaCollection
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.series.KomgaSeries
-import kotlin.math.max
 
 @Composable
 fun SeriesContent(
@@ -229,18 +226,12 @@ fun SeriesToolBar(
     onDownload: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         if (series != null) {
-            Text(
-                series.metadata.title,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f, false)
-            )
-
             FavoriteSeriesButton(series.id)
 
             Box {
@@ -303,91 +294,73 @@ fun Series(
     onFilterClick: (SeriesScreenFilter) -> Unit,
 ) {
     val width = LocalWindowWidth.current
-    val animation: FiniteAnimationSpec<IntSize> = remember(series) {
-        when (width) {
-            COMPACT, MEDIUM -> spring(stiffness = Spring.StiffnessHigh)
-            else -> spring(stiffness = Spring.StiffnessMediumLow)
-        }
-    }
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val thumbnailMinWidth = when (width) {
             COMPACT, MEDIUM -> 0.dp
             else -> 300.dp
         }
-        Layout(
-            content = {
-                SeriesThumbnail(
-                    seriesId = series.id,
-                    modifier = Modifier
-                        .animateContentSize(animationSpec = animation)
-                        .heightIn(min = 100.dp, max = 400.dp)
-                        .widthIn(min = thumbnailMinWidth, max = 500.dp),
-                    contentScale = ContentScale.Fit
+        SeriesThumbnail(
+            seriesId = series.id,
+            modifier = Modifier
+                .animateContentSize()
+                .heightIn(min = 190.dp, max = 400.dp)
+                .widthIn(min = thumbnailMinWidth, max = 320.dp),
+            contentScale = ContentScale.Fit
+        )
+
+        Text(
+            text = series.metadata.title,
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = 720.dp).padding(horizontal = 12.dp),
+        )
+
+        Surface(
+            modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = 1.dp,
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                SeriesDescriptionRow(
+                    library = library,
+                    onLibraryClick = onLibraryClick,
+                    releaseDate = series.booksMetadata.releaseDate,
+                    status = series.metadata.status,
+                    ageRating = series.metadata.ageRating,
+                    language = series.metadata.language,
+                    readingDirection = series.metadata.readingDirection,
+                    deleted = series.deleted || library.unavailable,
+                    alternateTitles = series.metadata.alternateTitles,
+                    onFilterClick = onFilterClick,
+                    modifier = Modifier.fillMaxWidth(),
                 )
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    SeriesDescriptionRow(
-                        library = library,
-                        onLibraryClick = onLibraryClick,
-                        releaseDate = series.booksMetadata.releaseDate,
-                        status = series.metadata.status,
-                        ageRating = series.metadata.ageRating,
-                        language = series.metadata.language,
-                        readingDirection = series.metadata.readingDirection,
-                        deleted = series.deleted || library.unavailable,
-                        alternateTitles = series.metadata.alternateTitles,
-                        onFilterClick = onFilterClick,
-                        modifier = Modifier,
-                    )
-                    HorizontalDivider(Modifier.padding(vertical = 10.dp))
-                    SeriesSummary(
-                        seriesSummary = series.metadata.summary,
-                        bookSummary = series.booksMetadata.summary,
-                        bookSummaryNumber = series.booksMetadata.summaryNumber,
-                    )
-                }
-
-            }
-        ) { measurables, constraints ->
-            val spacing = 15.dp.roundToPx()
-            val infoMinWidth = when (width) {
-                COMPACT, MEDIUM -> 0
-                else -> 350.dp.toPx().toInt()
-            }
-
-            val thumbnail = measurables[0].measure(constraints)
-            val availableWidth = (constraints.maxWidth - thumbnail.width).coerceAtMost(1200.dp.toPx().toInt())
-            val isRow = availableWidth > infoMinWidth + spacing
-
-            val infoConstraints = if (isRow) {
-                constraints.copy(
-                    minWidth = infoMinWidth.dp.toPx().toInt().coerceAtMost(availableWidth),
-                    maxWidth = availableWidth
+                SeriesSummary(
+                    seriesSummary = series.metadata.summary,
+                    bookSummary = series.booksMetadata.summary,
+                    bookSummaryNumber = series.booksMetadata.summaryNumber,
                 )
-            } else constraints
-
-            val info = measurables[1].measure(infoConstraints)
-
-            val (totalWidth, totalHeight) = if (isRow) {
-                thumbnail.width + info.width + spacing to max(thumbnail.height, info.height)
-            } else {
-                max(thumbnail.width, info.width) to thumbnail.height + info.height + spacing
-
-            }
-            layout(totalWidth, totalHeight) {
-                thumbnail.placeRelative(0, 0)
-                if (isRow) {
-                    info.placeRelative(thumbnail.width + spacing, 0)
-                } else {
-                    info.placeRelative(0, thumbnail.height + spacing)
-                }
             }
         }
 
-        SeriesChipTags(series, onFilterClick)
+        Surface(
+            modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = 1.dp,
+        ) {
+            Column(Modifier.padding(16.dp)) {
+                SeriesChipTags(series, onFilterClick)
+            }
+        }
     }
 }
 

@@ -105,7 +105,9 @@ fun SeriesLazyCardGrid(
                         isSelected = isSelected,
                         onSeriesSelect = onSeriesSelect?.let { { onSeriesSelect(series) } },
                         topStartContent = seriesTopStartContent,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(5.dp)
                     )
                 }
             }
@@ -148,7 +150,9 @@ private fun LazyGridItemScope.DraggableSeriesCard(
                     seriesMenuActions = seriesMenuActions,
                     isSelected = isSelected,
                     onSeriesSelect = onSeriesSelect?.let { { onSeriesSelect(series) } },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(5.dp)
                 )
 
                 Box(
@@ -167,7 +171,10 @@ private fun LazyGridItemScope.DraggableSeriesCard(
                 seriesMenuActions = seriesMenuActions,
                 isSelected = isSelected,
                 onSeriesSelect = onSeriesSelect?.let { { onSeriesSelect(series) } },
-                modifier = Modifier.fillMaxSize().draggableHandle()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(5.dp)
+                    .draggableHandle()
             )
         }
     }

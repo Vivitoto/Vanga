@@ -1,6 +1,5 @@
 package io.github.vivitoto.vanga.ui.common.cards
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -19,14 +18,17 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.OfflinePin
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -45,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -170,12 +171,12 @@ private fun BookImageOverlay(
                             .padding(1.dp)
                             .size(26.dp)
                             .clip(CircleShape)
-                            .background(Color.Black)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = .88f))
                     )
                 }
 
                 Spacer(Modifier.weight(1f))
-                if (book.readProgress == null) BookUnreadTick()
+                if (book.readProgress == null) BookUnreadBadge()
             }
 
             Spacer(modifier = Modifier.weight(1f))
@@ -206,8 +207,8 @@ private fun BookImageOverlay(
                 LinearProgressIndicator(
                     progress = { getReadProgressPercentage(book) },
                     color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
-                    modifier = Modifier.height(6.dp).fillMaxWidth().background(Color.Black),
+                    trackColor = MaterialTheme.colorScheme.surface.copy(alpha = .72f),
+                    modifier = Modifier.height(5.dp).fillMaxWidth().background(MaterialTheme.colorScheme.surface.copy(alpha = .72f)),
                     drawStopIndicator = {}
                 )
             }
@@ -232,7 +233,7 @@ private fun BookDownloadCardOverlay(book: VangaBook) {
 
             Box(
                 modifier = Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f)),
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = .86f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.Download, null, tint = MaterialTheme.colorScheme.tertiary)
@@ -250,19 +251,22 @@ private fun BookDownloadCardOverlay(book: VangaBook) {
 }
 
 @Composable
-private fun BookUnreadTick() {
-    val color = MaterialTheme.colorScheme.tertiary
-    Canvas(modifier = Modifier.size(30.dp)) {
-        val trianglePath = Path().apply {
-            moveTo(0f, 0f)
-            lineTo(x = size.width, y = size.height)
-            lineTo(x = size.width, y = size.height)
-            lineTo(x = size.width, y = 0f)
-        }
-
-        drawPath(
-            color = color,
-            path = trianglePath
+private fun BookUnreadBadge() {
+    Box(
+        modifier = Modifier
+            .padding(6.dp)
+            .background(
+                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = .96f),
+                RoundedCornerShape(999.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "未读",
+            color = MaterialTheme.colorScheme.onTertiaryContainer,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }
@@ -297,7 +301,7 @@ private fun BookHoverOverlay(
         if (showOverlay.value) {
             val backgroundColor =
                 if (isSelected)
-                    Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .5f))
+                    Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
                 else Modifier
             Column(backgroundColor.fillMaxSize()) {
                 if (onSelect != null) {
@@ -357,7 +361,10 @@ fun BookDetailedListCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     Card(
-        modifier
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        modifier = modifier
             .cursorForHand()
             .combinedClickable(onClick = onClick ?: {}, onLongClick = onSelect)
             .hoverable(interactionSource)
@@ -379,7 +386,10 @@ fun BookDetailedListCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box {
-                BookSimpleImageCard(book)
+                BookSimpleImageCard(
+                    book = book,
+                    modifier = Modifier.width(104.dp)
+                )
                 if (onSelect != null && (isSelected || isHovered.value)) {
                     SelectionRadioButton(
                         isSelected,

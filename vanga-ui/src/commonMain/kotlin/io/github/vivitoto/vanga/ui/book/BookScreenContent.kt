@@ -6,9 +6,6 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,10 +23,10 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -72,7 +70,6 @@ import io.github.vivitoto.vanga.ui.readlist.BookReadListsContent
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookScreenContent(
     library: KomgaLibrary?,
@@ -115,38 +112,44 @@ fun BookScreenContent(
                     .fillMaxWidth()
                     .verticalScroll(state = scrollState),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    BookThumbnail(
-                        book.id,
-                        modifier = Modifier
-                            .heightIn(min = 100.dp, max = 400.dp)
-                            .widthIn(min = coverMinWidth, max = 500.dp)
-                            .animateContentSize()
+                BookHero(book = book, coverMinWidth = coverMinWidth)
+
+                DetailSection {
+                    BookInfoRow(
+                        book = book,
+                        onSeriesButtonClick = onParentSeriesPress,
                     )
-                    BookMainInfo(
+
+                    BookActionRow(
                         book = book,
                         library = library,
                         onBookReadPress = onBookReadPress,
-                        onSeriesParentSeriesPress = onParentSeriesPress,
                         onDownload = onBookDownload,
                         onDownloadDelete = onBookDownloadDelete
                     )
+
+                    ExpandableText(
+                        text = book.metadata.summary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
 
-                BookInfoColumn(
-                    publisher = null,
-                    genres = null,
-                    authors = book.metadata.authors,
-                    tags = book.metadata.tags,
-                    links = book.metadata.links,
-                    sizeInMiB = book.size,
-                    mediaType = book.media.mediaType,
-                    isbn = book.metadata.isbn,
-                    fileUrl = book.url,
-                    onFilterClick = onFilterClick,
-                )
+                DetailSection {
+                    BookInfoColumn(
+                        publisher = null,
+                        genres = null,
+                        authors = book.metadata.authors,
+                        tags = book.metadata.tags,
+                        links = book.metadata.links,
+                        sizeInMiB = book.size,
+                        mediaType = book.media.mediaType,
+                        isbn = book.metadata.isbn,
+                        fileUrl = book.url,
+                        onFilterClick = onFilterClick,
+                    )
+                }
                 BookReadListsContent(
                     readLists = readLists,
                     onReadListClick = onReadListClick,
@@ -165,15 +168,10 @@ fun BookToolBar(
     bookMenuActions: BookMenuActions,
 ) {
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+        horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            book.metadata.title,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, false)
-        )
         FavoriteBookButton(book.id)
         ToolbarBookActions(book, bookMenuActions)
     }
@@ -215,67 +213,87 @@ private fun ToolbarBookActions(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun FlowRowScope.BookMainInfo(
+private fun BookHero(
+    book: VangaBook,
+    coverMinWidth: Dp,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        BookThumbnail(
+            book.id,
+            modifier = Modifier
+                .heightIn(min = 180.dp, max = 380.dp)
+                .widthIn(min = coverMinWidth, max = 320.dp)
+                .animateContentSize()
+        )
+        Text(
+            text = book.metadata.title,
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = 720.dp).padding(horizontal = 12.dp),
+        )
+        Text(
+            text = "第 ${book.metadata.number} 本 · ${book.media.pagesCount} 页",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun DetailSection(content: @Composable () -> Unit) {
+    Surface(
+        modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun BookActionRow(
     book: VangaBook,
     library: KomgaLibrary,
     onBookReadPress: (markReadProgress: Boolean) -> Unit,
-    onSeriesParentSeriesPress: () -> Unit,
     onDownload: () -> Unit,
     onDownloadDelete: () -> Unit
 ) {
-    val maxWidth = when (LocalWindowWidth.current) {
-        FULL -> 1200.dp
-        else -> Dp.Unspecified
-    }
-    val minWidth = when (LocalWindowWidth.current) {
-        COMPACT, MEDIUM -> 0.dp
-        else -> 350.dp
-    }
-
-    Column(
-        modifier = Modifier.weight(1f, false).widthIn(min = minWidth, max = maxWidth),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        BookInfoRow(
-            book = book,
-            onSeriesButtonClick = onSeriesParentSeriesPress,
-        )
-
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
-            if (!book.deleted && !library.unavailable && readIsSupported(book)) {
+        if (!book.deleted && !library.unavailable) {
+            if (readIsSupported(book)) {
                 BookReadButton(
-                    modifier = Modifier.fillMaxWidth(),
                     onRead = { onBookReadPress(true) },
                     onIncognitoRead = { onBookReadPress(false) },
                 )
             }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (!book.deleted && !library.unavailable && (!book.downloaded || book.isLocalFileOutdated)) {
-                    DownloadButton(book, onDownload)
-                }
-                if (book.downloaded) {
-                    ElevatedButton(
-                        onClick = onDownloadDelete,
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
-                    ) {
-                        Text("删除已下载")
-                    }
-                }
+            if (!book.downloaded || book.isLocalFileOutdated) {
+                DownloadButton(book, onDownload)
             }
         }
-        HorizontalDivider()
-        ExpandableText(
-            text = book.metadata.summary,
-            style = MaterialTheme.typography.bodyMedium
-        )
+        if (book.downloaded) {
+            ElevatedButton(
+                onClick = onDownloadDelete,
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
+            ) {
+                Text("删除已下载")
+            }
+        }
     }
 }
 

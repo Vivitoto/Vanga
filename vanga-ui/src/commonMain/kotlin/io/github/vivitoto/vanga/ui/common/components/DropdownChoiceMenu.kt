@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import io.github.vivitoto.vanga.ui.LocalStrings
+import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.series.SeriesFilterState.TagExclusionMode
 import io.github.vivitoto.vanga.ui.series.SeriesFilterState.TagInclusionMode
@@ -527,7 +528,7 @@ private fun TagFilterDropdownContent(
                     onReset()
                 },
                 enabled = includeTags.isNotEmpty() || excludeTags.isNotEmpty() || includeGenres.isNotEmpty() || excludeGenres.isNotEmpty(),
-                shape = RoundedCornerShape(5.dp),
+                shape = VangaButtonShape,
                 modifier = Modifier.cursorForHand()
             ) {
                 Text(strings.filterTagsReset, style = MaterialTheme.typography.bodyLarge)
@@ -621,7 +622,7 @@ private fun TagsRow(
         if (tags.size > maxTagNum) {
             TextButton(
                 onClick = { isExpanded = !isExpanded },
-                shape = RoundedCornerShape(5.dp),
+                shape = VangaButtonShape,
                 modifier = Modifier.cursorForHand()
             ) {
                 Text(

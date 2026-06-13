@@ -226,7 +226,7 @@ private fun JobCard(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f),
                             border = BorderStroke(Dp.Hairline, MaterialTheme.colorScheme.surface),
                             modifier = Modifier.widthIn(max = 400.dp),
-                            shape = RoundedCornerShape(5.dp)
+                            shape = MaterialTheme.shapes.medium
                         ) {
                             job.message?.let {
                                 Text(it, modifier = Modifier.padding(10.dp))

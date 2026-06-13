@@ -76,7 +76,7 @@ fun MainView(
         dependencies?.appRepositories?.settingsRepository?.getAppTheme()?.collect { appTheme = it }
     }
 
-    MaterialTheme(colorScheme = theme.colorScheme) {
+    MaterialTheme(colorScheme = theme.colorScheme, shapes = theme.shapes) {
         ConfigurePlatformTheme(theme)
         val focusManager = LocalFocusManager.current
         Surface(
