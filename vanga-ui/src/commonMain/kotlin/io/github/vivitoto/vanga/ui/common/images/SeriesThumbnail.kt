@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import io.github.vivitoto.vanga.image.coil.SeriesDefaultThumbnailRequest
+import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.LocalKomgaEvents
 import snd.komga.client.series.KomgaSeriesId
 import snd.komga.client.sse.KomgaEvent.ThumbnailBookEvent
@@ -39,7 +40,7 @@ fun SeriesThumbnail(
         data = requestData,
         cacheKey = seriesId.value,
         contentScale = contentScale,
-        modifier = modifier
+        modifier = modifier,
+        blurred = LocalCoverBlurSettings.current.libraryCovers,
     )
 }
-

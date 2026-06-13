@@ -41,6 +41,7 @@ import io.github.vinceglb.filekit.dialogs.FileKitType
 import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.common.cards.ThumbnailEditCard
 import io.github.vivitoto.vanga.ui.common.cards.ThumbnailUploadCard
 import io.github.vivitoto.vanga.ui.dialogs.PosterEditState.KomgaThumbnail.ThumbnailToBeUploaded
@@ -235,6 +236,7 @@ fun PosterEditContent(
     cardWidth: Dp,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val uploadBlurred = posterState.uploadedThumbnailBlurred()
     val launcher = rememberFilePickerLauncher(
         mode = FileKitMode.Multiple(),
     ) { files ->
@@ -276,6 +278,7 @@ fun PosterEditContent(
                     thumbnail = thumb,
                     onDelete = { posterState.onUploadThumbnailDelete(thumb) },
                     onSelect = { posterState.onUploadThumbnailSelect(thumb) },
+                    blurred = uploadBlurred,
                     modifier = Modifier.width(cardWidth)
                 )
             }
@@ -290,6 +293,18 @@ fun PosterEditContent(
             }
 
         }
+    }
+}
+
+@Composable
+private fun PosterEditState.uploadedThumbnailBlurred(): Boolean {
+    val coverBlurSettings = LocalCoverBlurSettings.current
+    return when (thumbnails.firstOrNull()) {
+        is PosterEditState.KomgaThumbnail.BookThumbnail -> coverBlurSettings.bookCovers
+        is PosterEditState.KomgaThumbnail.CollectionThumbnail -> coverBlurSettings.collectionCovers
+        is PosterEditState.KomgaThumbnail.ReadListThumbnail -> coverBlurSettings.collectionCovers
+        is PosterEditState.KomgaThumbnail.SeriesThumbnail -> coverBlurSettings.libraryCovers
+        null -> false
     }
 }
 

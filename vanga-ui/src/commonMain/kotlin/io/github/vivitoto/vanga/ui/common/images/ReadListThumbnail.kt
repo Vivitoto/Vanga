@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.flow.filterIsInstance
 import io.github.vivitoto.vanga.image.coil.ReadListDefaultThumbnailRequest
+import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.LocalKomgaEvents
 import snd.komga.client.readlist.KomgaReadListId
 import snd.komga.client.sse.KomgaEvent.ThumbnailReadListEvent
@@ -33,7 +34,8 @@ fun ReadListThumbnail(
         data = requestData,
         cacheKey = readListId.value,
         contentScale = contentScale,
-        modifier = modifier
+        modifier = modifier,
+        blurred = LocalCoverBlurSettings.current.collectionCovers,
     )
 
 }

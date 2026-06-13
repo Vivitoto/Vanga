@@ -39,4 +39,13 @@ interface CommonSettingsRepository {
 
     fun getAppTheme(): Flow<AppTheme>
     suspend fun putAppTheme(theme: AppTheme)
+
+    fun getLibraryCoversBlurred(): Flow<Boolean>
+    suspend fun putLibraryCoversBlurred(blurred: Boolean)
+
+    fun getCollectionCoversBlurred(): Flow<Boolean>
+    suspend fun putCollectionCoversBlurred(blurred: Boolean)
+
+    fun getBookCoversBlurred(): Flow<Boolean>
+    suspend fun putBookCoversBlurred(blurred: Boolean)
 }

@@ -22,6 +22,7 @@ import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.common.components.AppSliderDefaults
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
+import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -37,6 +38,12 @@ fun AppearanceSettingsContent(
     onCardWidthChange: (Dp) -> Unit,
     currentTheme: AppTheme,
     onThemeChange: (AppTheme) -> Unit,
+    libraryCoversBlurred: Boolean,
+    onLibraryCoversBlurredChange: (Boolean) -> Unit,
+    collectionCoversBlurred: Boolean,
+    onCollectionCoversBlurredChange: (Boolean) -> Unit,
+    bookCoversBlurred: Boolean,
+    onBookCoversBlurredChange: (Boolean) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -52,6 +59,32 @@ fun AppearanceSettingsContent(
             options = themeOptions.map { LabeledEntry(it, strings.forAppTheme(it)) },
             onOptionChange = { onThemeChange(it.value) },
             inputFieldModifier = Modifier.widthIn(min = 250.dp)
+        )
+
+        HorizontalDivider()
+
+        Text("封面模糊", style = androidx.compose.material3.MaterialTheme.typography.titleMedium)
+        Text("隐藏封面细节，可分别控制首页/书库、合集和单本。", style = androidx.compose.material3.MaterialTheme.typography.bodyMedium)
+        SwitchWithLabel(
+            checked = libraryCoversBlurred,
+            onCheckedChange = onLibraryCoversBlurredChange,
+            label = { Text("书库封面模糊") },
+            supportingText = { Text("作用于首页和书库里的系列/书库封面。") },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 6.dp)
+        )
+        SwitchWithLabel(
+            checked = collectionCoversBlurred,
+            onCheckedChange = onCollectionCoversBlurredChange,
+            label = { Text("合集封面模糊") },
+            supportingText = { Text("作用于合集和阅读列表封面。") },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 6.dp)
+        )
+        SwitchWithLabel(
+            checked = bookCoversBlurred,
+            onCheckedChange = onBookCoversBlurredChange,
+            label = { Text("单本封面模糊") },
+            supportingText = { Text("作用于单本漫画/图书封面和详情页单本封面。") },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 6.dp)
         )
 
         HorizontalDivider()

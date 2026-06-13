@@ -16,6 +16,9 @@ data class AppSettings(
     val bookPageLoadSize: Int = 20,
     val bookListLayout: BooksLayout = BooksLayout.GRID,
     val appTheme: AppTheme = AppTheme.SYSTEM,
+    val libraryCoversBlurred: Boolean = false,
+    val collectionCoversBlurred: Boolean = false,
+    val bookCoversBlurred: Boolean = false,
 
     val checkForUpdatesOnStartup: Boolean = true,
     val updateLastCheckedTimestamp: Instant? = null,

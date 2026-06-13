@@ -28,7 +28,13 @@ class AppSettingsScreen : Screen {
                     cardWidth = vm.cardWidth,
                     onCardWidthChange = vm::onCardWidthChange,
                     currentTheme = vm.currentTheme,
-                    onThemeChange = vm::onAppThemeChange
+                    onThemeChange = vm::onAppThemeChange,
+                    libraryCoversBlurred = vm.libraryCoversBlurred,
+                    onLibraryCoversBlurredChange = vm::onLibraryCoversBlurredChange,
+                    collectionCoversBlurred = vm.collectionCoversBlurred,
+                    onCollectionCoversBlurredChange = vm::onCollectionCoversBlurredChange,
+                    bookCoversBlurred = vm.bookCoversBlurred,
+                    onBookCoversBlurredChange = vm::onBookCoversBlurredChange,
                 )
             }
         }

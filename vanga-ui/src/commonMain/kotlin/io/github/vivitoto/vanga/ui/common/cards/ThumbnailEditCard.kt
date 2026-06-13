@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
@@ -45,6 +46,7 @@ import io.github.vivitoto.vanga.image.coil.BookThumbnailRequest
 import io.github.vivitoto.vanga.image.coil.CollectionThumbnailRequest
 import io.github.vivitoto.vanga.image.coil.ReadListThumbnailRequest
 import io.github.vivitoto.vanga.image.coil.SeriesThumbnailRequest
+import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.common.images.ThumbnailImage
 import io.github.vivitoto.vanga.ui.dialogs.PosterEditState.KomgaThumbnail
 import io.github.vivitoto.vanga.ui.dialogs.PosterEditState.KomgaThumbnail.ThumbnailToBeUploaded
@@ -60,6 +62,13 @@ fun ThumbnailEditCard(
     onSelect: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val coverBlurSettings = LocalCoverBlurSettings.current
+    val blurred = when (thumbnail) {
+        is KomgaThumbnail.BookThumbnail -> coverBlurSettings.bookCovers
+        is KomgaThumbnail.CollectionThumbnail -> coverBlurSettings.collectionCovers
+        is KomgaThumbnail.ReadListThumbnail -> coverBlurSettings.collectionCovers
+        is KomgaThumbnail.SeriesThumbnail -> coverBlurSettings.libraryCovers
+    }
     val thumbRequest = remember(thumbnail) {
         when (thumbnail) {
             is KomgaThumbnail.BookThumbnail -> BookThumbnailRequest(
@@ -90,7 +99,8 @@ fun ThumbnailEditCard(
                 data = thumbRequest,
                 cacheKey = thumbnail.id.value,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                blurred = blurred,
             )
         }
     ) {
@@ -121,11 +131,19 @@ fun ThumbnailUploadCard(
     thumbnail: ThumbnailToBeUploaded,
     onDelete: () -> Unit,
     onSelect: () -> Unit,
+    blurred: Boolean,
     modifier: Modifier = Modifier
 ) {
     ItemCard(
         modifier,
-        image = { AsyncImage(model = thumbnail.file, contentDescription = null, contentScale = ContentScale.Crop) }
+        image = {
+            AsyncImage(
+                model = thumbnail.file,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize().then(if (blurred) Modifier.blur(16.dp) else Modifier),
+            )
+        }
     ) {
 
         ThumbnailCardContent(

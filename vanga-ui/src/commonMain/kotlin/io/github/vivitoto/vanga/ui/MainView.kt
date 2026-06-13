@@ -102,6 +102,12 @@ fun MainView(
             if (viewModelFactory == null) return@Surface
 
             val notificationToaster = rememberToasterState()
+            val settingsRepository = dependencies.appRepositories.settingsRepository
+            val coverBlurSettings = CoverBlurSettings(
+                libraryCovers = settingsRepository.getLibraryCoversBlurred().collectAsState(false).value,
+                collectionCovers = settingsRepository.getCollectionCoversBlurred().collectAsState(false).value,
+                bookCovers = settingsRepository.getBookCoversBlurred().collectAsState(false).value,
+            )
 
             CompositionLocalProvider(
                 LocalViewModelFactory provides viewModelFactory,
@@ -118,7 +124,8 @@ fun MainView(
                 LocalReloadEvents provides viewModelFactory.screenReloadEvents,
                 LocalBookDownloadEvents provides dependencies.offlineDependencies.bookDownloadEvents,
                 LocalOfflineMode provides dependencies.isOffline,
-                LocalKomgaState provides dependencies.komgaSharedState
+                LocalKomgaState provides dependencies.komgaSharedState,
+                LocalCoverBlurSettings provides coverBlurSettings,
             ) {
                 MainContent(platformType, dependencies.komgaSharedState)
 

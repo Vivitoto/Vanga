@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.common.images.ThumbnailImage
@@ -63,7 +64,8 @@ fun KomfResultCard(
                             ThumbnailImage(
                                 data = image,
                                 cacheKey = it,
-                                contentScale = ContentScale.Crop
+                                contentScale = ContentScale.Crop,
+                                blurred = LocalCoverBlurSettings.current.libraryCovers,
                             )
                     }
                 }

@@ -3,11 +3,13 @@ package io.github.vivitoto.vanga.ui.common.images
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -21,6 +23,7 @@ fun ThumbnailImage(
     contentScale: ContentScale = ContentScale.Fit,
     placeholder: Painter? = NoopPainter,
     modifier: Modifier = Modifier,
+    blurred: Boolean = false,
 ) {
     val context = LocalPlatformContext.current
     val request = remember(data, cacheKey) {
@@ -44,7 +47,7 @@ fun ThumbnailImage(
     AsyncImage(
         model = request,
         contentDescription = null,
-        modifier = modifier,
+        modifier = modifier.then(if (blurred) Modifier.blur(16.dp) else Modifier),
         placeholder = placeholder,
         contentScale = contentScale,
         filterQuality = FilterQuality.None

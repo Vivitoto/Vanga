@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import kotlinx.coroutines.flow.filterIsInstance
 import io.github.vivitoto.vanga.image.coil.CollectionDefaultThumbnailRequest
+import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.LocalKomgaEvents
 import snd.komga.client.collection.KomgaCollectionId
 import snd.komga.client.sse.KomgaEvent.ThumbnailCollectionEvent
@@ -33,6 +34,7 @@ fun CollectionThumbnail(
         data = requestData,
         cacheKey = collectionId.value,
         contentScale = contentScale,
-        modifier = modifier
+        modifier = modifier,
+        blurred = LocalCoverBlurSettings.current.collectionCovers,
     )
 }

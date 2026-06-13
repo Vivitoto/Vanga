@@ -20,12 +20,18 @@ class AppSettingsViewModel(
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
     var cardWidth by mutableStateOf(defaultCardWidth.dp)
     var currentTheme by mutableStateOf(AppTheme.SYSTEM)
+    var libraryCoversBlurred by mutableStateOf(false)
+    var collectionCoversBlurred by mutableStateOf(false)
+    var bookCoversBlurred by mutableStateOf(false)
 
     suspend fun initialize() {
         if (state.value !is LoadState.Uninitialized) return
         mutableState.value = LoadState.Loading
         cardWidth = settingsRepository.getCardWidth().map { it.dp }.first()
         currentTheme = settingsRepository.getAppTheme().first()
+        libraryCoversBlurred = settingsRepository.getLibraryCoversBlurred().first()
+        collectionCoversBlurred = settingsRepository.getCollectionCoversBlurred().first()
+        bookCoversBlurred = settingsRepository.getBookCoversBlurred().first()
         mutableState.value = LoadState.Success(Unit)
     }
 
@@ -37,6 +43,21 @@ class AppSettingsViewModel(
     fun onAppThemeChange(theme: AppTheme) {
         this.currentTheme = theme
         screenModelScope.launch { settingsRepository.putAppTheme(theme) }
+    }
+
+    fun onLibraryCoversBlurredChange(blurred: Boolean) {
+        libraryCoversBlurred = blurred
+        screenModelScope.launch { settingsRepository.putLibraryCoversBlurred(blurred) }
+    }
+
+    fun onCollectionCoversBlurredChange(blurred: Boolean) {
+        collectionCoversBlurred = blurred
+        screenModelScope.launch { settingsRepository.putCollectionCoversBlurred(blurred) }
+    }
+
+    fun onBookCoversBlurredChange(blurred: Boolean) {
+        bookCoversBlurred = blurred
+        screenModelScope.launch { settingsRepository.putBookCoversBlurred(blurred) }
     }
 
 }

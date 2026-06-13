@@ -360,6 +360,8 @@ fun BookDetailedListCard(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
+    val coverWidth = 104.dp
+    val coverHeight = coverWidth / coverAspectRatio
     Card(
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
@@ -388,7 +390,7 @@ fun BookDetailedListCard(
             Box {
                 BookSimpleImageCard(
                     book = book,
-                    modifier = Modifier.width(104.dp)
+                    modifier = Modifier.width(coverWidth)
                 )
                 if (onSelect != null && (isSelected || isHovered.value)) {
                     SelectionRadioButton(
@@ -401,6 +403,7 @@ fun BookDetailedListCard(
                 book = book,
                 bookMenuActions = bookMenuActions,
                 onBookReadClick = onBookReadClick,
+                modifier = Modifier.weight(1f).padding(start = 10.dp).height(coverHeight),
             )
         }
     }
@@ -412,83 +415,108 @@ private fun BookDetailedListDetails(
     book: VangaBook,
     bookMenuActions: BookMenuActions?,
     onBookReadClick: ((Boolean) -> Unit)? = null,
+    modifier: Modifier = Modifier,
 ) {
     val width = LocalWindowWidth.current
-    Column(Modifier.padding(start = 10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(modifier) {
+        Column {
             Text(
                 book.metadata.title,
                 fontWeight = FontWeight.Bold,
                 maxLines = when (width) {
                     COMPACT, MEDIUM -> 2
-                    else -> 4
+                    else -> 3
+                },
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            LazyRow(
+                modifier = Modifier.padding(top = 4.dp, bottom = 2.dp),
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                item {
+                    Text(
+                        "${book.media.pagesCount} 页",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
+                items(book.metadata.tags) {
+                    NoPaddingChip(
+                        borderColor = MaterialTheme.colorScheme.surface,
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            Text(
+                book.metadata.summary,
+                maxLines = when (width) {
+                    COMPACT, MEDIUM -> 1
+                    else -> 2
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.widthIn(max = 1500.dp)
             )
         }
 
-        LazyRow(
-            modifier = Modifier.padding(vertical = 5.dp),
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            item {
-                Text(
-                    "${book.media.pagesCount} 页",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            items(book.metadata.tags) {
-                NoPaddingChip(
-                    borderColor = MaterialTheme.colorScheme.surface,
-                    color = MaterialTheme.colorScheme.surface
-                ) {
-                    Text(
-                        it,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-
-        Text(
-            book.metadata.summary,
-            maxLines = when (width) {
-                COMPACT, MEDIUM -> 3
-                else -> 4
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 1500.dp)
-        )
-
         Spacer(Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.Start) {
-            if (onBookReadClick != null && !book.deleted && readIsSupported(book)) {
-                BookReadButton(
-                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
-                    onRead = { onBookReadClick(true) },
-                    onIncognitoRead = { onBookReadClick(false) }
-                )
-            }
-            if (bookMenuActions != null) {
-                Box {
-                    var isMenuExpanded by remember { mutableStateOf(false) }
-                    IconButton(
-                        onClick = { isMenuExpanded = true },
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-                    ) {
-                        Icon(Icons.Default.MoreVert, null)
-                    }
-                    BookActionsMenu(
-                        book = book,
-                        actions = bookMenuActions,
-                        expanded = isMenuExpanded,
-                        showEditOption = true,
-                        showDownloadOption = true,
-                        onDismissRequest = { isMenuExpanded = false },
-                    )
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            BookDetailedListActions(
+                book = book,
+                bookMenuActions = bookMenuActions,
+                onBookReadClick = onBookReadClick,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BookDetailedListActions(
+    book: VangaBook,
+    bookMenuActions: BookMenuActions?,
+    onBookReadClick: ((Boolean) -> Unit)? = null,
+) {
+    Row(
+        modifier = Modifier.padding(start = 10.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (onBookReadClick != null && !book.deleted && readIsSupported(book)) {
+            BookReadButton(
+                onRead = { onBookReadClick(true) },
+                onIncognitoRead = { onBookReadClick(false) }
+            )
+        }
+        if (bookMenuActions != null) {
+            Box {
+                var isMenuExpanded by remember { mutableStateOf(false) }
+                IconButton(
+                    onClick = { isMenuExpanded = true },
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Icon(Icons.Default.MoreVert, null)
                 }
+                BookActionsMenu(
+                    book = book,
+                    actions = bookMenuActions,
+                    expanded = isMenuExpanded,
+                    showEditOption = true,
+                    showDownloadOption = true,
+                    onDismissRequest = { isMenuExpanded = false },
+                )
             }
         }
     }

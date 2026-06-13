@@ -34,3 +34,10 @@ val LocalBookDownloadEvents =
     staticCompositionLocalOf<SharedFlow<DownloadEvent>?> { error("Book download event flow was not initialized") }
 val LocalOfflineMode = staticCompositionLocalOf<StateFlow<Boolean>> { error("offline mode flow was not initialized") }
 val LocalKomgaState = staticCompositionLocalOf<KomgaAuthenticationState> { error("komga state was not initialized") }
+val LocalCoverBlurSettings = staticCompositionLocalOf { CoverBlurSettings() }
+
+data class CoverBlurSettings(
+    val libraryCovers: Boolean = false,
+    val collectionCovers: Boolean = false,
+    val bookCovers: Boolean = false,
+)

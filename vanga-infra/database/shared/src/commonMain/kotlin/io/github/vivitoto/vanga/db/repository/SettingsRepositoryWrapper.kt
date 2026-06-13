@@ -103,4 +103,28 @@ class SettingsRepositoryWrapper(
         wrapper.transform { it.copy(appTheme = theme) }
     }
 
+    override fun getLibraryCoversBlurred(): Flow<Boolean> {
+        return wrapper.state.map { it.libraryCoversBlurred }.distinctUntilChanged()
+    }
+
+    override suspend fun putLibraryCoversBlurred(blurred: Boolean) {
+        wrapper.transform { it.copy(libraryCoversBlurred = blurred) }
+    }
+
+    override fun getCollectionCoversBlurred(): Flow<Boolean> {
+        return wrapper.state.map { it.collectionCoversBlurred }.distinctUntilChanged()
+    }
+
+    override suspend fun putCollectionCoversBlurred(blurred: Boolean) {
+        wrapper.transform { it.copy(collectionCoversBlurred = blurred) }
+    }
+
+    override fun getBookCoversBlurred(): Flow<Boolean> {
+        return wrapper.state.map { it.bookCoversBlurred }.distinctUntilChanged()
+    }
+
+    override suspend fun putBookCoversBlurred(blurred: Boolean) {
+        wrapper.transform { it.copy(bookCoversBlurred = blurred) }
+    }
+
 }
