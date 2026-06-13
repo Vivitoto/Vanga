@@ -28,10 +28,12 @@ import snd.komga.client.announcements.KomgaJsonFeed.KomgaAnnouncement
 
 @Composable
 fun AnnouncementsContent(announcements: List<KomgaAnnouncement>) {
-    Column(verticalArrangement = Arrangement.spacedBy(50.dp)) {
-        announcements.forEach {
-            Announcement(it)
-            HorizontalDivider()
+    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        announcements.forEachIndexed { index, announcement ->
+            Announcement(announcement)
+            if (index < announcements.lastIndex) {
+                HorizontalDivider()
+            }
         }
     }
 }

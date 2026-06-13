@@ -28,6 +28,8 @@ fun SeriesCollectionsContent(
     onSeriesClick: (KomgaSeries) -> Unit,
     cardWidth: Dp
 ) {
+    if (collections.isEmpty()) return
+
     Column(
         modifier = Modifier.padding(top = 10.dp, bottom = 30.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),

@@ -37,6 +37,7 @@ import io.github.vivitoto.vanga.offline.server.model.OfflineMediaServer
 import io.github.vivitoto.vanga.offline.server.model.OfflineMediaServerId
 import io.github.vivitoto.vanga.offline.user.model.OfflineUser
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import snd.komga.client.user.KomgaUser
 import snd.komga.client.user.KomgaUserId
 
@@ -53,8 +54,10 @@ fun OfflineUserSettingsContent(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
 
-        Text("离线身份", style = MaterialTheme.typography.titleMedium)
-        Text("切换在线/离线阅读身份，并管理已缓存的离线用户数据。", style = MaterialTheme.typography.bodyMedium)
+        SettingsSectionHeader(
+            title = "离线身份",
+            description = "切换在线/离线阅读身份，并管理已缓存的离线用户数据。"
+        )
 
         Column {
             Text("当前用户：${currentUser?.email ?: "无"}")

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.common.components.withTextFieldNavigation
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import kotlin.time.Instant
 
 @Composable
@@ -39,13 +40,10 @@ fun FavoriteSyncSettingsContent(
     onSyncNow: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("收藏同步", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "收藏默认保存在本机。启用 WebDAV 后，Vanga 会按当前 Komga 服务器和账号同步对应收藏，避免多用户互相覆盖。",
-                style = MaterialTheme.typography.bodyMedium,
-            )
-        }
+        SettingsSectionHeader(
+            title = "收藏同步",
+            description = "收藏默认保存在本机。启用 WebDAV 后，Vanga 会按当前服务器和账号同步对应收藏，避免多用户互相覆盖。"
+        )
 
         CheckboxWithLabel(
             checked = enabled,
@@ -106,6 +104,6 @@ fun FavoriteSyncSettingsContent(
             }
         }
 
-        Spacer(Modifier.height(80.dp))
+        Spacer(Modifier.height(24.dp))
     }
 }

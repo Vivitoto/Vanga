@@ -452,7 +452,9 @@ private fun TemplateFieldsEditor(
                 ) {
                     TemplateFieldEditor(field)
                 }
-                HorizontalDivider()
+                if (index < fieldTemplates.lastIndex) {
+                    HorizontalDivider()
+                }
             }
 
         }
@@ -620,5 +622,4 @@ private fun PreviewContent(
         }
     }
 }
-
 

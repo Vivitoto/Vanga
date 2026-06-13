@@ -47,7 +47,7 @@ fun CollectionImageCard(
                     CollectionThumbnail(
                         collectionId = collection.id,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 }
             }

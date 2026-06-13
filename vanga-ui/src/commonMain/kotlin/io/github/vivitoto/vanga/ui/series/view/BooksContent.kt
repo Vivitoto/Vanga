@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -63,6 +62,7 @@ import io.github.vivitoto.vanga.ui.common.cards.BookDetailedListCard
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.components.FilterDropdownChoice
 import io.github.vivitoto.vanga.ui.common.components.FilterDropdownMultiChoice
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.PageSizeSelectionDropdown
 import io.github.vivitoto.vanga.ui.common.components.Pagination
@@ -124,7 +124,7 @@ fun LazyGridScope.SeriesBooksContent(
             layout = booksState.layout,
         )
 
-        if (!booksState.selectionMode) {
+        if (!booksState.selectionMode && booksState.totalPages > 1) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 val coroutineScope = rememberCoroutineScope()
                 Pagination(
@@ -136,7 +136,7 @@ fun LazyGridScope.SeriesBooksContent(
                             onPageChange(it)
                         }
                     },
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
@@ -160,7 +160,7 @@ private fun LoadIndicator() {
     Box(
         modifier = Modifier
             .padding(vertical = 30.dp)
-            .height(500.dp)
+            .height(260.dp)
             .fillMaxWidth()
             .background(animatedColor.value)
             .clip(RoundedCornerShape(10.dp))
@@ -181,7 +181,10 @@ private fun LazyGridScope.BooksContent(
 ) {
     if (books.isEmpty()) {
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Text("暂无书籍", modifier = Modifier.fillMaxWidth())
+            EmptyState(
+                title = "暂无书籍",
+                body = "当前筛选条件下没有可显示的书籍。"
+            )
         }
     } else
         when (layout) {
@@ -316,7 +319,7 @@ private fun BooksToolBar(
             )
         }
 
-        AnimatedVisibility(!selectionMode) {
+        AnimatedVisibility(!selectionMode && totalBookPages > 1) {
             Pagination(
                 totalPages = totalBookPages,
                 currentPage = currentBookPage,
@@ -578,18 +581,14 @@ private fun LazyGridScope.BooksGrid(
     onBookSelect: ((VangaBook) -> Unit)? = null,
 ) {
     items(books) { book ->
-        Column {
-            BookImageCard(
-                book = book,
-                onBookClick = onBookClick?.let { { onBookClick(book) } },
-                onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
-                bookMenuActions = bookMenuActions,
-                isSelected = selectedBooks.any { it.id == book.id },
-                onSelect = onBookSelect?.let { { onBookSelect(book) } },
-            )
-            Spacer(Modifier.height(15.dp))
-        }
-
+        BookImageCard(
+            book = book,
+            onBookClick = onBookClick?.let { { onBookClick(book) } },
+            onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
+            bookMenuActions = bookMenuActions,
+            isSelected = selectedBooks.any { it.id == book.id },
+            onSelect = onBookSelect?.let { { onBookSelect(book) } },
+        )
     }
 }
 
@@ -604,17 +603,14 @@ fun LazyGridScope.BooksList(
 ) {
     books.forEach { book ->
         item(span = { GridItemSpan(maxLineSpan) }) {
-            Column {
-                BookDetailedListCard(
-                    book = book,
-                    onClick = onBookClick?.let { { onBookClick(book) } },
-                    onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
-                    bookMenuActions = bookMenuActions,
-                    isSelected = selectedBooks.any { it.id == book.id },
-                    onSelect = onBookSelect?.let { { onBookSelect(book) } },
-                )
-                Spacer(Modifier.height(15.dp))
-            }
+            BookDetailedListCard(
+                book = book,
+                onClick = onBookClick?.let { { onBookClick(book) } },
+                onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
+                bookMenuActions = bookMenuActions,
+                isSelected = selectedBooks.any { it.id == book.id },
+                onSelect = onBookSelect?.let { { onBookSelect(book) } },
+            )
         }
     }
 }

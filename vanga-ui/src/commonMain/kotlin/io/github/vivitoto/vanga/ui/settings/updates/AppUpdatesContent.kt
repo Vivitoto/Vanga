@@ -77,13 +77,13 @@ fun AppUpdatesContent(
             }
         }
 
-        if (releases.isNotEmpty()) {
+        val latestRelease = remember(releases, latestVersion) {
+            latestVersion?.let { version -> releases.firstOrNull { it.version == version } }
+        }
+        if (latestRelease != null) {
             HorizontalDivider(Modifier.padding(vertical = 20.dp))
-            Text("更新说明", style = MaterialTheme.typography.headlineMedium)
-            releases.forEach {
-                ReleaseDetails(it)
-                HorizontalDivider()
-            }
+            Text("最新版本更新说明", style = MaterialTheme.typography.headlineMedium)
+            ReleaseDetails(latestRelease)
         }
 
         if (downloadProgress != null) {

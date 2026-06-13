@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.common.components.LoadingMaxSizeIndicator
 import io.github.vivitoto.vanga.ui.common.components.PageSizeSelectionDropdown
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.itemlist.CollectionLazyCardGrid
 import io.github.vivitoto.vanga.ui.common.itemlist.PlaceHolderLazyCardGrid
 import snd.komga.client.collection.KomgaCollection
@@ -56,6 +57,11 @@ fun LibraryCollectionsContent(
         if (isLoading) {
             if (collectionsTotalCount > pageSize) PlaceHolderLazyCardGrid(pageSize, minSize)
             else LoadingMaxSizeIndicator()
+        } else if (collections.isEmpty()) {
+            EmptyState(
+                title = "暂无合集",
+                body = "服务器里还没有合集，或当前筛选没有匹配结果。"
+            )
         } else {
             CollectionLazyCardGrid(
                 collections = collections,

@@ -77,9 +77,9 @@ fun KomfSettingsContent(
                 Row {
                     Spacer(Modifier.weight(1f))
                     ElevatedButton(
-                        onClick = { uriHandler.openUri("https://github.com/Vivitoto/komf") },
+                        onClick = { uriHandler.openUri("https://github.com/Snd-R/komf") },
                     ) {
-                        Text("项目链接")
+                        Text("Komf 项目链接")
                     }
                 }
             }

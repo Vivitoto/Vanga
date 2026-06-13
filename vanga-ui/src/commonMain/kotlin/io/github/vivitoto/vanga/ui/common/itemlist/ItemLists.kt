@@ -42,9 +42,9 @@ fun PlaceHolderLazyCardGrid(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize),
             state = scrollState,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            modifier = Modifier.padding(horizontal = CardGridHorizontalPadding)
         ) {
             for (i in 0 until elements) {
                 item { ItemCard(modifier = Modifier.padding(5.dp), onClick = {}, image = {}) }

@@ -215,8 +215,8 @@ val EnStrings = AppStrings(
         appThemeLight = "浅色",
         imageCardSize = "网格视图封面卡片大小（最小显示尺寸）",
         decoder = "图片解码/采样器",
-        epubReaderTypeKomga = "Komga EPUB 阅读器",
-        epubReaderTypeTtsu = "ッツ EPUB 阅读器"
+        epubReaderTypeKomga = "Vanga 兼容 EPUB 阅读器",
+        epubReaderTypeTtsu = "完整排版 EPUB 阅读器"
     ),
     errorCodes = ErrorCodes(
         err1000 = "分析时无法访问文件",

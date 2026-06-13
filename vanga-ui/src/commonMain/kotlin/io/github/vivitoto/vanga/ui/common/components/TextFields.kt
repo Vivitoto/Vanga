@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -108,7 +109,7 @@ fun PasswordTextField(
                 Icon(imageVector = image, description)
             }
         },
-        modifier = modifier.withTextFieldNavigation()
+        modifier = modifier.heightIn(min = 56.dp).withTextFieldNavigation()
     )
 }
 
@@ -207,7 +208,7 @@ fun HttpTextField(
     placeholder: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     supportingText: @Composable (() -> Unit)? = null,
-    singleLine: Boolean = false,
+    singleLine: Boolean = true,
 ) {
     val strippedValue by remember(value) { mutableStateOf(value.replace(httpRegex, "")) }
     var isHttps by remember(value) { mutableStateOf(value.startsWith("https://")) }
@@ -218,7 +219,7 @@ fun HttpTextField(
         onValueChange = {
             onValueChange(httpText.value + it.replace(httpRegex, ""))
         },
-        modifier = modifier,
+        modifier = modifier.heightIn(min = 56.dp),
         prefix = {
             HttpPrefixButton(
                 httpText = httpText.value,
@@ -247,7 +248,7 @@ fun OutlinedHttpTextField(
     label: @Composable (() -> Unit)? = null,
     placeholder: @Composable (() -> Unit)? = null,
     supportingText: @Composable (() -> Unit)? = null,
-    singleLine: Boolean = false,
+    singleLine: Boolean = true,
 ) {
     val strippedValue by remember(value) { mutableStateOf(value.replace(httpRegex, "")) }
     var isHttps by remember(value) { mutableStateOf(value.startsWith("https://")) }
@@ -259,7 +260,7 @@ fun OutlinedHttpTextField(
         onValueChange = {
             onValueChange(httpText.value + it.replace(httpRegex, ""))
         },
-        modifier = modifier,
+        modifier = modifier.heightIn(min = 56.dp),
         prefix = {
             HttpPrefixButton(
                 httpText = httpText.value,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
@@ -59,7 +60,7 @@ fun SavableTextField(
                 supportingText = supportingText,
                 isError = isError,
                 label = label,
-                modifier = Modifier.weight(1f).animateContentSize()
+                modifier = Modifier.weight(1f).heightIn(min = 56.dp).animateContentSize()
             )
         } else {
             TextField(
@@ -75,7 +76,7 @@ fun SavableTextField(
                 supportingText = supportingText,
                 isError = isError,
                 singleLine = true,
-                modifier = Modifier.weight(1f).animateContentSize()
+                modifier = Modifier.weight(1f).heightIn(min = 56.dp).animateContentSize()
             )
         }
 
@@ -143,7 +144,7 @@ fun SavableHttpTextField(
                 isChanged = true
             },
             label = { Text(label) },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).heightIn(min = 56.dp),
             isError = isError,
             supportingText = supportingText
         )

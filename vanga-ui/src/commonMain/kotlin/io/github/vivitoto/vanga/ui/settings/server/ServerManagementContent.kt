@@ -20,6 +20,7 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 
 @Composable
 fun ServerManagementContent(
@@ -35,8 +36,10 @@ fun ServerManagementContent(
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text("书库维护", style = MaterialTheme.typography.titleLarge)
-        HorizontalDivider()
+        SettingsSectionHeader(
+            title = "书库维护",
+            description = "扫描书库、处理后台任务，以及执行少量高风险服务器操作。"
+        )
         Button(
             title = "扫描全部书库",
             description = "检查目录里新增或移除的书籍。\n适合日常增量更新。",
@@ -44,7 +47,6 @@ fun ServerManagementContent(
             level = WarningLevel.NORMAL,
             onClick = { onScanAllLibraries(false) }
         )
-        HorizontalDivider()
         Button(
             title = "深度扫描全部书库",
             description = "强制重新比对文件和数据库，耗时更久。\n只有普通扫描不准时再用。",
@@ -52,15 +54,14 @@ fun ServerManagementContent(
             level = WarningLevel.NORMAL,
             onClick = { onScanAllLibraries(true) }
         )
-        HorizontalDivider()
 
+        HorizontalDivider()
         FilledTonalButton(onClick = { showDangerActions = !showDangerActions }) {
             Text(if (showDangerActions) "收起危险操作" else "危险操作")
         }
 
         if (showDangerActions) {
             Text("这些操作会影响服务器状态或删除记录，确认后再执行。", style = MaterialTheme.typography.bodyMedium)
-            HorizontalDivider()
             Button(
                 title = "清空全部书库回收站",
                 description = "删除已标记为不可用的媒体记录。\n确认文件不会恢复后再操作。",
@@ -68,7 +69,6 @@ fun ServerManagementContent(
                 level = WarningLevel.NORMAL,
                 onClick = { showEmptyTrashDialog = true }
             )
-            HorizontalDivider()
             Button(
                 title = "取消全部任务",
                 description = "停止当前正在运行的服务器任务。",
@@ -76,21 +76,19 @@ fun ServerManagementContent(
                 level = WarningLevel.WARNING,
                 onClick = { onCancelAllTasks() }
             )
-            HorizontalDivider()
             Button(
                 title = "关闭服务器",
-                description = "停止 Komga 服务进程。\n除非你知道如何重新启动，否则不要操作。",
+                description = "停止服务器服务进程。\n除非你知道如何重新启动，否则不要操作。",
                 buttonText = "关闭",
                 level = WarningLevel.DANGER,
                 onClick = { showShutdownDialog = true }
             )
-            HorizontalDivider()
         }
 
         if (showEmptyTrashDialog) {
             ConfirmationDialog(
                 title = "清空回收站",
-                body = "Komga 默认不会立刻删除缺失媒体的信息，以避免硬盘临时断开造成数据丢失。清空后，缺失媒体的记录会被删除。确定继续吗？",
+                body = "服务器默认不会立刻删除缺失媒体的信息，以避免硬盘临时断开造成数据丢失。清空后，缺失媒体的记录会被删除。确定继续吗？",
                 buttonConfirm = "清空",
                 buttonCancel = "取消",
                 onDialogConfirm = onEmptyTrash,
@@ -101,7 +99,7 @@ fun ServerManagementContent(
         if (showShutdownDialog) {
             ConfirmationDialog(
                 title = "关闭服务器",
-                body = "确定要停止 Komga 服务吗？",
+                body = "确定要停止服务器服务吗？",
                 buttonConfirm = "停止",
                 buttonCancel = "取消",
                 buttonConfirmColor = MaterialTheme.colorScheme.errorContainer,

@@ -64,10 +64,10 @@ fun BookLazyCardGrid(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize),
             state = gridState,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 30.dp),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            contentPadding = PaddingValues(bottom = CardGridBottomPadding),
+            modifier = Modifier.padding(horizontal = CardGridHorizontalPadding)
         ) {
 
             items(books, key = { it.id.value }) { book ->
@@ -95,17 +95,19 @@ fun BookLazyCardGrid(
                 }
             }
 
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Pagination(
-                    totalPages = totalPages,
-                    currentPage = currentPage,
-                    onPageChange = {
-                        coroutineScope.launch {
-                            onPageChange(it)
-                            gridState.scrollToItem(0)
+            if (totalPages > 1) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Pagination(
+                        totalPages = totalPages,
+                        currentPage = currentPage,
+                        onPageChange = {
+                            coroutineScope.launch {
+                                onPageChange(it)
+                                gridState.scrollToItem(0)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
         VerticalScrollbar(gridState, Modifier.align(Alignment.TopEnd))

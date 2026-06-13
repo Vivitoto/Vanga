@@ -64,7 +64,7 @@ fun KomfResultCard(
                             ThumbnailImage(
                                 data = image,
                                 cacheKey = it,
-                                contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Fit,
                                 blurred = LocalCoverBlurSettings.current.libraryCovers,
                             )
                     }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberBasicTooltipState
@@ -77,7 +78,7 @@ fun <T> DropdownChoiceMenu(
     modifier: Modifier = Modifier,
     label: @Composable (() -> Unit)? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
@@ -129,7 +130,7 @@ fun <T> DropdownMultiChoiceMenu(
     label: @Composable (() -> Unit)? = null,
     placeholder: String? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
@@ -176,7 +177,7 @@ private fun InputField(
     label: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit),
     color: Color,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
@@ -187,6 +188,7 @@ private fun InputField(
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
             .then(modifier)
+            .heightIn(min = 56.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -200,7 +202,7 @@ private fun InputField(
                 CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.labelMedium) {
                     label?.let { it() }
                 }
-                Text(value, maxLines = 1)
+                Text(value, maxLines = 1, style = MaterialTheme.typography.bodyLarge)
             }
 
             Spacer(Modifier.weight(1f))
@@ -221,7 +223,7 @@ fun <T> DropdownChoiceMenuWithSearch(
     label: @Composable (() -> Unit)? = null,
     placeholder: String? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surface,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 ) {
     var searchText by remember { mutableStateOf("") }
     LaunchedEffect(searchText) {
@@ -387,7 +389,7 @@ fun TagFiltersDropdownMenu(
     modifier: Modifier = Modifier,
     inputFieldModifier: Modifier = Modifier,
     inputFieldColor: Color = MaterialTheme.colorScheme.surface,
-    contentPadding: PaddingValues = PaddingValues(10.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
 ) {
     val strings = LocalStrings.current.filters
     var isExpanded by remember { mutableStateOf(false) }

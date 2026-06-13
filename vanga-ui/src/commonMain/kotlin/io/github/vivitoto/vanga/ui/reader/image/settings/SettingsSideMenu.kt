@@ -112,14 +112,14 @@ fun SettingsSideMenuOverlay(
     Column(modifier = Modifier.fillMaxSize()) {
         Spacer(
             Modifier.fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                 .windowInsetsPadding(WindowInsets.statusBars)
         )
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .width(350.dp)
-                .padding(horizontal = 10.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                .width(380.dp)
+                .padding(horizontal = 16.dp)
                 .imePadding()
                 .fillMaxHeight()
                 .align(Alignment.End)
@@ -157,7 +157,7 @@ fun SettingsSideMenuOverlay(
                     onOptionChange = { onReaderTypeChange(it.value) },
                     inputFieldModifier = Modifier.fillMaxWidth(),
                     label = { Text(readerStrings.readerType) },
-                    inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
+                    inputFieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )
                 when (readerType) {
                     PAGED -> PagedReaderSettingsContent(pagedReaderState)
@@ -270,7 +270,7 @@ private fun ColumnScope.ContinuousReaderSettingsContent(state: ContinuousReaderS
         onOptionChange = { state.onReadingDirectionChange(it.value) },
         inputFieldModifier = Modifier.fillMaxWidth(),
         label = { Text(strings.readingDirection) },
-        inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
+        inputFieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
     )
 
     Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {

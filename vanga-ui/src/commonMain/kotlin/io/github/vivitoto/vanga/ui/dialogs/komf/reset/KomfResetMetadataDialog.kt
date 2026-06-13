@@ -26,11 +26,12 @@ import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.series.KomgaSeries
 
 val resetSeriesText = """
-    All series metadata will be reset including field locks and thumbnails uploaded by Komf.
-    No files will be modified. Continue?
+    将重置此作品的全部元数据，包括字段锁定和由 Komf 上传的封面。
+    不会修改本地文件。是否继续？
 """.trimIndent()
 val resetLibraryText = """
-    All metadata of all series inside this library will be reset including field locks and thumbnails uploaded by Komf. No files will be modified. Continue?
+    将重置此书库内全部作品的元数据，包括字段锁定和由 Komf 上传的封面。
+    不会修改本地文件。是否继续？
 """.trimIndent()
 
 @Composable

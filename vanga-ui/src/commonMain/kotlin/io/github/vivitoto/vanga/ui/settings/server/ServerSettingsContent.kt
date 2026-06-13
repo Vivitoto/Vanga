@@ -38,6 +38,7 @@ import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.withTextFieldNavigation
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import snd.komga.client.settings.KomgaThumbnailSize
 
 @Composable
@@ -92,7 +93,7 @@ fun ServerSettingsContent(
         onShutdown = onShutdown
     )
 
-    Spacer(Modifier.height(100.dp))
+    Spacer(Modifier.height(24.dp))
 }
 
 @Composable
@@ -111,10 +112,10 @@ fun GeneralSettingsContent(
     var showAdvancedServerSettings by remember { mutableStateOf(false) }
 
     Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("封面与缩略图", style = MaterialTheme.typography.titleMedium)
-            Text("影响书库列表和详情页的封面清晰度。普通用户通常只需要改这里。", style = MaterialTheme.typography.bodyMedium)
-        }
+        SettingsSectionHeader(
+            title = "封面与缩略图",
+            description = "影响书库列表和详情页的封面清晰度。普通用户通常只需要改这里。"
+        )
 
         Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
             DropdownChoiceMenu(
@@ -130,10 +131,10 @@ fun GeneralSettingsContent(
         }
 
         if (showAdvancedServerSettings) {
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("高级服务器配置", style = MaterialTheme.typography.titleMedium)
-                Text("这些设置会影响服务器行为，部分修改需要重启 Komga 后生效。", style = MaterialTheme.typography.bodyMedium)
-            }
+            SettingsSectionHeader(
+                title = "高级服务器配置",
+                description = "这些设置会影响服务器行为，部分修改需要重启服务器后生效。"
+            )
 
             Column {
                 CheckboxWithLabel(

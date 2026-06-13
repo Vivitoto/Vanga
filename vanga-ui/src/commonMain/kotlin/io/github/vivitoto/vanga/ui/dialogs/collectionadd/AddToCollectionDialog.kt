@@ -114,12 +114,15 @@ private fun DialogContent(
         Surface(tonalElevation = 1.dp) {
             Column {
                 val filteredCollections = derivedStateOf { collections.filter { it.name.contains(query) } }
-                filteredCollections.value.forEach { collection ->
+                filteredCollections.value.forEachIndexed { index, collection ->
                     CollectionEntry(
                         collection = collection,
                         alreadyContainsSeries = series.size == 1 && collection.seriesIds.any { it == series.first().id },
                         onClick = { coroutineScope.launch { onAddToCollection(collection) } }
                     )
+                    if (index < filteredCollections.value.lastIndex) {
+                        HorizontalDivider()
+                    }
                 }
             }
         }
@@ -154,7 +157,5 @@ private fun CollectionEntry(
                 color = MaterialTheme.colorScheme.tertiary
             )
         }
-
-        HorizontalDivider()
     }
 }

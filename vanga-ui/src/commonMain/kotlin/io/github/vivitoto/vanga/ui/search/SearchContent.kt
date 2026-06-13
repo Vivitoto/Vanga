@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,6 +23,7 @@ import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.common.cards.BookDetailedListCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesDetailedListCard
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.platform.VerticalScrollbar
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass
@@ -89,12 +89,14 @@ fun SearchContent(
                                 modifier = widthModifier
                             )
                         }
-                        item {
-                            Pagination(
-                                totalPages = seriesTotalPages,
-                                currentPage = seriesCurrentPage,
-                                onPageChange = onSeriesPageChange
-                            )
+                        if (seriesTotalPages > 1) {
+                            item {
+                                Pagination(
+                                    totalPages = seriesTotalPages,
+                                    currentPage = seriesCurrentPage,
+                                    onPageChange = onSeriesPageChange
+                                )
+                            }
                         }
                     }
 
@@ -106,12 +108,14 @@ fun SearchContent(
                                 modifier = widthModifier
                             )
                         }
-                        item {
-                            Pagination(
-                                totalPages = bookTotalPages,
-                                currentPage = bookCurrentPage,
-                                onPageChange = onBookPageChange
-                            )
+                        if (bookTotalPages > 1) {
+                            item {
+                                Pagination(
+                                    totalPages = bookTotalPages,
+                                    currentPage = bookCurrentPage,
+                                    onPageChange = onBookPageChange
+                                )
+                            }
                         }
 
                     }
@@ -125,14 +129,11 @@ fun SearchContent(
 
 @Composable
 private fun EmptySearchResults() {
-    Column(
+    EmptyState(
+        title = "没有找到结果",
+        body = "换个关键词试试",
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(Modifier.height(100.dp))
-        Text("没有找到结果", style = MaterialTheme.typography.titleLarge)
-        Text("换个关键词试试")
-    }
+    )
 }
 
 @Composable

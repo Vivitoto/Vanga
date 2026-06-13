@@ -447,48 +447,41 @@ private class SeriesMetadataTab(private val state: ProviderConfigState) : Dialog
                 onCheckedChange = state::onSeriesAgeRatingChange,
                 label = { Text("年龄分级") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesAuthors,
                 onCheckedChange = state::onSeriesAuthorsChange,
                 label = { Text("作者") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesBookCount,
                 onCheckedChange = state::onSeriesBookCountChange,
                 label = { Text("单本数量") }
             )
-            HorizontalDivider()
             SwitchWithLabel(
                 checked = state.seriesCover,
                 onCheckedChange = state::onSeriesCoverChange,
                 label = { Text("封面") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesGenres,
                 onCheckedChange = state::onSeriesGenresChange,
                 label = { Text("类型") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesLinks,
                 onCheckedChange = state::onSeriesLinksChange,
                 label = { Text("链接") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesPublisher,
                 onCheckedChange = state::onSeriesPublisherChange,
                 label = { Text("出版社") }
             )
-            HorizontalDivider()
 
             if (state.canHaveMultiplePublishers) {
                 SwitchWithLabel(
@@ -497,7 +490,6 @@ private class SeriesMetadataTab(private val state: ProviderConfigState) : Dialog
                     label = { Text("使用原始出版社") },
                     supportingText = { Text("优先使用原始出版社名称，而不是本地化名称") }
                 )
-                HorizontalDivider()
             }
 
             SwitchWithLabel(
@@ -505,28 +497,24 @@ private class SeriesMetadataTab(private val state: ProviderConfigState) : Dialog
                 onCheckedChange = state::onSeriesReleaseDateChange,
                 label = { Text("发布日期") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesStatus,
                 onCheckedChange = state::onSeriesStatusChange,
                 label = { Text("状态") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesSummary,
                 onCheckedChange = state::onSeriesSummaryChange,
                 label = { Text("简介") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesTags,
                 onCheckedChange = state::onSeriesTagsChange,
                 label = { Text("标签") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 checked = state.seriesTitle,
@@ -548,7 +536,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookEnabledChange,
                 label = { Text("启用") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -556,7 +543,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookAuthorsChange,
                 label = { Text("作者") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -564,7 +550,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookCoverChange,
                 label = { Text("封面") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -572,7 +557,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookIsbnChange,
                 label = { Text("ISBN") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -580,7 +564,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookLinksChange,
                 label = { Text("链接") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -588,7 +571,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookNumberChange,
                 label = { Text("编号") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -596,7 +578,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookReleaseDateChange,
                 label = { Text("发布日期") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -604,7 +585,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
                 onCheckedChange = state::onBookSummaryChange,
                 label = { Text("简介") }
             )
-            HorizontalDivider()
 
             SwitchWithLabel(
                 enabled = state.bookEnabled,
@@ -615,7 +595,6 @@ private class BookMetadataTab(private val state: ProviderConfigState) : DialogTa
         }
     }
 }
-
 private class ProviderSettingsTab(private val state: ProviderConfigState) : DialogTab {
     override fun options() = TabItem(title = "数据源设置")
 

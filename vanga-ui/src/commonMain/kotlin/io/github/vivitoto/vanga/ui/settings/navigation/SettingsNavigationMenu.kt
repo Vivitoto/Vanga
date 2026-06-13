@@ -178,7 +178,7 @@ fun SettingsNavigationMenu(
                 Text("服务器管理", style = MaterialTheme.typography.titleSmall)
                 NavigationButton(
                     label = "服务器设置",
-                    description = "Komga 基础配置和维护入口",
+                    description = "服务器基础配置和维护入口",
                     icon = Icons.Default.Settings,
                     onClick = { onNavigation(ServerSettingsScreen()) },
                     isSelected = currentScreen is ServerSettingsScreen,
@@ -187,7 +187,7 @@ fun SettingsNavigationMenu(
 
                 NavigationButton(
                     label = "用户管理",
-                    description = "新增、编辑或删除 Komga 用户",
+                    description = "新增、编辑或删除服务器用户",
                     icon = Icons.Default.SupervisorAccount,
                     onClick = { onNavigation(UsersScreen()) },
                     isSelected = currentScreen is UsersScreen,
@@ -284,7 +284,7 @@ fun SettingsNavigationMenu(
         }
 
         if (updatesEnabled) {
-            HorizontalDivider(Modifier.padding(vertical = 10.dp))
+            if (isOffline) HorizontalDivider(Modifier.padding(vertical = 10.dp))
             Text("应用", style = MaterialTheme.typography.titleSmall)
             NavigationButton(
                 label = "版本更新",

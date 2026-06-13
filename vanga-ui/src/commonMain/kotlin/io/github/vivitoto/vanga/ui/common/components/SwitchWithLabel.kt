@@ -4,9 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
@@ -28,7 +33,7 @@ fun SwitchWithLabel(
     supportingTextColor: Color = LocalContentColor.current.copy(alpha = 0.6f),
     enabled: Boolean = true,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    contentPadding: PaddingValues = PaddingValues(vertical = 8.dp)
 ) {
     val contentColor = if (enabled) LocalContentColor.current else LocalContentColor.current.copy(alpha = .4f)
     val actualSupportingTextColor = if (enabled) supportingTextColor else LocalContentColor.current.copy(alpha = .4f)
@@ -39,19 +44,27 @@ fun SwitchWithLabel(
     CompositionLocalProvider(LocalContentColor provides contentColor) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.clickable(
-                enabled = enabled,
-                onClick = { onCheckedChange(!checked) }
-            )
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .clickable(
+                    enabled = enabled,
+                    onClick = { onCheckedChange(!checked) }
+                )
                 .pointerHoverIcon(PointerIcon.Hand)
                 .padding(contentPadding),
         ) {
             Column(Modifier.weight(1f)) {
-                label()
+                ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
+                    label()
+                }
                 CompositionLocalProvider(LocalContentColor provides actualSupportingTextColor) {
-                    supportingText()
+                    ProvideTextStyle(MaterialTheme.typography.bodyMedium) {
+                        supportingText()
+                    }
                 }
             }
+            Spacer(Modifier.width(16.dp))
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,

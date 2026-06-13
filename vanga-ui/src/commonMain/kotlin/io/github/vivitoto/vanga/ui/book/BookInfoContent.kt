@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -80,8 +79,8 @@ fun BookInfoColumn(
             )
         }
 
-        val genreEntries = remember(genres) { genres?.map { stringEntry(it) } }
-        if (genreEntries != null) {
+        val genreEntries = remember(genres) { genres.orEmpty().map { stringEntry(it) } }
+        if (genreEntries.isNotEmpty()) {
             DescriptionChips(
                 label = "题材",
                 chipValues = genreEntries,
@@ -89,22 +88,25 @@ fun BookInfoColumn(
             )
         }
 
-        TagList(
-            tags = tags,
-            secondaryTags = null,
-            onTagClick = { onFilterClick(SeriesScreenFilter(tags = listOf(it))) },
-        )
+        if (tags.isNotEmpty()) {
+            TagList(
+                tags = tags,
+                secondaryTags = null,
+                onTagClick = { onFilterClick(SeriesScreenFilter(tags = listOf(it))) },
+            )
+        }
 
         val uriHandler = LocalUriHandler.current
         val linkEntries = remember(links) { links.map { LabeledEntry(it, it.label) } }
-        DescriptionChips(
-            label = "链接",
-            chipValues = linkEntries,
-            onChipClick = { entry -> uriHandler.openUri(entry.url) },
-            icon = Icons.Default.Link,
-        )
+        if (linkEntries.isNotEmpty()) {
+            DescriptionChips(
+                label = "链接",
+                chipValues = linkEntries,
+                onChipClick = { entry -> uriHandler.openUri(entry.url) },
+                icon = Icons.Default.Link,
+            )
+        }
 
-        Spacer(Modifier.size(0.dp))
         val authorEntries = remember(authors) {
             authors
                 .groupBy { it.role }
@@ -121,7 +123,6 @@ fun BookInfoColumn(
             )
         }
 
-        Spacer(Modifier.size(0.dp))
         Row {
             Text(
                 "大小",

@@ -139,11 +139,14 @@ private fun NotificationsContent(
                         .padding(horizontal = 20.dp)
                         .verticalScroll(scrollState)
                 ) {
-                    for (notification in notifications) {
+                    val lastNotificationIndex = notifications.size - 1
+                    notifications.forEachIndexed { index, notification ->
                         when (notification) {
                             is BookNotification -> BookNotification(notification)
                         }
-                        HorizontalDivider()
+                        if (index < lastNotificationIndex) {
+                            HorizontalDivider()
+                        }
                     }
                 }
                 VerticalScrollbar(scrollState, modifier = Modifier.align(Alignment.TopEnd))

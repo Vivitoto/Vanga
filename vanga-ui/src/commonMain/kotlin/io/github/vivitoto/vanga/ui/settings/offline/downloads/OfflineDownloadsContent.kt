@@ -29,7 +29,9 @@ import androidx.compose.ui.unit.dp
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vivitoto.vanga.formatDecimal
 import io.github.vivitoto.vanga.offline.sync.model.DownloadEvent
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.dialogs.permissions.StoragePermissionRequestDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import snd.komga.client.book.KomgaBookId
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -43,8 +45,10 @@ fun OfflineDownloadsContent(
     onDownloadCancel: (KomgaBookId) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("下载与存储", style = MaterialTheme.typography.titleMedium)
-        Text("管理离线书籍的保存位置和当前下载任务。", style = MaterialTheme.typography.bodyMedium)
+        SettingsSectionHeader(
+            title = "下载与存储",
+            description = "管理离线书籍的保存位置和当前下载任务。"
+        )
 
         if (storageLocation != null) {
             Column {
@@ -71,9 +75,9 @@ fun OfflineDownloadsContent(
         }
 
         HorizontalDivider()
-        Text("当前下载", style = MaterialTheme.typography.titleMedium)
+        SettingsSectionHeader("当前下载")
         if (downloads.isEmpty()) {
-            Text("暂无下载任务")
+            EmptyState("暂无下载任务", body = "离线下载任务会显示在这里。")
         }
         for (event in downloads) {
             Column(

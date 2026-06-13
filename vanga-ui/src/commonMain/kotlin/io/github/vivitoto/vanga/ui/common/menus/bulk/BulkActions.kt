@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -91,14 +93,19 @@ fun BulkActionsContainer(
 @Composable
 fun BottomPopupBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
     Popup(popupPositionProvider = BottomScreenPopupPositionProvider) {
-        Surface {
+        Surface(
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            tonalElevation = 3.dp,
+            shadowElevation = 6.dp,
+        ) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
-                    .clip(RoundedCornerShape(5.dp))
+                    .heightIn(min = 56.dp)
+                    .navigationBarsPadding()
+                    .padding(horizontal = 8.dp)
                     .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
             ) {
                 content()
@@ -114,7 +121,10 @@ object BottomScreenPopupPositionProvider : PopupPositionProvider {
         windowSize: IntSize,
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize
-    ) = IntOffset(0, windowSize.height)
+    ): IntOffset {
+        val containerBottom = if (anchorBounds.bottom > 0) anchorBounds.bottom else windowSize.height
+        return IntOffset(0, (containerBottom - popupContentSize.height).coerceAtLeast(0))
+    }
 }
 
 @Composable

@@ -33,7 +33,7 @@ class KomfProcessingSettingsScreen(val serverType: MediaServer) : Screen {
                 KAVITA -> "Kavita"
             }
 
-            "$serverName Metadata Processing Settings"
+            "$serverName 元数据处理设置"
         }
         SettingsScreenContainer(title = title) {
 

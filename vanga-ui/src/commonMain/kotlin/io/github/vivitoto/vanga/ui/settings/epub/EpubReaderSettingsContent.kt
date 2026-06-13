@@ -53,7 +53,7 @@ fun EpubReaderSettingsContent(
                     onClick = { uriHandler.openUri("https://github.com/ttu-ttu/ebook-reader") },
                     modifier = Modifier.cursorForHand().padding(start = 20.dp)
                 ) {
-                    Text("打开项目主页")
+                    Text("打开 TTU 阅读器项目主页")
                 }
             }
         }
@@ -67,7 +67,7 @@ fun EpubReaderSettingsContent(
                 """.trimIndent()
             )
 
-            KOMGA_EPUB -> Text("使用 Komga Web 阅读器，兼容性更接近服务器端体验。")
+            KOMGA_EPUB -> Text("使用 Vanga 兼容 EPUB 阅读器，兼容性更接近服务器端体验。")
 
         }
     }

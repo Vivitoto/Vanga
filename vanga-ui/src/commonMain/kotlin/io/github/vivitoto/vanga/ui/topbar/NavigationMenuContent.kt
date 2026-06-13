@@ -124,7 +124,7 @@ fun LibrariesNavBarContent(
                 onLibrariesClick = onLibrariesClick,
                 onLibraryClick = onLibraryClick
             )
-            Spacer(Modifier.size(30.dp))
+            Spacer(Modifier.height(16.dp))
         }
     }
 

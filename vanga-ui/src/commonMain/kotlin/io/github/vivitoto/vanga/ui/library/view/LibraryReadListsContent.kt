@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.common.components.LoadingMaxSizeIndicator
 import io.github.vivitoto.vanga.ui.common.components.PageSizeSelectionDropdown
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.itemlist.PlaceHolderLazyCardGrid
 import io.github.vivitoto.vanga.ui.common.itemlist.ReadListLazyCardGrid
 import snd.komga.client.readlist.KomgaReadList
@@ -57,6 +58,11 @@ fun LibraryReadListsContent(
         if (isLoading) {
             if (readListsTotalCount > pageSize) PlaceHolderLazyCardGrid(pageSize, minSize)
             else LoadingMaxSizeIndicator()
+        } else if (readLists.isEmpty()) {
+            EmptyState(
+                title = "暂无阅读清单",
+                body = "服务器里还没有阅读清单，或当前筛选没有匹配结果。"
+            )
         } else {
             ReadListLazyCardGrid(
                 readLists = readLists,

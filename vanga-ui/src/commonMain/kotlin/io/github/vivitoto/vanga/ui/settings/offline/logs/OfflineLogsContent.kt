@@ -28,8 +28,10 @@ import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.toSystemTimeString
 import io.github.vivitoto.vanga.offline.sync.model.OfflineLogEntry
 import io.github.vivitoto.vanga.ui.common.components.AppFilterChipDefaults
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import io.github.vivitoto.vanga.ui.settings.offline.logs.OfflineLogsState.TaskTab
 
 @Composable
@@ -43,20 +45,24 @@ fun OfflineLogsContent(
     onDelete: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("离线日志", style = MaterialTheme.typography.titleMedium)
-        Text("用于排查离线下载或同步失败；日常阅读不用关注。", style = MaterialTheme.typography.bodyMedium)
+        SettingsSectionHeader(
+            title = "离线日志",
+            description = "用于排查离线下载或同步失败；日常阅读不用关注。"
+        )
 
         StatusFilters(selectedTab, onTabSelect, onDelete)
 
-        Pagination(
-            totalPages = totalPages,
-            currentPage = currentPage,
-            onPageChange = onPageChange,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        if (totalPages > 1) {
+            Pagination(
+                totalPages = totalPages,
+                currentPage = currentPage,
+                onPageChange = onPageChange,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
 
         if (logs.isEmpty()) {
-            Text("暂无记录")
+            EmptyState("暂无记录", body = "离线下载和同步日志会显示在这里。")
         } else {
             LogsContent(logs)
 
@@ -71,7 +77,7 @@ fun OfflineLogsContent(
             )
         }
 
-        Spacer(Modifier.height(30.dp))
+        Spacer(Modifier.height(16.dp))
     }
 }
 
@@ -125,10 +131,9 @@ private fun LogsContent(logs: List<OfflineLogEntry>) {
             verticalArrangement = Arrangement.spacedBy(5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            HorizontalDivider()
-            for (task in logs) {
+            logs.forEachIndexed { index, task ->
+                if (index > 0) HorizontalDivider()
                 LogEntryContent(task)
-                HorizontalDivider()
             }
         }
     }

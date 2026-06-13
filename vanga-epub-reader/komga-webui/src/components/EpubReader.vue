@@ -841,10 +841,10 @@ async function setupState(currentBookId: string) {
 //   this.book.context = this.context
 //   //   if (this?.context.origin === ContextOrigin.READLIST) {
 //   //     this.contextName = (await (this.$komgaReadLists.getOneReadList(this.context.id))).name
-//   //     document.title = `Komga - ${this.contextName} - ${this.book.metadata.title}`
+//   //     document.title = `Vanga - ${this.contextName} - ${this.book.metadata.title}`
 //   //   }
 // } else {
-  document.title = `Komga - ${getBookTitleCompact(book.value.metadata.title, series.value.metadata.title)}`
+  document.title = `Vanga - ${getBookTitleCompact(book.value.metadata.title, series.value.metadata.title)}`
 // }
 
   incognito.value = await externalFunctions.isIncognito()

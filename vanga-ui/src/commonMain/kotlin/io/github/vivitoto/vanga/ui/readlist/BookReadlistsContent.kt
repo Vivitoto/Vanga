@@ -44,23 +44,23 @@ fun BookReadListsContent(
     onBookClick: (VangaBook, KomgaReadList) -> Unit,
     cardWidth: Dp
 ) {
+    if (readLists.isEmpty()) return
+
     var show by rememberSaveable { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (readLists.isNotEmpty()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { show = !show }
-                    .cursorForHand()
-                    .padding(20.dp),
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                Text("阅读清单")
-                if (show) Icon(Icons.Default.ExpandLess, null)
-                else Icon(Icons.Default.ExpandMore, null)
-            }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .clickable { show = !show }
+                .cursorForHand()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text("阅读清单")
+            if (show) Icon(Icons.Default.ExpandLess, null)
+            else Icon(Icons.Default.ExpandMore, null)
         }
 
         AnimatedVisibility(show) {

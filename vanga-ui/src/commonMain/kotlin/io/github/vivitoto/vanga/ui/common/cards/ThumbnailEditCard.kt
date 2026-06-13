@@ -98,7 +98,7 @@ fun ThumbnailEditCard(
             ThumbnailImage(
                 data = thumbRequest,
                 cacheKey = thumbnail.id.value,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
                 blurred = blurred,
             )
@@ -140,7 +140,7 @@ fun ThumbnailUploadCard(
             AsyncImage(
                 model = thumbnail.file,
                 contentDescription = null,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize().then(if (blurred) Modifier.blur(16.dp) else Modifier),
             )
         }

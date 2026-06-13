@@ -114,12 +114,15 @@ private fun DialogContent(
         Surface(tonalElevation = 1.dp) {
             Column {
                 val filteredReadLists = derivedStateOf { readLists.filter { it.name.contains(query) } }
-                filteredReadLists.value.forEach { readList ->
+                filteredReadLists.value.forEachIndexed { index, readList ->
                     ReadListEntry(
                         readList = readList,
                         alreadyContainsSeries = books.size == 1 && readList.bookIds.any { it == books.first().id },
                         onClick = { coroutineScope.launch { onAddToReadList(readList) } }
                     )
+                    if (index < filteredReadLists.value.lastIndex) {
+                        HorizontalDivider()
+                    }
                 }
             }
         }
@@ -154,7 +157,5 @@ private fun ReadListEntry(
                 color = MaterialTheme.colorScheme.tertiary
             )
         }
-
-        HorizontalDivider()
     }
 }

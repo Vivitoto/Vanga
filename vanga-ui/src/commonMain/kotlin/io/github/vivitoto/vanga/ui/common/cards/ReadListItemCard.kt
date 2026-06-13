@@ -47,7 +47,7 @@ fun ReadListImageCard(
                     ReadListThumbnail(
                         readListId = readLists.id,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 }
             }

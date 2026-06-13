@@ -1,7 +1,6 @@
 package io.github.vivitoto.vanga.ui.common.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -35,10 +34,7 @@ fun Pagination(
     navigationButtons: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    if (totalPages <= 1) {
-        Box(modifier)
-        return
-    }
+    if (totalPages <= 1) return
 
     BoxWithConstraints(
         modifier = modifier,

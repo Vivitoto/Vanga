@@ -224,7 +224,9 @@ fun NotificationContextDialogContent(
                 ) {
                     BookContext(book)
                 }
-                HorizontalDivider()
+                if (index < state.books.lastIndex) {
+                    HorizontalDivider()
+                }
             }
 
         }

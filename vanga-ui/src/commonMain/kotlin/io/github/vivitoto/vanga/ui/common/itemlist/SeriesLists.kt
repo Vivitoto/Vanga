@@ -36,6 +36,7 @@ import sh.calvin.reorderable.rememberReorderableLazyGridState
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.cards.DraggableImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
+import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
 import io.github.vivitoto.vanga.ui.platform.PlatformType
@@ -64,12 +65,13 @@ fun SeriesLazyCardGrid(
 
     modifier: Modifier = Modifier,
 
-    beforeContent: @Composable () -> Unit = {},
+    beforeContent: (@Composable () -> Unit)? = null,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val beforeContentItemOffset = if (beforeContent != null) 1 else 0
     val reorderableLazyGridState = rememberReorderableLazyGridState(
         lazyGridState = gridState,
-        onMove = { from, to -> onReorder(from.index - 1, to.index - 1) }
+        onMove = { from, to -> onReorder(from.index - beforeContentItemOffset, to.index - beforeContentItemOffset) }
     )
     LaunchedEffect(reorderableLazyGridState.isAnyItemDragging) {
         onReorderDragStateChange(reorderableLazyGridState.isAnyItemDragging)
@@ -80,13 +82,24 @@ fun SeriesLazyCardGrid(
         LazyVerticalGrid(
             state = gridState,
             columns = GridCells.Adaptive(minSize),
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
-            verticalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(bottom = 50.dp),
-            modifier = Modifier.padding(horizontal = 20.dp)
+            horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            contentPadding = PaddingValues(bottom = CardGridBottomPadding),
+            modifier = Modifier.padding(horizontal = CardGridHorizontalPadding)
         ) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                beforeContent()
+            if (beforeContent != null) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    beforeContent()
+                }
+            }
+
+            if (series.isEmpty()) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    EmptyState(
+                        title = "暂无作品",
+                        body = "当前书库或筛选条件下没有可显示的作品。"
+                    )
+                }
             }
 
             items(items = series, key = { it.id.value }) { series ->
@@ -112,21 +125,25 @@ fun SeriesLazyCardGrid(
                 }
             }
 
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                Pagination(
-                    totalPages = totalPages,
-                    currentPage = currentPage,
-                    onPageChange = {
-                        coroutineScope.launch {
-                            onPageChange(it)
-                            gridState.scrollToItem(0)
+            if (totalPages > 1) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Pagination(
+                        totalPages = totalPages,
+                        currentPage = currentPage,
+                        onPageChange = {
+                            coroutineScope.launch {
+                                onPageChange(it)
+                                gridState.scrollToItem(0)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
-        VerticalScrollbarWithFullSpans(gridState, Modifier.align(Alignment.TopEnd), 2)
+        val emptyStateItemOffset = if (series.isEmpty()) 1 else 0
+        val fullSpanItems = beforeContentItemOffset + emptyStateItemOffset + if (totalPages > 1) 1 else 0
+        VerticalScrollbarWithFullSpans(gridState, Modifier.align(Alignment.TopEnd), fullSpanItems)
     }
 }
 

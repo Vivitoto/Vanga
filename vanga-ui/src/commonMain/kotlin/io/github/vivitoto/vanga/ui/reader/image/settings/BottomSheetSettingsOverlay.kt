@@ -51,7 +51,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
@@ -172,9 +171,7 @@ fun BottomSheetSettingsOverlay(
             ModalBottomSheet(
                 onDismissRequest = { showSettingsDialog = false },
                 sheetState = sheetState,
-                dragHandle = {},
-                scrimColor = Color.Transparent,
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
             ) {
                 var selectedTab by remember { mutableStateOf(0) }
                 SecondaryTabRow(

@@ -280,10 +280,12 @@ private fun FlowRowScope.OneshotMainInfo(
             }
         }
 
-        HorizontalDivider()
-        ExpandableText(
-            text = book.metadata.summary,
-            style = MaterialTheme.typography.bodyMedium
-        )
+        if (book.metadata.summary.isNotBlank()) {
+            HorizontalDivider()
+            ExpandableText(
+                text = book.metadata.summary,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }

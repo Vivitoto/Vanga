@@ -17,6 +17,7 @@ import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.DropdownMultiChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import io.github.vivitoto.vanga.ui.settings.komf.LanguageSelectionField
 import io.github.vivitoto.vanga.ui.settings.komf.LibraryTabs
 import io.github.vivitoto.vanga.ui.settings.komf.komfLanguageTagsSuggestions
@@ -88,14 +89,14 @@ private fun ProcessingConfigContent(
         )
         HorizontalDivider()
 
-        Text("聚合设置", style = MaterialTheme.typography.titleLarge)
+        SettingsSectionHeader("聚合设置")
         SwitchWithLabel(
             checked = state.aggregate,
             onCheckedChange = state::onAggregateChange,
             label = { Text("聚合") },
             supportingText = {
                 Text(
-                    "aggregate and combine metadata from all enabled providers instead of taking first matched result",
+                    "聚合所有已启用数据源的元数据，而不是只采用第一个匹配结果。",
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -108,7 +109,7 @@ private fun ProcessingConfigContent(
             label = { Text("合并类型") },
             supportingText = {
                 Text(
-                    "if aggregate option is enabled merge genres instead of taking them from first matched result",
+                    "启用聚合后，合并多个数据源的类型，而不是只采用第一个匹配结果。",
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
@@ -122,14 +123,14 @@ private fun ProcessingConfigContent(
 
             supportingText = {
                 Text(
-                    "if aggregate option is enabled merge tags instead of taking them from first matched result",
+                    "启用聚合后，合并多个数据源的标签，而不是只采用第一个匹配结果。",
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
         )
 
         HorizontalDivider()
-        Text("封面设置", style = MaterialTheme.typography.titleLarge)
+        SettingsSectionHeader("封面设置")
         SwitchWithLabel(
             checked = state.seriesCovers,
             onCheckedChange = state::onSeriesCoversChange,
@@ -163,14 +164,14 @@ private fun ProcessingConfigContent(
 
             supportingText = {
                 Text(
-                    "If entry already has a user uploaded cover, mark newly uploaded cover as current.\nIf disabled, then upload cover without selecting it",
+                    "如果条目已有用户上传的封面，则将新上传的封面设为当前封面。\n关闭后只上传新封面，不自动选中。",
                     style = MaterialTheme.typography.labelLarge,
                 )
             }
         )
 
         HorizontalDivider()
-        Text("标题设置", style = MaterialTheme.typography.titleLarge)
+        SettingsSectionHeader("标题设置")
         SwitchWithLabel(
             checked = state.seriesTitle,
             onCheckedChange = state::onSeriesTitleChange,
@@ -220,7 +221,7 @@ private fun ProcessingConfigContent(
             suggestions = komfLanguageTagsSuggestions
         )
         HorizontalDivider()
-        Text("默认值", style = MaterialTheme.typography.titleLarge)
+        SettingsSectionHeader("默认值")
         if (serverType == KOMGA) {
             DropdownChoiceMenu(
                 selectedOption = LabeledEntry(state.readingDirectionValue, state.readingDirectionValue?.name ?: "无"),
@@ -240,7 +241,6 @@ private fun ProcessingConfigContent(
             onLanguageValueSave = state::onDefaultLanguageSave
         )
 
-        Spacer(Modifier.height(30.dp))
+        Spacer(Modifier.height(16.dp))
     }
 }
-

@@ -40,22 +40,11 @@ fun CollectionLazyCardGrid(
         LazyVerticalGrid(
             columns = GridCells.Adaptive(minSize),
             state = scrollState,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 30.dp),
-            modifier = Modifier.padding(horizontal = 10.dp)
+            horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
+            contentPadding = PaddingValues(bottom = CardGridBottomPadding),
+            modifier = Modifier.padding(horizontal = CardGridHorizontalPadding)
         ) {
-            item(
-                span = { GridItemSpan(maxLineSpan) },
-            ) {
-                if (scrollState.canScrollForward || scrollState.canScrollBackward)
-                    Pagination(
-                        totalPages = totalPages,
-                        currentPage = currentPage,
-                        onPageChange = onPageChange
-                    )
-            }
-
             items(collections) {
                 CollectionImageCard(
                     collection = it,
@@ -65,19 +54,21 @@ fun CollectionLazyCardGrid(
                 )
             }
 
-            item(
-                span = { GridItemSpan(maxLineSpan) },
-            ) {
-                Pagination(
-                    totalPages = totalPages,
-                    currentPage = currentPage,
-                    onPageChange = {
-                        coroutineScope.launch {
-                            onPageChange(it)
-                            scrollState.scrollToItem(0)
+            if (totalPages > 1) {
+                item(
+                    span = { GridItemSpan(maxLineSpan) },
+                ) {
+                    Pagination(
+                        totalPages = totalPages,
+                        currentPage = currentPage,
+                        onPageChange = {
+                            coroutineScope.launch {
+                                onPageChange(it)
+                                scrollState.scrollToItem(0)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
 
         }
