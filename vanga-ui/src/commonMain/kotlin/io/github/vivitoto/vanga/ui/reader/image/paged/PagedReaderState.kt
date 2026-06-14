@@ -12,6 +12,7 @@ import io.github.reactivecircus.cache4k.CacheEvent.Removed
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -295,6 +296,21 @@ class PagedReaderState(
         if (currentSpreadIndex.value == lastPageIndex) return
         pageChangeFlow.tryEmit(Unit)
         loadPage(lastPageIndex)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun previewSpread(spreadIndex: Int): PageSpread? {
+        val spreadMetadata = pageSpreads.value.getOrNull(spreadIndex) ?: return null
+        return PageSpread(
+            spreadMetadata.map { metadata ->
+                val cached = imageCache.get(metadata.toPageId())
+                if (cached != null && cached.isCompleted && !cached.isCancelled) {
+                    runCatching { cached.getCompleted() }.getOrElse { Page(metadata, null) }
+                } else {
+                    Page(metadata, null)
+                }
+            }
+        )
     }
 
     private fun loadPage(spreadIndex: Int) {

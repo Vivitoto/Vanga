@@ -180,6 +180,7 @@ fun ReaderControlsOverlay(
     isSettingsMenuOpen: Boolean,
     onSettingsMenuToggle: () -> Unit,
     canNavigateByHorizontalSwipe: () -> Boolean = { true },
+    onHorizontalSwipeProgress: (Float) -> Unit = {},
     onBackGesture: () -> Unit = {},
     contentAreaSize: IntSize,
     modifier: Modifier,
@@ -191,6 +192,7 @@ fun ReaderControlsOverlay(
     val minSwipeDistance = with(density) { 72.dp.toPx() }
     val minSwipeDistanceFloor = with(density) { 48.dp.toPx() }
     val currentCanNavigateByHorizontalSwipe by rememberUpdatedState(canNavigateByHorizontalSwipe)
+    val currentOnHorizontalSwipeProgress by rememberUpdatedState(onHorizontalSwipeProgress)
     val currentOnBackGesture by rememberUpdatedState(onBackGesture)
     val leftAction = {
         if (isSettingsMenuOpen) onSettingsMenuToggle()
@@ -226,6 +228,16 @@ fun ReaderControlsOverlay(
                         val tracked = event.changes.firstOrNull { it.id == down.id }
                         if (tracked != null) {
                             lastPosition = tracked.position
+                            val drag = lastPosition - down.position
+                            val isHorizontalDrag = maxPointers == 1 &&
+                                abs(drag.x) > minSwipeDistanceFloor &&
+                                abs(drag.x) > abs(drag.y) * 1.2f
+                            val isBackSwipe = down.position.x <= edgeSwipeWidth && drag.x > 0
+
+                            if (!isSettingsMenuOpen && isHorizontalDrag && !isBackSwipe && currentCanNavigateByHorizontalSwipe()) {
+                                currentOnHorizontalSwipeProgress(drag.x)
+                            }
+
                             if (!tracked.pressed) break
                         } else if (pressedPointers == 0) {
                             break
@@ -247,6 +259,7 @@ fun ReaderControlsOverlay(
                             currentCanNavigateByHorizontalSwipe() -> if (drag.x < 0) rightAction() else leftAction()
                         }
                     }
+                    currentOnHorizontalSwipeProgress(0f)
                 }
             }
             .pointerInput(

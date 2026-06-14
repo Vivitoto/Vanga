@@ -78,7 +78,8 @@ fun <T> DropdownChoiceMenu(
     modifier: Modifier = Modifier,
     label: @Composable (() -> Unit)? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    minHeight: Dp = 56.dp,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
@@ -95,7 +96,8 @@ fun <T> DropdownChoiceMenu(
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             color = inputFieldColor,
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
+            minHeight = minHeight,
         )
 
         val scrollState = rememberScrollState()
@@ -130,7 +132,8 @@ fun <T> DropdownMultiChoiceMenu(
     label: @Composable (() -> Unit)? = null,
     placeholder: String? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    minHeight: Dp = 56.dp,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(
@@ -147,7 +150,8 @@ fun <T> DropdownMultiChoiceMenu(
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             color = inputFieldColor,
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
+            minHeight = minHeight,
         )
 
         val scrollState = rememberScrollState()
@@ -177,7 +181,8 @@ private fun InputField(
     label: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit),
     color: Color,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    minHeight: Dp = 56.dp,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
@@ -188,7 +193,7 @@ private fun InputField(
             .indication(interactionSource, LocalIndication.current)
             .hoverable(interactionSource)
             .then(modifier)
-            .heightIn(min = 56.dp)
+            .heightIn(min = minHeight)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -223,7 +228,8 @@ fun <T> DropdownChoiceMenuWithSearch(
     label: @Composable (() -> Unit)? = null,
     placeholder: String? = null,
     inputFieldColor: Color = MaterialTheme.colorScheme.surface,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    minHeight: Dp = 56.dp,
 ) {
     var searchText by remember { mutableStateOf("") }
     LaunchedEffect(searchText) {
@@ -244,7 +250,8 @@ fun <T> DropdownChoiceMenuWithSearch(
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
             color = inputFieldColor,
-            contentPadding = contentPadding
+            contentPadding = contentPadding,
+            minHeight = minHeight,
         )
 
         val scrollState = rememberScrollState()
@@ -297,6 +304,8 @@ fun <T> DropdownChoiceMenuWithSearch(
     }
 }
 
+private val FilterDropdownMinHeight = 44.dp
+
 @Composable
 fun <T> FilterDropdownChoice(
     selectedOption: LabeledEntry<T>,
@@ -313,7 +322,8 @@ fun <T> FilterDropdownChoice(
         label = label?.let { { Text(it) } },
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
-        inputFieldModifier = Modifier.fillMaxWidth()
+        inputFieldModifier = Modifier.fillMaxWidth(),
+        minHeight = FilterDropdownMinHeight,
     )
 }
 
@@ -335,7 +345,8 @@ fun <T> FilterDropdownMultiChoice(
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
-        inputFieldModifier = Modifier.fillMaxWidth()
+        inputFieldModifier = Modifier.fillMaxWidth(),
+        minHeight = FilterDropdownMinHeight,
     )
 }
 
@@ -359,7 +370,8 @@ fun <T> FilterDropdownMultiChoiceWithSearch(
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         modifier = modifier.clip(RoundedCornerShape(5.dp)),
-        textFieldModifier = Modifier.fillMaxWidth()
+        textFieldModifier = Modifier.fillMaxWidth(),
+        minHeight = FilterDropdownMinHeight,
     )
 }
 
@@ -389,7 +401,8 @@ fun TagFiltersDropdownMenu(
     modifier: Modifier = Modifier,
     inputFieldModifier: Modifier = Modifier,
     inputFieldColor: Color = MaterialTheme.colorScheme.surface,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+    minHeight: Dp = 56.dp,
 ) {
     val strings = LocalStrings.current.filters
     var isExpanded by remember { mutableStateOf(false) }
@@ -451,7 +464,8 @@ fun TagFiltersDropdownMenu(
                 },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 color = inputFieldColor,
-                contentPadding = contentPadding
+                contentPadding = contentPadding,
+                minHeight = minHeight,
             )
 
             DropdownMenu(

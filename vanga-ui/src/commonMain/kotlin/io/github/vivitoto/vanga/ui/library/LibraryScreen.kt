@@ -3,6 +3,7 @@ package io.github.vivitoto.vanga.ui.library
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
@@ -249,9 +250,10 @@ fun LibraryToolBar(
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically,
+        contentPadding = PaddingValues(horizontal = 14.dp),
     ) {
-        item {
-            if (library != null && isAdmin && !isOffline) {
+        if (library != null) item {
+            if (isAdmin && !isOffline) {
                 Box {
                     IconButton(
                         onClick = { showOptionsMenu = true }
@@ -270,7 +272,7 @@ fun LibraryToolBar(
                     )
                 }
             }
-            Text(library?.let { library.name } ?: "全部书库")
+            Text(library.name)
 
             Spacer(Modifier.width(5.dp))
         }

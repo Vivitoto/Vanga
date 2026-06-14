@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -65,6 +66,7 @@ fun SeriesFilterContent(
 ) {
     val strings = LocalStrings.current.seriesFilter
     val widthClass = LocalWindowWidth.current
+    val isCompact = widthClass == COMPACT
 
     val spacing = remember(widthClass) {
         when (widthClass) {
@@ -79,23 +81,65 @@ fun SeriesFilterContent(
             else -> 250.dp
         }
     }
+    val filterItemModifier = if (isCompact) Modifier.fillMaxWidth() else Modifier.width(width)
     val currentFilter = filterState.state.collectAsState().value
 
     Column(
-        modifier = Modifier.widthIn(max = 1400.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 1400.dp)
+            .padding(horizontal = if (isCompact) 12.dp else 0.dp, vertical = if (isCompact) 6.dp else 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing)
     ) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.Center,
-        ) {
+        var searchTerm by remember { mutableStateOf(currentFilter.searchTerm) }
+        LaunchedEffect(searchTerm) {
+            delay(200)
+            filterState.onSearchTermChange(searchTerm)
+        }
 
-            var searchTerm by remember { mutableStateOf(currentFilter.searchTerm) }
-            LaunchedEffect(searchTerm) {
-                delay(200)
-                filterState.onSearchTermChange(searchTerm)
+        if (isCompact) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                NoPaddingTextField(
+                    text = searchTerm,
+                    placeholder = strings.search,
+                    onTextChange = { searchTerm = it },
+                    modifier = Modifier.fillMaxWidth().height(40.dp),
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    OutlinedButton(
+                        onClick = filterState::reset,
+                        enabled = filterState.isChanged,
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (filterState.isChanged) MaterialTheme.colorScheme.tertiaryContainer else Color.Unspecified,
+                        ),
+                        border = if (filterState.isChanged) null else ButtonDefaults.outlinedButtonBorder(true),
+                        modifier = Modifier.weight(1f).height(40.dp).cursorForHand()
+                    ) {
+                        Text(strings.resetFilters, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                    }
+
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f).height(40.dp).cursorForHand()
+                    ) {
+                        Text(strings.hideFilters, style = MaterialTheme.typography.bodyMedium, maxLines = 1)
+                    }
+                }
             }
+        } else {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+                verticalArrangement = Arrangement.Center,
+            ) {
             NoPaddingTextField(
                 text = searchTerm,
                 placeholder = strings.search,
@@ -126,9 +170,11 @@ fun SeriesFilterContent(
                     Text(strings.hideFilters, style = MaterialTheme.typography.bodyLarge)
                 }
             }
+            }
         }
 
         FlowRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(spacing),
             verticalArrangement = Arrangement.spacedBy(spacing),
         ) {
@@ -137,7 +183,7 @@ fun SeriesFilterContent(
                 options = LibrarySeriesTabState.SeriesSort.entries.map { LabeledEntry(it, strings.forSeriesSort(it)) },
                 onOptionChange = { filterState.onSortOrderChange(it.value) },
                 label = strings.sort,
-                modifier = Modifier.width(width)
+                modifier = filterItemModifier
             )
             TagFiltersDropdownMenu(
                 allTags = filterState.tagOptions,
@@ -160,9 +206,10 @@ fun SeriesFilterContent(
                 label = strings.filterTagsLabel,
                 inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier
-                    .width(width)
+                    .then(filterItemModifier)
                     .clip(RoundedCornerShape(5.dp)),
-                inputFieldModifier = Modifier.fillMaxWidth()
+                inputFieldModifier = Modifier.fillMaxWidth(),
+                minHeight = 44.dp,
             )
             FilterDropdownMultiChoice(
                 selectedOptions = currentFilter.readStatus
@@ -170,7 +217,7 @@ fun SeriesFilterContent(
                 options = KomgaReadStatus.entries.map { LabeledEntry(it, strings.forSeriesReadStatus(it)) },
                 onOptionSelect = { changed -> filterState.onReadStatusSelect(changed.value) },
                 label = strings.readStatus,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -179,7 +226,7 @@ fun SeriesFilterContent(
                 options = KomgaSeriesStatus.entries.map { LabeledEntry(it, strings.forPublicationStatus(it)) },
                 onOptionSelect = { changed -> filterState.onPublicationStatusSelect(changed.value) },
                 label = strings.publicationStatus,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             val authorsSelectedOptions = remember(currentFilter.authors) {
@@ -194,7 +241,7 @@ fun SeriesFilterContent(
                 onOptionSelect = { author -> filterState.onAuthorSelect(author.value) },
                 onSearch = filterState::onAuthorsSearch,
                 label = strings.authors,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -202,7 +249,7 @@ fun SeriesFilterContent(
                 options = filterState.publishersOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onPublisherSelect(changed.value) },
                 label = strings.publisher,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -210,14 +257,14 @@ fun SeriesFilterContent(
                 options = filterState.languagesOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onLanguageSelect(changed.value) },
                 label = strings.language,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
             FilterDropdownMultiChoice(
                 selectedOptions = currentFilter.releaseDates.map { stringEntry(it) },
                 options = filterState.releaseDateOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onReleaseDateSelect(changed.value) },
                 label = strings.releaseDate,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             FilterDropdownMultiChoice(
@@ -225,11 +272,11 @@ fun SeriesFilterContent(
                 options = filterState.ageRatingsOptions.map { stringEntry(it) },
                 onOptionSelect = { changed -> filterState.onAgeRatingSelect(changed.value) },
                 label = strings.ageRating,
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
             )
 
             Row(
-                modifier = Modifier.width(width),
+                modifier = filterItemModifier,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
