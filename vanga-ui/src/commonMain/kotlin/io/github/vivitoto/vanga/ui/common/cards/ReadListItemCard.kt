@@ -27,8 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.LocalKomgaState
+import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.images.ReadListThumbnail
 import io.github.vivitoto.vanga.ui.common.menus.ReadListActionsMenu
+import io.github.vivitoto.vanga.ui.platform.PlatformType.MOBILE
 import snd.komga.client.readlist.KomgaReadList
 
 @Composable
@@ -65,7 +67,9 @@ private fun ReadListCardHoverOverlay(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     var isActionsMenuExpanded by remember { mutableStateOf(false) }
+    val isMobile = LocalPlatform.current == MOBILE
     val showOverlay = derivedStateOf { isHovered.value || isActionsMenuExpanded }
+    val showControls = derivedStateOf { isMobile || showOverlay.value }
 
     val border = if (showOverlay.value) overlayBorderModifier() else Modifier
     Box(
@@ -77,7 +81,7 @@ private fun ReadListCardHoverOverlay(
     ) {
         content()
 
-        if (showOverlay.value && isAdmin) {
+        if (showControls.value && isAdmin) {
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.Bottom,

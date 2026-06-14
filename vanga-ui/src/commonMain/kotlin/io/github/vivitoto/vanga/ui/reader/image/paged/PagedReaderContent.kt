@@ -1,5 +1,8 @@
 package io.github.vivitoto.vanga.ui.reader.image.paged
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -15,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -32,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.settings.model.PageDisplayLayout.DOUBLE_PAGES
 import io.github.vivitoto.vanga.settings.model.PageDisplayLayout.DOUBLE_PAGES_NO_COVER
@@ -80,6 +85,7 @@ fun BoxScope.PagedReaderContent(
 
     val coroutineScope = rememberCoroutineScope()
     var horizontalSwipeOffset by remember { mutableFloatStateOf(0f) }
+    var horizontalSwipeSettleJob by remember { mutableStateOf<Job?>(null) }
     ReaderControlsOverlay(
         readingDirection = layoutDirection,
         onNexPageClick = pagedReaderState::nextPage,
@@ -88,7 +94,35 @@ fun BoxScope.PagedReaderContent(
         isSettingsMenuOpen = showSettingsMenu,
         onSettingsMenuToggle = { onShowSettingsMenuChange(!showSettingsMenu) },
         canNavigateByHorizontalSwipe = { !screenScaleState.canPanHorizontally() },
-        onHorizontalSwipeProgress = { horizontalSwipeOffset = it },
+        onHorizontalSwipeProgress = {
+            horizontalSwipeSettleJob?.cancel()
+            horizontalSwipeSettleJob = null
+            horizontalSwipeOffset = it
+        },
+        onHorizontalSwipeCancel = {
+            horizontalSwipeSettleJob?.cancel()
+            horizontalSwipeSettleJob = coroutineScope.launch {
+                animateSwipeOffset(
+                    from = horizontalSwipeOffset,
+                    to = 0f,
+                    pageWidth = currentContainerSize.width.toFloat(),
+                ) { horizontalSwipeOffset = it }
+            }
+        },
+        onHorizontalSwipeRelease = { dragOffset, navigate ->
+            horizontalSwipeSettleJob?.cancel()
+            horizontalSwipeSettleJob = coroutineScope.launch {
+                val width = currentContainerSize.width.toFloat().coerceAtLeast(1f)
+                val targetOffset = if (dragOffset < 0f) -width else width
+                animateSwipeOffset(
+                    from = horizontalSwipeOffset,
+                    to = targetOffset,
+                    pageWidth = width,
+                ) { horizontalSwipeOffset = it }
+                navigate()
+                horizontalSwipeOffset = 0f
+            }
+        },
         onBackGesture = onBackGesture,
         modifier = Modifier.onKeyEvent { event ->
             pagedReaderOnKeyEvents(
@@ -120,6 +154,32 @@ fun BoxScope.PagedReaderContent(
             )
         }
     }
+}
+
+
+private suspend fun animateSwipeOffset(
+    from: Float,
+    to: Float,
+    pageWidth: Float,
+    onValue: (Float) -> Unit,
+) {
+    val width = pageWidth.coerceAtLeast(1f)
+    val animation = Animatable(from)
+    animation.animateTo(
+        targetValue = to,
+        animationSpec = tween(
+            durationMillis = swipeSettleDurationMillis(from, to, width),
+            easing = FastOutSlowInEasing,
+        )
+    ) {
+        onValue(value)
+    }
+    onValue(to)
+}
+
+private fun swipeSettleDurationMillis(from: Float, to: Float, pageWidth: Float): Int {
+    val remainingFraction = (abs(to - from) / pageWidth.coerceAtLeast(1f)).coerceIn(0.15f, 1f)
+    return (90 + 170 * remainingFraction).roundToInt()
 }
 
 @Composable

@@ -121,15 +121,15 @@ fun BookScreenContent(
                     BookInfoRow(
                         book = book,
                         onSeriesButtonClick = onParentSeriesPress,
-                    )
-
-                    BookActionRow(
-                        book = book,
-                        library = library,
-                        onBookReadPress = onBookReadPress,
-                        onDownload = onBookDownload,
-                        onDownloadDelete = onBookDownloadDelete
-                    )
+                    ) {
+                        BookActionRow(
+                            book = book,
+                            library = library,
+                            onBookReadPress = onBookReadPress,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete
+                        )
+                    }
 
                     ExpandableText(
                         text = book.metadata.summary,
@@ -246,12 +246,6 @@ private fun BookHero(
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.widthIn(max = 720.dp).padding(horizontal = 12.dp),
-        )
-        Text(
-            text = "第 ${book.metadata.number} 本 · ${book.media.pagesCount} 页",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
         )
     }
 }

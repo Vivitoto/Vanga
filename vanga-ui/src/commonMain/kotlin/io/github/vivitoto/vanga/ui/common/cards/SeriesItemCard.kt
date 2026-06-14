@@ -39,10 +39,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.LocalLibraries
+import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.components.NoPaddingChip
 import io.github.vivitoto.vanga.ui.common.images.SeriesThumbnail
 import io.github.vivitoto.vanga.ui.common.menus.SeriesActionsMenu
 import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
+import io.github.vivitoto.vanga.ui.platform.PlatformType.MOBILE
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import snd.komga.client.series.KomgaSeries
 
@@ -125,7 +127,9 @@ private fun SeriesCardHoverOverlay(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     var isActionsMenuExpanded by remember { mutableStateOf(false) }
+    val isMobile = LocalPlatform.current == MOBILE
     val showOverlay = derivedStateOf { isHovered.value || isActionsMenuExpanded || isSelected }
+    val showControls = derivedStateOf { isMobile || showOverlay.value }
     val border = if (showOverlay.value) overlayBorderModifier() else Modifier
 
     Box(
@@ -137,7 +141,7 @@ private fun SeriesCardHoverOverlay(
     ) {
         content()
 
-        if (showOverlay.value) {
+        if (showControls.value) {
             val backgroundModifier =
                 if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
                 else Modifier

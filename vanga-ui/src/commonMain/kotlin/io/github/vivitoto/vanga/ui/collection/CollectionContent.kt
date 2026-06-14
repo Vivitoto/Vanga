@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -12,7 +13,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.LocalKomgaState
@@ -127,26 +126,25 @@ private fun CollectionToolbar(
     pageSize: Int,
     onPageSizeChange: (Int) -> Unit,
 
-    ) {
+) {
     Row(
-        modifier = Modifier.padding(start = 10.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Column(
+            modifier = Modifier.weight(1f),
+        ) {
             Text(
-                "collection",
-                style = MaterialTheme.typography.labelMedium,
-                fontStyle = FontStyle.Italic
+                collection.name,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 2,
             )
-            Spacer(Modifier.width(5.dp))
-            Text(collection.name, style = MaterialTheme.typography.titleMedium)
+            Text(
+                "合集 · $totalSeriesCount 部作品",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
-        SuggestionChip(
-            onClick = {},
-            label = { Text("$totalSeriesCount 部作品", style = MaterialTheme.typography.bodyMedium) },
-            modifier = Modifier.padding(horizontal = 10.dp),
-        )
 
         val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
         if (isAdmin) {
@@ -167,7 +165,6 @@ private fun CollectionToolbar(
             IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
         }
 
-        Spacer(Modifier.weight(1f))
         PageSizeSelectionDropdown(pageSize, onPageSizeChange)
     }
 }

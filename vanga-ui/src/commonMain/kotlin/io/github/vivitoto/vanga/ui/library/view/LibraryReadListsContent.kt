@@ -3,10 +3,9 @@ package io.github.vivitoto.vanga.ui.library.view
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -43,15 +42,14 @@ fun LibraryReadListsContent(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp)
         ) {
-            SuggestionChip(
-                onClick = {},
-                label = {
-                    Text("$readListsTotalCount 个阅读清单")
-                },
-                modifier = Modifier.padding(end = 10.dp)
-            )
-
-            Spacer(Modifier.weight(1f))
+            Column(Modifier.weight(1f)) {
+                Text("阅读清单", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "$readListsTotalCount 个阅读清单",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             PageSizeSelectionDropdown(pageSize, onPageSizeChange)
         }
 

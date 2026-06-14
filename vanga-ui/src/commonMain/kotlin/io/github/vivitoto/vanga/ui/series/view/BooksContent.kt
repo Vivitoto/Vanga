@@ -33,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -243,22 +242,23 @@ private fun BooksToolBar(
                 }
             }
 
-            booksLabel?.let {
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text(booksLabel, style = MaterialTheme.typography.bodyMedium) },
-                    modifier = Modifier.padding(10.dp, 0.dp)
-                )
-            }
-
             if (selectionMode) {
                 Spacer(Modifier.weight(1f))
             } else {
+                Column(Modifier.weight(1f)) {
+                    Text("单本漫画", style = MaterialTheme.typography.titleMedium)
+                    booksLabel?.let {
+                        Text(
+                            booksLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
 
                 if (width == EXPANDED || width == FULL) {
                     ExpandableBookFiltersRow(filterState = booksFilterState)
                 }
-                Spacer(Modifier.weight(1f))
 
             }
 

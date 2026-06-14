@@ -181,6 +181,8 @@ fun ReaderControlsOverlay(
     onSettingsMenuToggle: () -> Unit,
     canNavigateByHorizontalSwipe: () -> Boolean = { true },
     onHorizontalSwipeProgress: (Float) -> Unit = {},
+    onHorizontalSwipeCancel: () -> Unit = { onHorizontalSwipeProgress(0f) },
+    onHorizontalSwipeRelease: ((Float, suspend () -> Unit) -> Unit)? = null,
     onBackGesture: () -> Unit = {},
     contentAreaSize: IntSize,
     modifier: Modifier,
@@ -191,19 +193,33 @@ fun ReaderControlsOverlay(
     val edgeSwipeWidth = with(density) { 32.dp.toPx() }
     val minSwipeDistance = with(density) { 72.dp.toPx() }
     val minSwipeDistanceFloor = with(density) { 48.dp.toPx() }
+    val defaultHorizontalSwipeRelease: (Float, suspend () -> Unit) -> Unit = { _, navigate ->
+        coroutineScope.launch {
+            navigate()
+            onHorizontalSwipeProgress(0f)
+        }
+    }
     val currentCanNavigateByHorizontalSwipe by rememberUpdatedState(canNavigateByHorizontalSwipe)
     val currentOnHorizontalSwipeProgress by rememberUpdatedState(onHorizontalSwipeProgress)
+    val currentOnHorizontalSwipeCancel by rememberUpdatedState(onHorizontalSwipeCancel)
+    val currentOnHorizontalSwipeRelease by rememberUpdatedState(onHorizontalSwipeRelease ?: defaultHorizontalSwipeRelease)
     val currentOnBackGesture by rememberUpdatedState(onBackGesture)
+    val leftNavigate: suspend () -> Unit = {
+        if (readingDirection == LayoutDirection.Ltr) onPrevPageClick()
+        else onNexPageClick()
+    }
+    val rightNavigate: suspend () -> Unit = {
+        if (readingDirection == LayoutDirection.Ltr) onNexPageClick()
+        else onPrevPageClick()
+    }
     val leftAction = {
         if (isSettingsMenuOpen) onSettingsMenuToggle()
-        else if (readingDirection == LayoutDirection.Ltr) coroutineScope.launch { onPrevPageClick() }
-        else coroutineScope.launch { onNexPageClick() }
+        else coroutineScope.launch { leftNavigate() }
     }
     val centerAction = { onSettingsMenuToggle() }
     val rightAction = {
         if (isSettingsMenuOpen) onSettingsMenuToggle()
-        else if (readingDirection == LayoutDirection.Ltr) coroutineScope.launch { onNexPageClick() }
-        else coroutineScope.launch { onPrevPageClick() }
+        else coroutineScope.launch { rightNavigate() }
     }
 
     Box(
@@ -252,14 +268,25 @@ fun ReaderControlsOverlay(
                         abs(drag.x) > threshold &&
                         abs(drag.x) > abs(drag.y) * 1.4f
 
+                    var swipeHandled = false
                     if (isHorizontalSwipe) {
                         when {
-                            isSettingsMenuOpen -> onSettingsMenuToggle()
-                            down.position.x <= edgeSwipeWidth && drag.x > threshold -> currentOnBackGesture()
-                            currentCanNavigateByHorizontalSwipe() -> if (drag.x < 0) rightAction() else leftAction()
+                            isSettingsMenuOpen -> {
+                                onSettingsMenuToggle()
+                                swipeHandled = true
+                            }
+                            down.position.x <= edgeSwipeWidth && drag.x > threshold -> {
+                                currentOnBackGesture()
+                                swipeHandled = true
+                            }
+                            currentCanNavigateByHorizontalSwipe() -> {
+                                val navigate = if (drag.x < 0) rightNavigate else leftNavigate
+                                currentOnHorizontalSwipeRelease(drag.x, navigate)
+                                swipeHandled = true
+                            }
                         }
                     }
-                    currentOnHorizontalSwipeProgress(0f)
+                    if (!swipeHandled) currentOnHorizontalSwipeCancel()
                 }
             }
             .pointerInput(

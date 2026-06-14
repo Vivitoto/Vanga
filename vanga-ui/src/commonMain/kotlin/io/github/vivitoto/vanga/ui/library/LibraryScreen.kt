@@ -4,7 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -12,6 +15,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -247,69 +251,75 @@ fun LibraryToolBar(
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
 
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
-        contentPadding = PaddingValues(horizontal = 14.dp),
     ) {
-        if (library != null) item {
-            if (isAdmin && !isOffline) {
-                Box {
-                    IconButton(
-                        onClick = { showOptionsMenu = true }
-                    ) {
-                        Icon(
-                            Icons.Rounded.MoreVert,
-                            contentDescription = null,
+        Column(Modifier.weight(1f)) {
+            if (library != null) {
+                Text(library.name, style = MaterialTheme.typography.titleMedium)
+            }
+
+            if (collectionsCount > 0 || readListsCount > 0) {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    contentPadding = PaddingValues(end = 10.dp),
+                ) {
+                    item {
+                        FilterChip(
+                            onClick = onBrowseClick,
+                            selected = currentTab == SERIES,
+                            label = { Text("漫画系列") },
+                            colors = chipColors,
+                            border = null,
                         )
                     }
 
-                    LibraryActionsMenu(
-                        library = library,
-                        actions = libraryActions,
-                        expanded = showOptionsMenu,
-                        onDismissRequest = { showOptionsMenu = false }
-                    )
+                    if (collectionsCount > 0)
+                        item {
+                            FilterChip(
+                                onClick = onCollectionsClick,
+                                selected = currentTab == COLLECTIONS,
+                                label = { Text("合集") },
+                                colors = chipColors,
+                                border = null,
+                            )
+                        }
+
+                    if (readListsCount > 0)
+                        item {
+                            FilterChip(
+                                onClick = onReadListsClick,
+                                selected = currentTab == READ_LISTS,
+                                label = { Text("阅读清单") },
+                                colors = chipColors,
+                                border = null,
+                            )
+                        }
                 }
             }
-            Text(library.name)
-
-            Spacer(Modifier.width(5.dp))
         }
 
+        if (library != null && isAdmin && !isOffline) {
+            Box {
+                IconButton(
+                    onClick = { showOptionsMenu = true }
+                ) {
+                    Icon(
+                        Icons.Rounded.MoreVert,
+                        contentDescription = null,
+                    )
+                }
 
-        if (collectionsCount > 0 || readListsCount > 0)
-            item {
-                FilterChip(
-                    onClick = onBrowseClick,
-                    selected = currentTab == SERIES,
-                    label = { Text("漫画系列") },
-                    colors = chipColors,
-                    border = null,
+                LibraryActionsMenu(
+                    library = library,
+                    actions = libraryActions,
+                    expanded = showOptionsMenu,
+                    onDismissRequest = { showOptionsMenu = false }
                 )
             }
-
-        if (collectionsCount > 0)
-            item {
-                FilterChip(
-                    onClick = onCollectionsClick,
-                    selected = currentTab == COLLECTIONS,
-                    label = { Text("合集") },
-                    colors = chipColors,
-                    border = null,
-                )
-            }
-
-        if (readListsCount > 0)
-            item {
-                FilterChip(
-                    onClick = onReadListsClick,
-                    selected = currentTab == READ_LISTS,
-                    label = { Text("阅读清单") },
-                    colors = chipColors,
-                    border = null,
-                )
-            }
+        }
 
     }
 }

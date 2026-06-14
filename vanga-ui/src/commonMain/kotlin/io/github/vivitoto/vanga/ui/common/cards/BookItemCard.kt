@@ -56,6 +56,7 @@ import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.offline.sync.model.DownloadEvent
 import io.github.vivitoto.vanga.ui.LocalBookDownloadEvents
 import io.github.vivitoto.vanga.ui.LocalLibraries
+import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.common.BookReadButton
 import io.github.vivitoto.vanga.ui.common.components.NoPaddingChip
@@ -63,6 +64,7 @@ import io.github.vivitoto.vanga.ui.common.images.BookThumbnail
 import io.github.vivitoto.vanga.ui.common.menus.BookActionsMenu
 import io.github.vivitoto.vanga.ui.common.menus.BookMenuActions
 import io.github.vivitoto.vanga.ui.common.readIsSupported
+import io.github.vivitoto.vanga.ui.platform.PlatformType.MOBILE
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.COMPACT
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
@@ -285,7 +287,9 @@ private fun BookHoverOverlay(
     var isReadButtonExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
+    val isMobile = LocalPlatform.current == MOBILE
     val showOverlay = derivedStateOf { isHovered.value || isActionsMenuExpanded || isReadButtonExpanded || isSelected }
+    val showControls = derivedStateOf { isMobile || showOverlay.value }
 
     val border =
         if (showOverlay.value) overlayBorderModifier() else Modifier
@@ -298,7 +302,7 @@ private fun BookHoverOverlay(
         contentAlignment = Alignment.Center
     ) {
         content()
-        if (showOverlay.value) {
+        if (showControls.value) {
             val backgroundColor =
                 if (isSelected)
                     Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))

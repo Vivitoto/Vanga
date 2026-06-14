@@ -254,28 +254,28 @@ private fun FlowRowScope.OneshotMainInfo(
         BookInfoRow(
             book = book,
             onSeriesButtonClick = null,
-        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (readIsSupported(book) && !isDeleted) {
-                BookReadButton(
-                    onRead = { onBookReadClick(true) },
-                    onIncognitoRead = { onBookReadClick(false) }
-                )
-                if (!book.downloaded || book.isLocalFileOutdated) {
-                    DownloadButton(book, onDownload)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (readIsSupported(book) && !isDeleted) {
+                    BookReadButton(
+                        onRead = { onBookReadClick(true) },
+                        onIncognitoRead = { onBookReadClick(false) }
+                    )
+                    if (!book.downloaded || book.isLocalFileOutdated) {
+                        DownloadButton(book, onDownload)
+                    }
                 }
-            }
 
-            if (book.downloaded) {
-                ElevatedButton(
-                    onClick = onDownloadDelete,
-                    border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
-                ) {
-                    Text("删除已下载文件")
+                if (book.downloaded) {
+                    ElevatedButton(
+                        onClick = onDownloadDelete,
+                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
+                    ) {
+                        Text("删除已下载文件")
+                    }
                 }
             }
         }

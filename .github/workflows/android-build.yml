@@ -30,6 +30,9 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
 
+      - name: Verify app version metadata
+        run: python3 scripts/verify_app_version.py
+
       - name: Build Android native library image
         run: docker build -t vanga-build-android . -f ./cmake/android.Dockerfile
 

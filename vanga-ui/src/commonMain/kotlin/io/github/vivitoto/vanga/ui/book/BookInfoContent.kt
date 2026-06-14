@@ -2,9 +2,12 @@ package io.github.vivitoto.vanga.ui.book
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -18,6 +21,7 @@ import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -165,65 +169,89 @@ fun BookInfoColumn(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookInfoRow(
     modifier: Modifier = Modifier,
     book: VangaBook,
     onSeriesButtonClick: (() -> Unit)? = null,
+    actions: (@Composable () -> Unit)? = null,
 ) {
 
     Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            if (onSeriesButtonClick != null) {
-                ElevatedButton(
-                    onClick = onSeriesButtonClick,
-                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (onSeriesButtonClick != null) {
+                    ElevatedButton(
+                        onClick = onSeriesButtonClick,
+                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                    ) {
+                        Icon(Icons.AutoMirrored.Outlined.LibraryBooks, null)
+                        Spacer(Modifier.width(3.dp))
+                        Text(text = book.seriesTitle, textDecoration = TextDecoration.Underline)
+                    }
+                }
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Icon(Icons.AutoMirrored.Outlined.LibraryBooks, null)
-                    Spacer(Modifier.width(3.dp))
-                    Text(text = book.seriesTitle, textDecoration = TextDecoration.Underline)
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text("第 ${book.metadata.number} 本 · ${book.media.pagesCount} 页") },
+                    )
+                    if (book.deleted) {
+                        SuggestionChip(
+                            onClick = {},
+                            label = { Text("不可用") },
+                            border = null,
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        )
+                    }
+                    if (book.remoteFileUnavailable) {
+                        SuggestionChip(
+                            onClick = {},
+                            label = { Text("远程文件不可用") },
+                            border = null,
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        )
+                    }
+
+                    if (book.isLocalFileOutdated) {
+                        SuggestionChip(
+                            onClick = {},
+                            label = { Text("本地下载已过期") },
+                            border = null,
+                            colors = SuggestionChipDefaults.suggestionChipColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        )
+                    }
                 }
             }
-            if (book.deleted) {
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text("不可用") },
-                    border = null,
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                )
-            }
-            if (book.remoteFileUnavailable) {
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text("远程文件不可用") },
-                    border = null,
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                )
-            }
-
-            if (book.isLocalFileOutdated) {
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text("本地下载已过期") },
-                    border = null,
-                    colors = SuggestionChipDefaults.suggestionChipColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                )
+            if (actions != null) {
+                Row(
+                    modifier = Modifier.padding(start = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    actions()
+                }
             }
         }
-
-        SelectionContainer {
-            Text(text = "第 ${book.metadata.number} 本 · ${book.media.pagesCount} 页")
-        }
-
-        Spacer(Modifier.heightIn(5.dp))
         SelectionContainer {
             Column {
                 book.metadata.releaseDate?.let {
