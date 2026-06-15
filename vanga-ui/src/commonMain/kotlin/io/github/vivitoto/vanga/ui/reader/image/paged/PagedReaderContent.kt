@@ -79,6 +79,7 @@ fun BoxScope.PagedReaderContent(
     }
     val pages = pagedReaderState.currentSpread.collectAsState().value.pages
     val currentSpreadIndex = pagedReaderState.currentSpreadIndex.collectAsState().value
+    val transitionPage = pagedReaderState.transitionPage.collectAsState().value
     val layout = pagedReaderState.layout.collectAsState().value
     val layoutOffset = pagedReaderState.layoutOffset.collectAsState().value
 
@@ -186,7 +187,6 @@ fun BoxScope.PagedReaderContent(
         }
     ) {
         ScalableContainer(scaleState = screenScaleState) {
-            val transitionPage = pagedReaderState.transitionPage.collectAsState().value
             SlidingPagedReaderSpread(
                 currentSpreadIndex = currentSpreadIndex,
                 previewSpread = pagedReaderState::previewSpread,

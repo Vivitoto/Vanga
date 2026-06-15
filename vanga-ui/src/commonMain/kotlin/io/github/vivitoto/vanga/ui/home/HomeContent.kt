@@ -349,7 +349,7 @@ private fun LazyGridScope.BookFilterEntry(
                 if (selectionMode) onSelectedItemSelect(selectedItem)
                 else onBookClick(book)
             },
-            onBookReadClick = if (selectionMode) null else { onBookReadClick(book, it) },
+            onBookReadClick = if (selectionMode) null else { markProgress: Boolean -> onBookReadClick(book, markProgress) },
             bookMenuActions = if (selectionMode) null else bookMenuActions,
             isSelected = selectedItems.containsSelectedItem(selectedItem),
             onSelect = { onSelectedItemSelect(selectedItem) },
