@@ -194,6 +194,7 @@ private fun LazyGridScope.BooksContent(
                     onBookReadClick = if (selectionMode) null else onBookReadClick,
                     bookMenuActions = if (selectionMode) null else bookMenuActions,
 
+                    selectionMode = selectionMode,
                     selectedBooks = selectedBooks,
                     onBookSelect = onBookSelect,
                 )
@@ -577,6 +578,7 @@ private fun LazyGridScope.BooksGrid(
     onBookReadClick: ((VangaBook, Boolean) -> Unit)? = null,
     bookMenuActions: BookMenuActions? = null,
 
+    selectionMode: Boolean = false,
     selectedBooks: List<VangaBook> = emptyList(),
     onBookSelect: ((VangaBook) -> Unit)? = null,
 ) {
@@ -588,6 +590,8 @@ private fun LazyGridScope.BooksGrid(
             bookMenuActions = bookMenuActions,
             isSelected = selectedBooks.any { it.id == book.id },
             onSelect = onBookSelect?.let { { onBookSelect(book) } },
+            showSelectionControl = selectionMode,
+            modifier = Modifier.padding(5.dp),
         )
     }
 }

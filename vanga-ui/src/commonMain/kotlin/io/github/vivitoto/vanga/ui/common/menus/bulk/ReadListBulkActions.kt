@@ -58,7 +58,7 @@ fun rememberReadListBulkActionsState(
     val factory = LocalViewModelFactory.current
     val isOffline = LocalOfflineMode.current.collectAsState().value
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
-    return remember(readList, books) {
+    return remember(readList, books, isOffline, isAdmin) {
         val actions = factory.getReadListBulkActions()
         ReadListBulkActinsState(
             readList = readList,

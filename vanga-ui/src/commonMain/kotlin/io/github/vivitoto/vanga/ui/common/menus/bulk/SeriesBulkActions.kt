@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -140,6 +141,7 @@ fun rememberSeriesBulkActionsState(
         SeriesBulkActionsState(
             series = series,
             actions = factory.getSeriesBulkActions(),
+            favoriteActions = factory.getFavoriteBulkActions(),
             coroutineScope = coroutineScope,
             isOffline = isOffline,
             isAdmin = isAdmin,
@@ -151,6 +153,7 @@ fun rememberSeriesBulkActionsState(
 data class SeriesBulkActionsState(
     val series: List<KomgaSeries>,
     val actions: SeriesBulkActions,
+    private val favoriteActions: FavoriteBulkActions,
     private val coroutineScope: CoroutineScope,
     private val isOffline: Boolean,
     private val isKomfEnabled: Boolean,
@@ -176,6 +179,13 @@ data class SeriesBulkActionsState(
                 description = "标记未读",
                 icon = Icons.Default.BookmarkRemove,
                 onClick = { coroutineScope.launch { actions.markAsUnread(series) } }
+            )
+        )
+        add(
+            BulkActionButtonData(
+                description = "加入 Vanga 本地收藏",
+                icon = Icons.Default.Star,
+                onClick = { coroutineScope.launch { favoriteActions.addSeriesToLocalFavorites(series) } }
             )
         )
         if (!isOffline && isAdmin) {

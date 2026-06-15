@@ -43,11 +43,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
+import io.github.vivitoto.vanga.ui.common.menus.bulk.BottomPopupBulkActionsPanel
+import io.github.vivitoto.vanga.ui.common.menus.bulk.BulkActionsContainer
+import io.github.vivitoto.vanga.ui.common.menus.bulk.MixedBulkActionsContent
+import io.github.vivitoto.vanga.ui.common.menus.bulk.SelectedItem
+import io.github.vivitoto.vanga.ui.common.menus.bulk.containsSelectedItem
 import io.github.vivitoto.vanga.ui.common.menus.BookMenuActions
 import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
+import io.github.vivitoto.vanga.ui.platform.WindowSizeClass
 import io.github.vivitoto.vanga.ui.platform.PlatformType
 import snd.komga.client.series.KomgaSeries
 
@@ -59,6 +66,11 @@ fun HomeContent(
     activeFilterNumber: Int,
     onFilterChange: (Int) -> Unit,
 
+    selectionMode: Boolean,
+    selectedItems: List<SelectedItem>,
+    onSelectionModeChange: (Boolean) -> Unit,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
+
     cardWidth: Dp,
     onSeriesClick: (KomgaSeries) -> Unit,
     seriesMenuActions: SeriesMenuActions,
@@ -68,11 +80,20 @@ fun HomeContent(
 ) {
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
+    val visibleItems = remember(filters, activeFilterNumber) { filters.visibleSelectedItems(activeFilterNumber) }
     Column {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
             Text("首页", style = MaterialTheme.typography.headlineMedium)
             Spacer(Modifier.height(4.dp))
             Text("继续阅读、最近更新和常用筛选", style = MaterialTheme.typography.bodySmall)
+        }
+        if (selectionMode) {
+            HomeBulkActionsToolbar(
+                visibleItems = visibleItems,
+                selectedItems = selectedItems,
+                onCancel = { onSelectionModeChange(false) },
+                onSelectedItemSelect = onSelectedItemSelect,
+            )
         }
         Toolbar(
             filters = filters,
@@ -94,7 +115,53 @@ fun HomeContent(
             bookMenuActions = bookMenuActions,
             onBookClick = onBookClick,
             onBookReadClick = onBookReadClick,
+            selectionMode = selectionMode,
+            selectedItems = selectedItems,
+            onSelectedItemSelect = onSelectedItemSelect,
         )
+
+        val width = LocalWindowWidth.current
+        if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedItems.isNotEmpty()) {
+            BottomPopupBulkActionsPanel(onCancel = { onSelectionModeChange(false) }) {
+                MixedBulkActionsContent(selectedItems, true)
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeBulkActionsToolbar(
+    visibleItems: List<SelectedItem>,
+    selectedItems: List<SelectedItem>,
+    onCancel: () -> Unit,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
+) {
+    BulkActionsContainer(
+        onCancel = onCancel,
+        selectedCount = selectedItems.size,
+        allSelected = visibleItems.isNotEmpty() && visibleItems.all { selectedItems.containsSelectedItem(it) },
+        onSelectAll = {
+            if (visibleItems.all { selectedItems.containsSelectedItem(it) }) {
+                visibleItems.forEach(onSelectedItemSelect)
+            } else {
+                visibleItems
+                    .filterNot { selectedItems.containsSelectedItem(it) }
+                    .forEach(onSelectedItemSelect)
+            }
+        }
+    ) {
+        when (LocalWindowWidth.current) {
+            WindowSizeClass.FULL, WindowSizeClass.EXPANDED -> {
+                if (selectedItems.isEmpty()) {
+                    Text("点击条目以选择或取消选择")
+                } else {
+                    Spacer(Modifier.weight(1f))
+                    MixedBulkActionsContent(selectedItems, false)
+                }
+            }
+
+            WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> {}
+        }
     }
 }
 
@@ -212,6 +279,9 @@ private fun DisplayContent(
     bookMenuActions: BookMenuActions,
     onBookClick: (VangaBook) -> Unit,
     onBookReadClick: (VangaBook, Boolean) -> Unit,
+    selectionMode: Boolean,
+    selectedItems: List<SelectedItem>,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
 ) {
     LazyVerticalGrid(
         modifier = Modifier.padding(horizontal = 20.dp),
@@ -230,6 +300,9 @@ private fun DisplayContent(
                         bookMenuActions = bookMenuActions,
                         onBookClick = onBookClick,
                         onBookReadClick = onBookReadClick,
+                        selectionMode = selectionMode,
+                        selectedItems = selectedItems,
+                        onSelectedItemSelect = onSelectedItemSelect,
                     )
 
                     is SeriesFilterData -> SeriesFilterEntries(
@@ -237,6 +310,9 @@ private fun DisplayContent(
                         series = data.series,
                         onSeriesClick = onSeriesClick,
                         seriesMenuActions = seriesMenuActions,
+                        selectionMode = selectionMode,
+                        selectedItems = selectedItems,
+                        onSelectedItemSelect = onSelectedItemSelect,
                     )
 
                 }
@@ -251,6 +327,9 @@ private fun LazyGridScope.BookFilterEntry(
     bookMenuActions: BookMenuActions,
     onBookClick: (VangaBook) -> Unit,
     onBookReadClick: (VangaBook, Boolean) -> Unit,
+    selectionMode: Boolean,
+    selectedItems: List<SelectedItem>,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
 ) {
     if (books.isEmpty()) return
 
@@ -263,11 +342,18 @@ private fun LazyGridScope.BookFilterEntry(
         }
     }
     items(books) { book ->
+        val selectedItem = SelectedItem.Book(book)
         BookImageCard(
             book = book,
-            onBookClick = { onBookClick(book) },
-            onBookReadClick = { onBookReadClick(book, it) },
-            bookMenuActions = bookMenuActions,
+            onBookClick = {
+                if (selectionMode) onSelectedItemSelect(selectedItem)
+                else onBookClick(book)
+            },
+            onBookReadClick = if (selectionMode) null else { onBookReadClick(book, it) },
+            bookMenuActions = if (selectionMode) null else bookMenuActions,
+            isSelected = selectedItems.containsSelectedItem(selectedItem),
+            onSelect = { onSelectedItemSelect(selectedItem) },
+            showSelectionControl = selectionMode,
             showSeriesTitle = true,
             modifier = Modifier.fillMaxSize()
         )
@@ -279,6 +365,9 @@ private fun LazyGridScope.SeriesFilterEntries(
     series: List<KomgaSeries>,
     onSeriesClick: (KomgaSeries) -> Unit,
     seriesMenuActions: SeriesMenuActions,
+    selectionMode: Boolean,
+    selectedItems: List<SelectedItem>,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
 ) {
     if (series.isEmpty()) return
     item(span = { GridItemSpan(maxLineSpan) }) {
@@ -292,11 +381,31 @@ private fun LazyGridScope.SeriesFilterEntries(
     }
 
     items(series) {
+        val selectedItem = SelectedItem.Series(it)
         SeriesImageCard(
             series = it,
-            onSeriesClick = { onSeriesClick(it) },
-            seriesMenuActions = seriesMenuActions,
+            onSeriesClick = {
+                if (selectionMode) onSelectedItemSelect(selectedItem)
+                else onSeriesClick(it)
+            },
+            isSelected = selectedItems.containsSelectedItem(selectedItem),
+            onSeriesSelect = { onSelectedItemSelect(selectedItem) },
+            showSelectionControl = selectionMode,
+            seriesMenuActions = if (selectionMode) null else seriesMenuActions,
             modifier = Modifier.fillMaxSize()
         )
     }
+}
+
+private fun List<HomeFilterData>.visibleSelectedItems(activeFilterNumber: Int): List<SelectedItem> {
+    return asSequence()
+        .filter { activeFilterNumber == 0 || it.filter.order == activeFilterNumber }
+        .flatMap { data ->
+            when (data) {
+                is BookFilterData -> data.books.asSequence().map { SelectedItem.Book(it) }
+                is SeriesFilterData -> data.series.asSequence().map { SelectedItem.Series(it) }
+            }
+        }
+        .distinctBy { it.key }
+        .toList()
 }

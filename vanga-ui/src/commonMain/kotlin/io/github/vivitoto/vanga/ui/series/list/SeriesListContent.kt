@@ -81,6 +81,7 @@ fun SeriesListContent(
 
             selectedSeries = selectedSeries,
             onSeriesSelect = onSeriesSelect,
+            showSelectionControls = editMode,
 
             totalPages = totalPages,
             currentPage = currentPage,
@@ -102,7 +103,7 @@ fun SeriesListContent(
         )
         val width = LocalWindowWidth.current
         if ((width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()) {
-            BottomPopupBulkActionsPanel {
+            BottomPopupBulkActionsPanel(onCancel = { onEditModeChange(false) }) {
                 SeriesBulkActionsContent(selectedSeries, true)
             }
         }

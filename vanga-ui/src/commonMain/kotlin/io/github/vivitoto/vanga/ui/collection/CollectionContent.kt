@@ -93,6 +93,7 @@ fun CollectionContent(
 
             selectedSeries = selectedSeries,
             onSeriesSelect = onSeriesSelect,
+            showSelectionControls = editMode,
 
             reorderable = collection.ordered && editMode,
             onReorder = onReorder,
@@ -108,7 +109,7 @@ fun CollectionContent(
 
         val width = LocalWindowWidth.current
         if ((width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()) {
-            BottomPopupBulkActionsPanel {
+            BottomPopupBulkActionsPanel(onCancel = { onEditModeChange(false) }) {
                 CollectionBulkActionsContent(collection, selectedSeries, true)
             }
         }

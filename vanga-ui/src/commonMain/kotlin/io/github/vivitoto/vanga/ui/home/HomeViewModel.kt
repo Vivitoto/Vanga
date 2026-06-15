@@ -32,6 +32,9 @@ import io.github.vivitoto.vanga.ui.LoadState.Uninitialized
 import io.github.vivitoto.vanga.ui.common.cards.defaultCardWidth
 import io.github.vivitoto.vanga.ui.common.menus.BookMenuActions
 import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
+import io.github.vivitoto.vanga.ui.common.menus.bulk.SelectedItem
+import io.github.vivitoto.vanga.ui.common.menus.bulk.containsSelectedItem
+import io.github.vivitoto.vanga.ui.common.menus.bulk.withoutSelectedItem
 import snd.komga.client.book.KomgaBookSearch
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.series.KomgaSeriesSearch
@@ -59,6 +62,8 @@ class HomeViewModel(
 
     val currentFilters = MutableStateFlow(emptyList<HomeFilterData>())
     val activeFilterNumber = MutableStateFlow(0)
+    val selectedItems = MutableStateFlow(emptyList<SelectedItem>())
+    val selectionMode = MutableStateFlow(false)
 
     suspend fun initialize() {
         if (state.value !is Uninitialized) return
@@ -168,4 +173,16 @@ class HomeViewModel(
         this.activeFilterNumber.value = number
     }
 
+    fun setSelectionMode(enabled: Boolean) {
+        selectionMode.value = enabled
+        if (!enabled) selectedItems.value = emptyList()
+    }
+
+    fun onSelectedItemSelect(item: SelectedItem) {
+        selectedItems.value =
+            if (selectedItems.value.containsSelectedItem(item)) selectedItems.value.withoutSelectedItem(item)
+            else selectedItems.value + item
+
+        if (selectedItems.value.isNotEmpty()) selectionMode.value = true
+    }
 }

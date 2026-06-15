@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.BookmarkRemove
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -157,6 +158,7 @@ fun rememberBookBulkActionsState(
         BookBulkActionsState(
             books = books,
             actions = actions ?: factory.getBookBulkActions(),
+            favoriteActions = factory.getFavoriteBulkActions(),
             isOffline = isOffline,
             isAdmin = isAdmin,
             coroutineScope = coroutineScope
@@ -167,6 +169,7 @@ fun rememberBookBulkActionsState(
 data class BookBulkActionsState(
     val books: List<VangaBook>,
     val actions: BookBulkActions,
+    private val favoriteActions: FavoriteBulkActions,
     private val isOffline: Boolean,
     private val isAdmin: Boolean,
     private val coroutineScope: CoroutineScope,
@@ -192,6 +195,13 @@ data class BookBulkActionsState(
                 icon = Icons.Default.BookmarkRemove,
                 onClick = { coroutineScope.launch { actions.markAsUnread(books) } }
             ))
+        add(
+            BulkActionButtonData(
+                description = "加入 Vanga 本地收藏",
+                icon = Icons.Default.Star,
+                onClick = { coroutineScope.launch { favoriteActions.addBooksToLocalFavorites(books) } }
+            )
+        )
         if (!isOffline && isAdmin) add(
             BulkActionButtonData(
                     description = "编辑",

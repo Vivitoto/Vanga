@@ -77,6 +77,7 @@ fun BookImageCard(
     onBookReadClick: ((markProgress: Boolean) -> Unit)? = null,
     isSelected: Boolean = false,
     onSelect: (() -> Unit)? = null,
+    showSelectionControl: Boolean = false,
     showSeriesTitle: Boolean = false,
     topStartContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -97,6 +98,7 @@ fun BookImageCard(
                 onBookReadClick = onBookReadClick,
                 onSelect = onSelect,
                 isSelected = isSelected,
+                showSelectionControl = showSelectionControl,
             ) {
                 BookImageOverlay(
                     book = book,
@@ -281,6 +283,7 @@ private fun BookHoverOverlay(
     onBookReadClick: ((Boolean) -> Unit)?,
     isSelected: Boolean,
     onSelect: (() -> Unit)?,
+    showSelectionControl: Boolean,
     content: @Composable () -> Unit
 ) {
     var isActionsMenuExpanded by remember { mutableStateOf(false) }
@@ -288,8 +291,11 @@ private fun BookHoverOverlay(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     val isMobile = LocalPlatform.current == MOBILE
+    val selectionControlVisible = derivedStateOf {
+        onSelect != null && (showSelectionControl || isSelected || isHovered.value)
+    }
     val showOverlay = derivedStateOf { isHovered.value || isActionsMenuExpanded || isReadButtonExpanded || isSelected }
-    val showControls = derivedStateOf { isMobile || showOverlay.value }
+    val showControls = derivedStateOf { isMobile || showOverlay.value || selectionControlVisible.value }
 
     val border =
         if (showOverlay.value) overlayBorderModifier() else Modifier
@@ -308,11 +314,8 @@ private fun BookHoverOverlay(
                     Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
                 else Modifier
             Column(backgroundColor.fillMaxSize()) {
-                if (onSelect != null) {
-                    SelectionRadioButton(
-                        isSelected,
-                        onSelect
-                    )
+                if (selectionControlVisible.value) {
+                    onSelect?.let { SelectionRadioButton(isSelected, it) }
                     Spacer(Modifier.weight(1f))
                 }
 

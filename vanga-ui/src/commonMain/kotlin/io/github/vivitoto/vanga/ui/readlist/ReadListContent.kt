@@ -65,6 +65,7 @@ fun ReadListContent(
 
     cardMinSize: Dp,
 ) {
+    val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
 
     Column {
         if (editMode)
@@ -73,13 +74,15 @@ fun ReadListContent(
                 readList = readList,
                 books = books,
                 selectedBooks = selectedBooks,
-                onBookSelect = onBookSelect
+                onBookSelect = onBookSelect,
+                isAdmin = isAdmin,
             )
         else {
             ReadListToolbar(
                 readList = readList,
                 onReadListDelete = onReadListDelete,
                 onEditModeEnable = { onEditModeChange(true) },
+                isAdmin = isAdmin,
 
                 pageSize = pageSize,
                 onPageSizeChange = onPageSizeChange,
@@ -104,8 +107,9 @@ fun ReadListContent(
 
             selectedBooks = selectedBooks,
             onBookSelect = onBookSelect,
+            showSelectionControls = editMode,
 
-            reorderable = readList.ordered && editMode,
+            reorderable = readList.ordered && editMode && isAdmin,
             onReorder = onReorder,
             onReorderDragStateChange = onReorderDragStateChange,
 
@@ -118,8 +122,8 @@ fun ReadListContent(
 
         val width = LocalWindowWidth.current
         if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedBooks.isNotEmpty()) {
-            BottomPopupBulkActionsPanel {
-                ReadListBulkActionsContent(readList, books, true)
+            BottomPopupBulkActionsPanel(onCancel = { onEditModeChange(false) }) {
+                ReadListBulkActionsContent(readList, selectedBooks, true)
             }
         }
     }
@@ -130,6 +134,7 @@ private fun ReadListToolbar(
     readList: KomgaReadList,
     onReadListDelete: () -> Unit,
     onEditModeEnable: () -> Unit,
+    isAdmin: Boolean,
     pageSize: Int,
     onPageSizeChange: (Int) -> Unit,
 ) {
@@ -152,7 +157,6 @@ private fun ReadListToolbar(
             )
         }
 
-        val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
         if (isAdmin) {
             Box {
                 var expandActions by remember { mutableStateOf(false) }
@@ -167,8 +171,8 @@ private fun ReadListToolbar(
                     onDismissRequest = { expandActions = false }
                 )
             }
-            IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
         }
+        IconButton(onClick = onEditModeEnable) { Icon(Icons.Default.EditNote, null) }
         PageSizeSelectionDropdown(pageSize, onPageSizeChange)
     }
 }
@@ -180,6 +184,7 @@ private fun BulkActionsToolbar(
     books: List<VangaBook>,
     selectedBooks: List<VangaBook>,
     onBookSelect: (VangaBook) -> Unit,
+    isAdmin: Boolean,
 ) {
     BulkActionsContainer(
         onCancel = onCancel,
@@ -192,22 +197,22 @@ private fun BulkActionsToolbar(
     ) {
         when (LocalWindowWidth.current) {
             WindowSizeClass.FULL -> {
-                if (readList.ordered) Text("编辑模式：点击选择，拖动调整顺序")
+                if (readList.ordered && isAdmin) Text("编辑模式：点击选择，拖动调整顺序")
                 else Text("选择模式：点击条目选择或取消选择")
                 if (selectedBooks.isNotEmpty()) {
                     Spacer(Modifier.weight(1f))
 
-                    ReadListBulkActionsContent(readList, books, false)
+                    ReadListBulkActionsContent(readList, selectedBooks, false)
                 }
             }
 
             WindowSizeClass.EXPANDED -> {
                 if (selectedBooks.isEmpty()) {
-                    if (readList.ordered) Text("编辑模式：点击选择，拖动调整顺序")
+                    if (readList.ordered && isAdmin) Text("编辑模式：点击选择，拖动调整顺序")
                     else Text("选择模式：点击条目选择或取消选择")
                 } else {
                     Spacer(Modifier.weight(1f))
-                    ReadListBulkActionsContent(readList, books, false)
+                    ReadListBulkActionsContent(readList, selectedBooks, false)
                 }
             }
 

@@ -28,6 +28,8 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
@@ -191,8 +193,10 @@ fun ReaderControlsOverlay(
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
     val edgeSwipeWidth = with(density) { 32.dp.toPx() }
+    val previewSwipeDistance = with(density) { 16.dp.toPx() }
     val minSwipeDistance = with(density) { 72.dp.toPx() }
     val minSwipeDistanceFloor = with(density) { 48.dp.toPx() }
+    val minFlingVelocity = with(density) { 900.dp.toPx() }
     val defaultHorizontalSwipeRelease: (Float, suspend () -> Unit) -> Unit = { _, navigate ->
         coroutineScope.launch {
             navigate()
@@ -233,8 +237,12 @@ fun ReaderControlsOverlay(
             ) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
+                    val velocityTracker = VelocityTracker()
+                    velocityTracker.addPointerInputChange(down)
                     var maxPointers = 1
                     var lastPosition = down.position
+                    var lastVelocityX = 0f
+                    var lastVelocityY = 0f
 
                     while (true) {
                         val event = awaitPointerEvent()
@@ -243,10 +251,14 @@ fun ReaderControlsOverlay(
 
                         val tracked = event.changes.firstOrNull { it.id == down.id }
                         if (tracked != null) {
+                            velocityTracker.addPointerInputChange(tracked)
                             lastPosition = tracked.position
+                            val velocity = velocityTracker.calculateVelocity()
+                            lastVelocityX = velocity.x
+                            lastVelocityY = velocity.y
                             val drag = lastPosition - down.position
                             val isHorizontalDrag = maxPointers == 1 &&
-                                abs(drag.x) > minSwipeDistanceFloor &&
+                                abs(drag.x) > previewSwipeDistance &&
                                 abs(drag.x) > abs(drag.y) * 1.2f
                             val isBackSwipe = down.position.x <= edgeSwipeWidth && drag.x > 0
 
@@ -264,24 +276,29 @@ fun ReaderControlsOverlay(
                     val threshold = minSwipeDistance
                         .coerceAtMost(contentAreaSize.width * .28f)
                         .coerceAtLeast(minSwipeDistanceFloor)
+                    val isHorizontalFling = maxPointers == 1 &&
+                        abs(lastVelocityX) > minFlingVelocity &&
+                        abs(lastVelocityX) > abs(lastVelocityY) * 1.4f &&
+                        abs(drag.x) > previewSwipeDistance
                     val isHorizontalSwipe = maxPointers == 1 &&
                         abs(drag.x) > threshold &&
                         abs(drag.x) > abs(drag.y) * 1.4f
 
                     var swipeHandled = false
-                    if (isHorizontalSwipe) {
+                    if (isHorizontalSwipe || isHorizontalFling) {
                         when {
                             isSettingsMenuOpen -> {
                                 onSettingsMenuToggle()
                                 swipeHandled = true
                             }
-                            down.position.x <= edgeSwipeWidth && drag.x > threshold -> {
+                            down.position.x <= edgeSwipeWidth && drag.x > 0f -> {
                                 currentOnBackGesture()
                                 swipeHandled = true
                             }
                             currentCanNavigateByHorizontalSwipe() -> {
-                                val navigate = if (drag.x < 0) rightNavigate else leftNavigate
-                                currentOnHorizontalSwipeRelease(drag.x, navigate)
+                                val horizontalDirection = if (isHorizontalFling) lastVelocityX else drag.x
+                                val navigate = if (horizontalDirection < 0) rightNavigate else leftNavigate
+                                currentOnHorizontalSwipeRelease(horizontalDirection, navigate)
                                 swipeHandled = true
                             }
                         }

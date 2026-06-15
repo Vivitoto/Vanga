@@ -61,6 +61,10 @@ class SearchScreen(
                             query = vm.query,
                             searchType = vm.currentTab,
                             onSearchTypeChange = vm::onSearchTypeChange,
+                            selectionMode = vm.selectionMode,
+                            selectedItems = vm.selectedItems,
+                            onSelectionModeChange = vm::setSelectionMode,
+                            onSelectedItemSelect = vm::onSelectedItemSelect,
 
                             seriesResults = vm.seriesResults,
                             seriesCurrentPage = vm.seriesCurrentPage,

@@ -38,6 +38,7 @@ fun BookLazyCardGrid(
 
     selectedBooks: List<VangaBook> = emptyList(),
     onBookSelect: ((VangaBook) -> Unit)? = null,
+    showSelectionControls: Boolean = false,
 
     reorderable: Boolean = false,
     onReorder: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
@@ -86,6 +87,7 @@ fun BookLazyCardGrid(
                         onBookReadClick = onBookReadClick?.let { { onBookReadClick(book, it) } },
                         isSelected = isSelected,
                         onSelect = onBookSelect?.let { { onBookSelect(book) } },
+                        showSelectionControl = showSelectionControls,
                         topStartContent = bookTopStartContent,
                         modifier = Modifier
                             .fillMaxSize()

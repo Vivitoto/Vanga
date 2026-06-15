@@ -64,6 +64,10 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
                         activeFilterNumber = vm.activeFilterNumber.collectAsState().value,
                         onFilterChange = vm::onFilterChange,
                         onEditStart = { navigator.replaceAll(FilterEditScreen(vm.currentFilters.value)) },
+                        selectionMode = vm.selectionMode.collectAsState().value,
+                        selectedItems = vm.selectedItems.collectAsState().value,
+                        onSelectionModeChange = vm::setSelectionMode,
+                        onSelectedItemSelect = vm::onSelectedItemSelect,
 
                         cardWidth = vm.cardWidth.collectAsState().value,
                         onSeriesClick = { navigator push seriesScreen(it) },

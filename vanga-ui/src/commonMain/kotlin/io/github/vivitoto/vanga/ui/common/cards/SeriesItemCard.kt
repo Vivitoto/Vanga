@@ -1,7 +1,8 @@
 package io.github.vivitoto.vanga.ui.common.cards
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -54,6 +55,7 @@ fun SeriesImageCard(
     onSeriesClick: (() -> Unit)? = null,
     isSelected: Boolean = false,
     onSeriesSelect: (() -> Unit)? = null,
+    showSelectionControl: Boolean = false,
     seriesMenuActions: SeriesMenuActions? = null,
     topStartContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
@@ -71,6 +73,7 @@ fun SeriesImageCard(
                 series = series,
                 onSeriesSelect = onSeriesSelect,
                 isSelected = isSelected,
+                showSelectionControl = showSelectionControl,
                 seriesActions = seriesMenuActions,
             ) {
                 SeriesImageOverlay(series = series, libraryIsDeleted = libraryIsDeleted) {
@@ -121,6 +124,7 @@ private fun SeriesCardHoverOverlay(
     series: KomgaSeries,
     isSelected: Boolean,
     onSeriesSelect: (() -> Unit)?,
+    showSelectionControl: Boolean,
     seriesActions: SeriesMenuActions?,
     content: @Composable () -> Unit,
 ) {
@@ -128,8 +132,11 @@ private fun SeriesCardHoverOverlay(
     val isHovered = interactionSource.collectIsHoveredAsState()
     var isActionsMenuExpanded by remember { mutableStateOf(false) }
     val isMobile = LocalPlatform.current == MOBILE
+    val selectionControlVisible = derivedStateOf {
+        onSeriesSelect != null && (showSelectionControl || isSelected || isHovered.value)
+    }
     val showOverlay = derivedStateOf { isHovered.value || isActionsMenuExpanded || isSelected }
-    val showControls = derivedStateOf { isMobile || showOverlay.value }
+    val showControls = derivedStateOf { isMobile || showOverlay.value || selectionControlVisible.value }
     val border = if (showOverlay.value) overlayBorderModifier() else Modifier
 
     Box(
@@ -146,8 +153,8 @@ private fun SeriesCardHoverOverlay(
                 if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
                 else Modifier
             Column(backgroundModifier.fillMaxSize()) {
-                if (onSeriesSelect != null) {
-                    SelectionRadioButton(isSelected, onSeriesSelect)
+                if (selectionControlVisible.value) {
+                    onSeriesSelect?.let { SelectionRadioButton(isSelected, it) }
                     Spacer(Modifier.weight(1f))
                 }
 
@@ -238,30 +245,46 @@ private fun SeriesImageOverlay(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SeriesDetailedListCard(
     series: KomgaSeries,
     onClick: () -> Unit,
+    isSelected: Boolean = false,
+    onSelect: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered = interactionSource.collectIsHoveredAsState()
     Card(
         shape = RoundedCornerShape(20.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = modifier
             .cursorForHand()
-            .clickable { onClick() }) {
+            .combinedClickable(onClick = onClick, onLongClick = onSelect)
+            .hoverable(interactionSource)
+    ) {
         Row(
             Modifier
                 .fillMaxWidth()
                 .heightIn(max = 200.dp)
+                .then(
+                    if (isSelected) Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
+                    else Modifier
+                )
                 .padding(10.dp)
         ) {
-            SeriesSimpleImageCard(
-                series = series,
-                onSeriesClick = onClick,
-                modifier = Modifier.width(104.dp)
-            )
+            Box {
+                SeriesSimpleImageCard(
+                    series = series,
+                    onSeriesClick = onClick,
+                    modifier = Modifier.width(104.dp)
+                )
+                if (onSelect != null && (isSelected || isHovered.value)) {
+                    SelectionRadioButton(isSelected, onSelect)
+                }
+            }
             SeriesDetails(series)
         }
     }

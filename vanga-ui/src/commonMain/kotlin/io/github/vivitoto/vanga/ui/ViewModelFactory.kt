@@ -18,6 +18,7 @@ import io.github.vivitoto.vanga.ui.book.BookViewModel
 import io.github.vivitoto.vanga.ui.collection.CollectionViewModel
 import io.github.vivitoto.vanga.ui.common.menus.bulk.BookBulkActions
 import io.github.vivitoto.vanga.ui.common.menus.bulk.CollectionBulkActions
+import io.github.vivitoto.vanga.ui.common.menus.bulk.FavoriteBulkActions
 import io.github.vivitoto.vanga.ui.common.menus.bulk.ReadListBulkActions
 import io.github.vivitoto.vanga.ui.common.menus.bulk.SeriesBulkActions
 import io.github.vivitoto.vanga.ui.dialogs.book.edit.BookEditDialogViewModel
@@ -707,6 +708,26 @@ class ViewModelFactory(
         komgaApi.readListApi,
         dependencies.appNotifications,
     )
+
+    fun getFavoriteBulkActions(): FavoriteBulkActions {
+        val ownerLabelProvider = { dependencies.komgaSharedState.authenticatedUser.value?.email }
+        val serverUrlProvider = { dependencies.komgaSharedState.serverUrl.value }
+        return FavoriteBulkActions(
+            favoriteCollectionService = FavoriteCollectionService(
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
+                ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
+            ),
+            favoriteReadListService = FavoriteReadListService(
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
+                ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
+            ),
+            favoriteSyncService = createFavoriteSyncService(ownerLabelProvider, serverUrlProvider),
+            notifications = dependencies.appNotifications,
+            onFavoritesChanged = { screenReloadEvents.tryEmit(Unit) },
+        )
+    }
 
     fun getImageReaderSettingsViewModel(): ImageReaderSettingsViewModel {
         return ImageReaderSettingsViewModel(

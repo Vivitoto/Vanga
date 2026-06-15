@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -59,11 +58,12 @@ fun BulkActionsContainer(
     selectedCount: Int,
     allSelected: Boolean,
     onSelectAll: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
             .clip(RoundedCornerShape(5.dp))
@@ -91,7 +91,10 @@ fun BulkActionsContainer(
 }
 
 @Composable
-fun BottomPopupBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
+fun BottomPopupBulkActionsPanel(
+    onCancel: () -> Unit,
+    content: @Composable RowScope.() -> Unit,
+) {
     Popup(popupPositionProvider = BottomScreenPopupPositionProvider) {
         Surface(
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
@@ -103,11 +106,12 @@ fun BottomPopupBulkActionsPanel(content: @Composable RowScope.() -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 56.dp)
                     .navigationBarsPadding()
+                    .height(64.dp)
                     .padding(horizontal = 8.dp)
                     .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
             ) {
+                IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
                 content()
             }
         }
@@ -122,8 +126,7 @@ object BottomScreenPopupPositionProvider : PopupPositionProvider {
         layoutDirection: LayoutDirection,
         popupContentSize: IntSize
     ): IntOffset {
-        val containerBottom = if (anchorBounds.bottom > 0) anchorBounds.bottom else windowSize.height
-        return IntOffset(0, (containerBottom - popupContentSize.height).coerceAtLeast(0))
+        return IntOffset(0, (windowSize.height - popupContentSize.height).coerceAtLeast(0))
     }
 }
 

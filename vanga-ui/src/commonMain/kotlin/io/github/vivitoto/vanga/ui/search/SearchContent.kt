@@ -25,6 +25,11 @@ import io.github.vivitoto.vanga.ui.common.cards.BookDetailedListCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesDetailedListCard
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.Pagination
+import io.github.vivitoto.vanga.ui.common.menus.bulk.BottomPopupBulkActionsPanel
+import io.github.vivitoto.vanga.ui.common.menus.bulk.BulkActionsContainer
+import io.github.vivitoto.vanga.ui.common.menus.bulk.MixedBulkActionsContent
+import io.github.vivitoto.vanga.ui.common.menus.bulk.SelectedItem
+import io.github.vivitoto.vanga.ui.common.menus.bulk.containsSelectedItem
 import io.github.vivitoto.vanga.ui.platform.VerticalScrollbar
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass
 import io.github.vivitoto.vanga.ui.search.SearchViewModel.SearchResultsTab
@@ -35,6 +40,10 @@ fun SearchContent(
     query: String,
     searchType: SearchResultsTab,
     onSearchTypeChange: (SearchResultsTab) -> Unit,
+    selectionMode: Boolean,
+    selectedItems: List<SelectedItem>,
+    onSelectionModeChange: (Boolean) -> Unit,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
 
     bookResults: List<VangaBook>,
     bookCurrentPage: Int,
@@ -66,6 +75,15 @@ fun SearchContent(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            if (selectionMode) {
+                SearchBulkActionsToolbar(
+                    visibleItems = visibleSelectedItems(searchType, seriesResults, bookResults),
+                    selectedItems = selectedItems,
+                    onCancel = { onSelectionModeChange(false) },
+                    onSelectedItemSelect = onSelectedItemSelect,
+                    modifier = widthModifier,
+                )
+            }
             SearchToolBar(
                 searchType = searchType,
                 onSearchTypeChange = onSearchTypeChange,
@@ -83,9 +101,15 @@ fun SearchContent(
                 when (searchType) {
                     SearchResultsTab.SERIES -> {
                         items(seriesResults) { series ->
+                            val selectedItem = SelectedItem.Series(series)
                             SeriesDetailedListCard(
                                 series = series,
-                                onClick = { onSeriesClick(series) },
+                                onClick = {
+                                    if (selectionMode) onSelectedItemSelect(selectedItem)
+                                    else onSeriesClick(series)
+                                },
+                                isSelected = selectedItems.containsSelectedItem(selectedItem),
+                                onSelect = { onSelectedItemSelect(selectedItem) },
                                 modifier = widthModifier
                             )
                         }
@@ -102,9 +126,15 @@ fun SearchContent(
 
                     SearchResultsTab.BOOKS -> {
                         items(bookResults) { book ->
+                            val selectedItem = SelectedItem.Book(book)
                             BookDetailedListCard(
                                 book = book,
-                                onClick = { onBookClick(book) },
+                                onClick = {
+                                    if (selectionMode) onSelectedItemSelect(selectedItem)
+                                    else onBookClick(book)
+                                },
+                                isSelected = selectedItems.containsSelectedItem(selectedItem),
+                                onSelect = { onSelectedItemSelect(selectedItem) },
                                 modifier = widthModifier
                             )
                         }
@@ -123,7 +153,52 @@ fun SearchContent(
             }
         }
 
+        val width = LocalWindowWidth.current
+        if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedItems.isNotEmpty()) {
+            BottomPopupBulkActionsPanel(onCancel = { onSelectionModeChange(false) }) {
+                MixedBulkActionsContent(selectedItems, true)
+            }
+        }
+
         VerticalScrollbar(scrollState, Modifier.align(Alignment.TopEnd))
+    }
+}
+
+@Composable
+private fun SearchBulkActionsToolbar(
+    visibleItems: List<SelectedItem>,
+    selectedItems: List<SelectedItem>,
+    onCancel: () -> Unit,
+    onSelectedItemSelect: (SelectedItem) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BulkActionsContainer(
+        onCancel = onCancel,
+        selectedCount = selectedItems.size,
+        allSelected = visibleItems.isNotEmpty() && visibleItems.all { selectedItems.containsSelectedItem(it) },
+        onSelectAll = {
+            if (visibleItems.all { selectedItems.containsSelectedItem(it) }) {
+                visibleItems.forEach(onSelectedItemSelect)
+            } else {
+                visibleItems
+                    .filterNot { selectedItems.containsSelectedItem(it) }
+                    .forEach(onSelectedItemSelect)
+            }
+        },
+        modifier = modifier,
+    ) {
+        when (LocalWindowWidth.current) {
+            WindowSizeClass.FULL, WindowSizeClass.EXPANDED -> {
+                if (selectedItems.isEmpty()) {
+                    Text("点击条目以选择或取消选择")
+                } else {
+                    Spacer(Modifier.weight(1f))
+                    MixedBulkActionsContent(selectedItems, false)
+                }
+            }
+
+            WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> {}
+        }
     }
 }
 
@@ -177,5 +252,16 @@ fun SearchToolBar(
                 border = null,
             )
         }
+    }
+}
+
+private fun visibleSelectedItems(
+    searchType: SearchResultsTab,
+    seriesResults: List<KomgaSeries>,
+    bookResults: List<VangaBook>,
+): List<SelectedItem> {
+    return when (searchType) {
+        SearchResultsTab.SERIES -> seriesResults.map { SelectedItem.Series(it) }
+        SearchResultsTab.BOOKS -> bookResults.map { SelectedItem.Book(it) }
     }
 }

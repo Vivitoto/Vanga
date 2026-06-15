@@ -19,6 +19,9 @@ import io.github.vivitoto.vanga.komga.api.KomgaBookApi
 import io.github.vivitoto.vanga.komga.api.KomgaSeriesApi
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LoadState
+import io.github.vivitoto.vanga.ui.common.menus.bulk.SelectedItem
+import io.github.vivitoto.vanga.ui.common.menus.bulk.containsSelectedItem
+import io.github.vivitoto.vanga.ui.common.menus.bulk.withoutSelectedItem
 import snd.komga.client.book.KomgaBookSearch
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.KomgaSort
@@ -52,6 +55,10 @@ class SearchViewModel(
 
     private var userSelectedTab by mutableStateOf(SearchResultsTab.SERIES)
     var currentTab by mutableStateOf(SearchResultsTab.SERIES)
+        private set
+    var selectedItems by mutableStateOf<List<SelectedItem>>(emptyList())
+        private set
+    var selectionMode by mutableStateOf(false)
         private set
 
     suspend fun initialize(initialQuery: String?) {
@@ -142,6 +149,19 @@ class SearchViewModel(
     fun onSearchTypeChange(type: SearchResultsTab) {
         this.currentTab = type
         this.userSelectedTab = type
+    }
+
+    fun setSelectionMode(enabled: Boolean) {
+        selectionMode = enabled
+        if (!enabled) selectedItems = emptyList()
+    }
+
+    fun onSelectedItemSelect(item: SelectedItem) {
+        selectedItems =
+            if (selectedItems.containsSelectedItem(item)) selectedItems.withoutSelectedItem(item)
+            else selectedItems + item
+
+        if (selectedItems.isNotEmpty()) selectionMode = true
     }
 
     enum class SearchResultsTab {

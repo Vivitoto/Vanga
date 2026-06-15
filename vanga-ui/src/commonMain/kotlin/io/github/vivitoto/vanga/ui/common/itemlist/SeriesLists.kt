@@ -52,6 +52,7 @@ fun SeriesLazyCardGrid(
 
     selectedSeries: List<KomgaSeries> = emptyList(),
     onSeriesSelect: ((KomgaSeries) -> Unit)? = null,
+    showSelectionControls: Boolean = false,
 
     reorderable: Boolean = false,
     onReorder: (fromIndex: Int, toIndex: Int) -> Unit = { _, _ -> },
@@ -117,6 +118,7 @@ fun SeriesLazyCardGrid(
                         seriesMenuActions = seriesMenuActions,
                         isSelected = isSelected,
                         onSeriesSelect = onSeriesSelect?.let { { onSeriesSelect(series) } },
+                        showSelectionControl = showSelectionControls,
                         topStartContent = seriesTopStartContent,
                         modifier = Modifier
                             .fillMaxSize()

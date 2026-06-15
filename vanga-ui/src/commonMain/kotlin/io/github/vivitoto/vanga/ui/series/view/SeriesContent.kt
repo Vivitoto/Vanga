@@ -209,7 +209,7 @@ fun SeriesContent(
     if (currentTab == SeriesTab.BOOKS &&
         (width == COMPACT || width == MEDIUM) && booksData.selectedBooks.isNotEmpty()
     ) {
-        BottomPopupBulkActionsPanel {
+        BottomPopupBulkActionsPanel(onCancel = { booksState.setSelectionMode(false) }) {
             BooksBulkActionsContent(
                 books = booksData.selectedBooks,
                 actions = booksState.bookBulkMenuActions(),

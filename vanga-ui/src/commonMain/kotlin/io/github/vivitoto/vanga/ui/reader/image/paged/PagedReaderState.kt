@@ -313,6 +313,20 @@ class PagedReaderState(
         )
     }
 
+    fun previewTransitionPage(forward: Boolean): TransitionPage? {
+        if (transitionPage.value != null || pageSpreads.value.isEmpty()) return null
+        val bookState = readerState.booksState.value ?: return null
+        return when {
+            forward && currentSpreadIndex.value >= pageSpreads.value.lastIndex ->
+                BookEnd(currentBook = bookState.currentBook, nextBook = bookState.nextBook)
+
+            !forward && currentSpreadIndex.value <= 0 ->
+                BookStart(currentBook = bookState.currentBook, previousBook = bookState.previousBook)
+
+            else -> null
+        }
+    }
+
     private fun loadPage(spreadIndex: Int) {
         if (spreadIndex != currentSpreadIndex.value) {
             val pageNumber = pageSpreads.value[spreadIndex].last().pageNumber

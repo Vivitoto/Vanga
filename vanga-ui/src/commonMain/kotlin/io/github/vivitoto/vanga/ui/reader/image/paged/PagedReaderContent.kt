@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -86,6 +87,28 @@ fun BoxScope.PagedReaderContent(
     val coroutineScope = rememberCoroutineScope()
     var horizontalSwipeOffset by remember { mutableFloatStateOf(0f) }
     var horizontalSwipeSettleJob by remember { mutableStateOf<Job?>(null) }
+    var settledSwipePreview by remember { mutableStateOf<SettledSwipePreview?>(null) }
+
+    LaunchedEffect(currentSpreadIndex, pages, transitionPage, settledSwipePreview) {
+        val preview = settledSwipePreview ?: return@LaunchedEffect
+        if (preview.transitionPage != null) {
+            if (transitionPage != null) settledSwipePreview = null
+            return@LaunchedEffect
+        }
+
+        val previewPageNumbers = preview.pages.map { it.metadata.pageNumber }
+        val currentPageNumbers = pages.map { it.metadata.pageNumber }
+        val currentPagesReady = pages.isNotEmpty() && pages.all { it.imageResult != null }
+        if (
+            transitionPage == null &&
+            currentSpreadIndex == preview.targetSpreadIndex &&
+            currentPageNumbers == previewPageNumbers &&
+            currentPagesReady
+        ) {
+            settledSwipePreview = null
+        }
+    }
+
     ReaderControlsOverlay(
         readingDirection = layoutDirection,
         onNexPageClick = pagedReaderState::nextPage,
@@ -97,6 +120,7 @@ fun BoxScope.PagedReaderContent(
         onHorizontalSwipeProgress = {
             horizontalSwipeSettleJob?.cancel()
             horizontalSwipeSettleJob = null
+            settledSwipePreview = null
             horizontalSwipeOffset = it
         },
         onHorizontalSwipeCancel = {
@@ -114,11 +138,31 @@ fun BoxScope.PagedReaderContent(
             horizontalSwipeSettleJob = coroutineScope.launch {
                 val width = currentContainerSize.width.toFloat().coerceAtLeast(1f)
                 val targetOffset = if (dragOffset < 0f) -width else width
+                val forward = isForwardSwipe(dragOffset, readingDirection)
+                val targetSpreadIndex = currentSpreadIndex + if (forward) 1 else -1
+                val previewPages = when (transitionPage) {
+                    null -> pagedReaderState.previewSpread(targetSpreadIndex)?.pages
+                    is BookEnd -> if (forward) null else pages
+                    is BookStart -> if (forward) pages else null
+                }
+                val previewTransitionPage = if (transitionPage == null && previewPages == null) {
+                    pagedReaderState.previewTransitionPage(forward)
+                } else null
+
                 animateSwipeOffset(
                     from = horizontalSwipeOffset,
                     to = targetOffset,
                     pageWidth = width,
                 ) { horizontalSwipeOffset = it }
+                if (previewPages != null || previewTransitionPage != null) {
+                    settledSwipePreview = SettledSwipePreview(
+                        targetSpreadIndex = targetSpreadIndex,
+                        pages = previewPages.orEmpty(),
+                        transitionPage = previewTransitionPage,
+                        layout = layout,
+                        readingDirection = readingDirection,
+                    )
+                }
                 navigate()
                 horizontalSwipeOffset = 0f
             }
@@ -146,15 +190,25 @@ fun BoxScope.PagedReaderContent(
             SlidingPagedReaderSpread(
                 currentSpreadIndex = currentSpreadIndex,
                 previewSpread = pagedReaderState::previewSpread,
+                previewTransitionPageForSwipe = pagedReaderState::previewTransitionPage,
                 pages = pages,
                 transitionPage = transitionPage,
                 layout = layout,
                 readingDirection = readingDirection,
                 horizontalSwipeOffset = horizontalSwipeOffset,
+                settledSwipePreview = settledSwipePreview,
             )
         }
     }
 }
+
+private data class SettledSwipePreview(
+    val targetSpreadIndex: Int,
+    val pages: List<Page>,
+    val transitionPage: TransitionPage?,
+    val layout: io.github.vivitoto.vanga.settings.model.PageDisplayLayout,
+    val readingDirection: PagedReadingDirection,
+)
 
 
 private suspend fun animateSwipeOffset(
@@ -179,23 +233,43 @@ private suspend fun animateSwipeOffset(
 
 private fun swipeSettleDurationMillis(from: Float, to: Float, pageWidth: Float): Int {
     val remainingFraction = (abs(to - from) / pageWidth.coerceAtLeast(1f)).coerceIn(0.15f, 1f)
-    return (90 + 170 * remainingFraction).roundToInt()
+    return (60 + 120 * remainingFraction).roundToInt()
 }
 
 @Composable
 private fun SlidingPagedReaderSpread(
     currentSpreadIndex: Int,
     previewSpread: (Int) -> PagedReaderState.PageSpread?,
+    previewTransitionPageForSwipe: (Boolean) -> TransitionPage?,
     pages: List<Page>,
     transitionPage: TransitionPage?,
     layout: io.github.vivitoto.vanga.settings.model.PageDisplayLayout,
     readingDirection: PagedReadingDirection,
     horizontalSwipeOffset: Float,
+    settledSwipePreview: SettledSwipePreview?,
 ) {
-    val previewIndex = previewSpreadIndex(currentSpreadIndex, horizontalSwipeOffset, readingDirection)
-    val previewPages = previewSpread(previewIndex)?.pages
+    if (settledSwipePreview != null && abs(horizontalSwipeOffset) < 1f) {
+        SpreadContent(
+            pages = settledSwipePreview.pages,
+            transitionPage = settledSwipePreview.transitionPage,
+            layout = settledSwipePreview.layout,
+            readingDirection = settledSwipePreview.readingDirection,
+        )
+        return
+    }
 
-    if (transitionPage != null || previewPages == null || abs(horizontalSwipeOffset) < 1f) {
+    val forward = isForwardSwipe(horizontalSwipeOffset, readingDirection)
+    val previewIndex = currentSpreadIndex + if (forward) 1 else -1
+    val previewPages = when (transitionPage) {
+        null -> previewSpread(previewIndex)?.pages
+        is BookEnd -> if (forward) null else pages
+        is BookStart -> if (forward) pages else null
+    }
+    val previewTransitionPage = if (transitionPage == null && previewPages == null) {
+        previewTransitionPageForSwipe(forward)
+    } else null
+
+    if ((previewPages == null && previewTransitionPage == null) || abs(horizontalSwipeOffset) < 1f) {
         SpreadContent(pages = pages, transitionPage = transitionPage, layout = layout, readingDirection = readingDirection)
         return
     }
@@ -204,7 +278,7 @@ private fun SlidingPagedReaderSpread(
         val density = LocalDensity.current
         val widthPx = with(density) { maxWidth.toPx() }
         val dragOffset = horizontalSwipeOffset.coerceIn(-widthPx, widthPx)
-        val previewSide = previewSpreadSide(currentSpreadIndex, previewIndex, readingDirection)
+        val previewSide = previewContentSide(forward, readingDirection)
 
         Box(
             modifier = Modifier
@@ -219,29 +293,28 @@ private fun SlidingPagedReaderSpread(
                 .fillMaxSize()
                 .offset { IntOffset((previewSide * widthPx + dragOffset).roundToInt(), 0) }
         ) {
-            SpreadContent(pages = previewPages, transitionPage = null, layout = layout, readingDirection = readingDirection)
+            SpreadContent(
+                pages = previewPages.orEmpty(),
+                transitionPage = previewTransitionPage,
+                layout = layout,
+                readingDirection = readingDirection
+            )
         }
     }
 }
 
-private fun previewSpreadIndex(
-    currentSpreadIndex: Int,
+private fun isForwardSwipe(
     horizontalSwipeOffset: Float,
     readingDirection: PagedReadingDirection,
-): Int {
-    val forward = when (readingDirection) {
-        LEFT_TO_RIGHT -> horizontalSwipeOffset < 0f
-        RIGHT_TO_LEFT -> horizontalSwipeOffset > 0f
-    }
-    return currentSpreadIndex + if (forward) 1 else -1
+): Boolean = when (readingDirection) {
+    LEFT_TO_RIGHT -> horizontalSwipeOffset < 0f
+    RIGHT_TO_LEFT -> horizontalSwipeOffset > 0f
 }
 
-private fun previewSpreadSide(
-    currentSpreadIndex: Int,
-    previewIndex: Int,
+private fun previewContentSide(
+    forward: Boolean,
     readingDirection: PagedReadingDirection,
 ): Int {
-    val forward = previewIndex > currentSpreadIndex
     return when (readingDirection) {
         LEFT_TO_RIGHT -> if (forward) 1 else -1
         RIGHT_TO_LEFT -> if (forward) -1 else 1
