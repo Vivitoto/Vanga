@@ -151,7 +151,7 @@ class SearchViewModel(
         this.userSelectedTab = type
     }
 
-    fun setSelectionMode(enabled: Boolean) {
+    fun updateSelectionMode(enabled: Boolean) {
         selectionMode = enabled
         if (!enabled) selectedItems = emptyList()
     }

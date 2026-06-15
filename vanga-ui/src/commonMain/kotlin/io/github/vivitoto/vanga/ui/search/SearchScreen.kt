@@ -63,7 +63,7 @@ class SearchScreen(
                             onSearchTypeChange = vm::onSearchTypeChange,
                             selectionMode = vm.selectionMode,
                             selectedItems = vm.selectedItems,
-                            onSelectionModeChange = vm::setSelectionMode,
+                            onSelectionModeChange = vm::updateSelectionMode,
                             onSelectedItemSelect = vm::onSelectedItemSelect,
 
                             seriesResults = vm.seriesResults,
