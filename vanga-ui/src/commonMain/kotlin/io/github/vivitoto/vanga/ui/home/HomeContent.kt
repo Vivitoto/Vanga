@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.LocalPlatform
+import io.github.vivitoto.vanga.ui.MobileTopContentPadding
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
 import io.github.vivitoto.vanga.ui.common.menus.bulk.BottomPopupBulkActionsPanel
@@ -76,11 +77,16 @@ fun HomeContent(
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
     val visibleItems = remember(filters, activeFilterNumber) { filters.visibleSelectedItems(activeFilterNumber) }
+    val isMobile = LocalPlatform.current == PlatformType.MOBILE
     Column {
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
-            Text("首页", style = MaterialTheme.typography.headlineMedium)
-            Spacer(Modifier.height(4.dp))
-            Text("继续阅读、最近更新和常用筛选", style = MaterialTheme.typography.bodySmall)
+        if (isMobile) {
+            Spacer(Modifier.height(MobileTopContentPadding))
+        } else {
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 14.dp)) {
+                Text("首页", style = MaterialTheme.typography.headlineMedium)
+                Spacer(Modifier.height(4.dp))
+                Text("继续阅读、最近更新和常用筛选", style = MaterialTheme.typography.bodySmall)
+            }
         }
         if (selectionMode) {
             HomeBulkActionsToolbar(

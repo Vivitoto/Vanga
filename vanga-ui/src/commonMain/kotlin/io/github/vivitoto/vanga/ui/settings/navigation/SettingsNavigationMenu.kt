@@ -3,6 +3,7 @@ package io.github.vivitoto.vanga.ui.settings.navigation
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -90,7 +91,8 @@ fun SettingsNavigationMenu(
     onLogout: () -> Unit,
     user: KomgaUser?,
     contentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val isAdmin = remember(user) { user?.roleAdmin() ?: true }
     val advancedScreenSelected = currentScreen is KomfSettingsScreen ||
@@ -100,7 +102,9 @@ fun SettingsNavigationMenu(
             currentScreen is KomfJobsScreen
     var showAdvancedSettings by remember(advancedScreenSelected) { mutableStateOf(advancedScreenSelected) }
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState()),
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(contentPadding),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         val isOffline = LocalOfflineMode.current.collectAsState().value

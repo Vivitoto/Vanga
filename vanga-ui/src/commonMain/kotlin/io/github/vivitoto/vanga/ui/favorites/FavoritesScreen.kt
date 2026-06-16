@@ -3,8 +3,10 @@ package io.github.vivitoto.vanga.ui.favorites
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -33,14 +35,17 @@ import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.vivitoto.vanga.ui.LoadState
+import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalReloadEvents
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
+import io.github.vivitoto.vanga.ui.MobileTopContentPadding
 import io.github.vivitoto.vanga.ui.ReloadableScreen
 import io.github.vivitoto.vanga.ui.book.bookScreen
 import io.github.vivitoto.vanga.ui.common.components.LoadingMaxSizeIndicator
 import io.github.vivitoto.vanga.ui.common.itemlist.BookLazyCardGrid
 import io.github.vivitoto.vanga.ui.common.itemlist.SeriesLazyCardGrid
+import io.github.vivitoto.vanga.ui.platform.PlatformType
 import io.github.vivitoto.vanga.ui.reader.readerScreen
 import io.github.vivitoto.vanga.ui.series.seriesScreen
 
@@ -88,24 +93,37 @@ private fun FavoritesContent(
     onBookReadClick: (io.github.vivitoto.vanga.komga.api.model.VangaBook, Boolean) -> Unit,
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
+    val isMobile = LocalPlatform.current == PlatformType.MOBILE
 
     Column(Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Text("我的收藏", style = MaterialTheme.typography.headlineMedium)
-            Text(
-                "收藏保存在本机；启用 WebDAV 后会按服务器和账号同步。",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        if (isMobile) {
+            Spacer(Modifier.height(MobileTopContentPadding))
             if (!canWriteFavorites) {
                 Text(
                     "用户信息加载中，暂时不能修改收藏。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 8.dp),
                 )
+            }
+        } else {
+            Column(
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text("我的收藏", style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    "收藏保存在本机；启用 WebDAV 后会按服务器和账号同步。",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (!canWriteFavorites) {
+                    Text(
+                        "用户信息加载中，暂时不能修改收藏。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
         }
 

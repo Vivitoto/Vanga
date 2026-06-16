@@ -3,8 +3,7 @@ package io.github.vivitoto.vanga.ui.library
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
@@ -34,8 +33,10 @@ import io.github.vivitoto.vanga.ui.LoadState.Success
 import io.github.vivitoto.vanga.ui.LoadState.Uninitialized
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
+import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.LocalReloadEvents
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
+import io.github.vivitoto.vanga.ui.MobileTopContentPadding
 import io.github.vivitoto.vanga.ui.ReloadableScreen
 import io.github.vivitoto.vanga.ui.collection.CollectionScreen
 import io.github.vivitoto.vanga.ui.common.components.AppFilterChipDefaults
@@ -49,6 +50,7 @@ import io.github.vivitoto.vanga.ui.library.LibraryTab.SERIES
 import io.github.vivitoto.vanga.ui.library.view.LibraryCollectionsContent
 import io.github.vivitoto.vanga.ui.library.view.LibraryReadListsContent
 import io.github.vivitoto.vanga.ui.platform.BackPressHandler
+import io.github.vivitoto.vanga.ui.platform.PlatformType
 import io.github.vivitoto.vanga.ui.platform.ScreenPullToRefreshBox
 import io.github.vivitoto.vanga.ui.readlist.ReadListScreen
 import io.github.vivitoto.vanga.ui.series.list.SeriesListContent
@@ -91,7 +93,13 @@ class LibraryScreen(
             when (val state = vm.state.collectAsState().value) {
                 is Error -> ErrorContent(message = state.exception.message ?: "未知错误", onReload = vm::reload)
                 Uninitialized, Loading, is Success -> {
-                    Column {
+                    val contentModifier =
+                        if (LocalPlatform.current == PlatformType.MOBILE) {
+                            Modifier.padding(top = MobileTopContentPadding)
+                        } else {
+                            Modifier
+                        }
+                    Column(contentModifier) {
                         if (vm.showToolbar.collectAsState().value) {
                             LibraryToolBar(
                                 library = vm.library.collectAsState().value,
@@ -261,8 +269,8 @@ fun LibraryToolBar(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        item {
-            if (library != null && isAdmin && !isOffline) {
+        if (library != null && isAdmin && !isOffline) {
+            item {
                 Box {
                     IconButton(
                         onClick = { showOptionsMenu = true }
@@ -281,9 +289,6 @@ fun LibraryToolBar(
                     )
                 }
             }
-            Text(library?.let { library.name } ?: "全部书库")
-
-            Spacer(Modifier.width(5.dp))
         }
 
 

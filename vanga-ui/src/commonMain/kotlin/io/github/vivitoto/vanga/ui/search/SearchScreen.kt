@@ -1,7 +1,9 @@
 package io.github.vivitoto.vanga.ui.search
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,6 +19,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
+import io.github.vivitoto.vanga.ui.MobileTopContentPadding
 import io.github.vivitoto.vanga.ui.ReloadableScreen
 import io.github.vivitoto.vanga.ui.book.bookScreen
 import io.github.vivitoto.vanga.ui.common.components.ErrorContent
@@ -45,8 +48,10 @@ class SearchScreen(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (LocalPlatform.current == PlatformType.MOBILE)
+                if (LocalPlatform.current == PlatformType.MOBILE) {
+                    Spacer(Modifier.height(MobileTopContentPadding))
                     SearchField(vm)
+                }
 
                 when (val state = vm.state.collectAsState().value) {
                     is LoadState.Error -> ErrorContent(

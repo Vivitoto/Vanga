@@ -2,12 +2,11 @@ package io.github.vivitoto.vanga.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -18,8 +17,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
-import io.github.vivitoto.vanga.ui.platform.PlatformTitleBar
+import io.github.vivitoto.vanga.ui.MobileTopContentPadding
 import io.github.vivitoto.vanga.ui.settings.navigation.SettingsNavigationMenu
+
+private val MobileSettingsBottomPadding = 24.dp
 
 class MobileSettingsScreen : Screen {
     @Composable
@@ -34,14 +35,12 @@ class MobileSettingsScreen : Screen {
             color = MaterialTheme.colorScheme.surface,
         ) {
             Column(
-                modifier = Modifier.padding(horizontal = 10.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 10.dp)
+                    .padding(top = MobileTopContentPadding),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                PlatformTitleBar()
-                Text("设置", style = MaterialTheme.typography.titleLarge)
-
-                HorizontalDivider()
-
                 SettingsNavigationMenu(
                     currentScreen = currentNavigator.lastItem,
                     onNavigation = { currentNavigator.push(it) },
@@ -52,7 +51,8 @@ class MobileSettingsScreen : Screen {
                     onLogout = vm::logout,
                     user = vm.user.collectAsState().value,
                     contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f, false)
+                    modifier = Modifier.weight(1f, false),
+                    contentPadding = PaddingValues(bottom = MobileSettingsBottomPadding),
                 )
             }
         }
