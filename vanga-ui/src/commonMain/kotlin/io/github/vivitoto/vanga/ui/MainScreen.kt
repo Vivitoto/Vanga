@@ -30,8 +30,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key as compositionKey
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +46,7 @@ import androidx.compose.ui.input.key.KeyEventType.Companion.KeyUp
 import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.model.rememberScreenModel
@@ -53,6 +58,7 @@ import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.book.bookScreen
 import io.github.vivitoto.vanga.ui.favorites.FavoritesScreen
 import io.github.vivitoto.vanga.ui.home.HomeScreen
+import io.github.vivitoto.vanga.ui.library.LocalLibraryScreenVisible
 import io.github.vivitoto.vanga.ui.library.LibraryScreen
 import io.github.vivitoto.vanga.ui.platform.PlatformType.DESKTOP
 import io.github.vivitoto.vanga.ui.platform.PlatformType.MOBILE
@@ -194,10 +200,75 @@ class MainScreen(
                             )
                             .consumeWindowInsets(paddingValues)
                     ) {
-                        CurrentScreen()
+                        MobileScreenContent(navigator)
                     }
                 }
             )
+        }
+    }
+
+    @Composable
+    private fun MobileScreenContent(navigator: Navigator) {
+        val cachedScreens = remember {
+            mutableStateListOf<Screen>().apply {
+                if (defaultScreen.mobileTopLevelDestination() != null) add(defaultScreen)
+            }
+        }
+        val currentScreen = navigator.lastItem
+        val currentDestination = currentScreen.mobileTopLevelDestination()
+        val shouldCacheCurrentScreen = currentDestination != null && navigator.items.size == 1
+
+        LaunchedEffect(currentScreen.key, shouldCacheCurrentScreen) {
+            if (shouldCacheCurrentScreen && cachedScreens.none { it.isSameTopLevelDestination(currentScreen) }) {
+                cachedScreens.add(currentScreen)
+            }
+        }
+
+        val screens = if (
+            currentDestination != null &&
+            cachedScreens.none { it.isSameTopLevelDestination(currentScreen) }
+        ) {
+            cachedScreens + currentScreen
+        } else {
+            cachedScreens
+        }
+
+        screens.forEach { screen ->
+            compositionKey(screen.key) {
+                val visible = currentDestination != null && screen.isSameTopLevelDestination(currentScreen)
+                KeepAliveContent(visible = visible) {
+                    if (screen is LibraryScreen) {
+                        CompositionLocalProvider(LocalLibraryScreenVisible provides visible) {
+                            screen.Content()
+                        }
+                    } else {
+                        screen.Content()
+                    }
+                }
+            }
+        }
+
+        if (currentDestination == null) {
+            CurrentScreen()
+        }
+    }
+
+    @Composable
+    private fun KeepAliveContent(
+        visible: Boolean,
+        content: @Composable () -> Unit,
+    ) {
+        Layout(
+            modifier = Modifier.fillMaxSize(),
+            content = content,
+        ) { measurables, constraints ->
+            val placeables = measurables.map { it.measure(constraints) }
+
+            layout(constraints.maxWidth, constraints.maxHeight) {
+                if (visible) {
+                    placeables.forEach { it.place(0, 0) }
+                }
+            }
         }
     }
 
@@ -218,7 +289,7 @@ class MainScreen(
                     CompactNavButton(
                         text = "首页",
                         icon = Icons.Default.Home,
-                        onClick = { navigator.replaceAll(HomeScreen()) },
+                        onClick = { navigator.replaceAllIfDifferent(HomeScreen()) },
                         isSelected = navigator.lastItem is HomeScreen,
                         modifier = Modifier.weight(1f)
                     )
@@ -226,7 +297,7 @@ class MainScreen(
                     CompactNavButton(
                         text = "书库",
                         icon = Icons.Default.LocalLibrary,
-                        onClick = { navigator.replaceAll(LibraryScreen()) },
+                        onClick = { navigator.replaceAllIfDifferent(LibraryScreen()) },
                         isSelected = navigator.lastItem is LibraryScreen,
                         modifier = Modifier.weight(1f)
                     )
@@ -235,7 +306,7 @@ class MainScreen(
                     CompactNavButton(
                         text = "收藏",
                         icon = Icons.Default.Star,
-                        onClick = { navigator.replaceAll(FavoritesScreen()) },
+                        onClick = { navigator.replaceAllIfDifferent(FavoritesScreen()) },
                         isSelected = navigator.lastItem is FavoritesScreen,
                         modifier = Modifier.weight(1f)
                     )
@@ -252,8 +323,8 @@ class MainScreen(
                     CompactNavButton(
                         text = "设置",
                         icon = Icons.Default.Settings,
-                        onClick = { navigator.parent!!.push(MobileSettingsScreen()) },
-                        isSelected = navigator.lastItem is SettingsScreen,
+                        onClick = { navigator.replaceAllIfDifferent(MobileSettingsScreen()) },
+                        isSelected = navigator.hasMobileSettingsScreen(),
                         modifier = Modifier.weight(1f)
                     )
 
@@ -290,6 +361,41 @@ class MainScreen(
         }
     }
 
+    private enum class MobileTopLevelDestination {
+        HOME,
+        LIBRARY,
+        FAVORITES,
+        SETTINGS
+    }
+
+    private fun Navigator.replaceAllIfDifferent(screen: Screen) {
+        if (!lastItem.isSameTopLevelDestination(screen)) replaceAll(screen)
+    }
+
+    private fun Navigator.hasMobileSettingsScreen(): Boolean {
+        return items.any { it is MobileSettingsScreen }
+    }
+
+    private fun Screen.isSameTopLevelDestination(screen: Screen): Boolean {
+        return when {
+            this is HomeScreen && screen is HomeScreen -> true
+            this is LibraryScreen && screen is LibraryScreen -> libraryId == screen.libraryId && key == screen.key
+            this is FavoritesScreen && screen is FavoritesScreen -> true
+            this is MobileSettingsScreen && screen is MobileSettingsScreen -> true
+            else -> false
+        }
+    }
+
+    private fun Screen.mobileTopLevelDestination(): MobileTopLevelDestination? {
+        return when (this) {
+            is HomeScreen -> MobileTopLevelDestination.HOME
+            is LibraryScreen -> MobileTopLevelDestination.LIBRARY
+            is FavoritesScreen -> MobileTopLevelDestination.FAVORITES
+            is MobileSettingsScreen -> MobileTopLevelDestination.SETTINGS
+            else -> null
+        }
+    }
+
 
     @Composable
     private fun NavBar(
@@ -303,20 +409,20 @@ class MainScreen(
             libraries = vm.libraries.collectAsState().value,
             libraryActions = vm.getLibraryActions(),
             onHomeClick = {
-                navigator.replaceAll(HomeScreen())
+                navigator.replaceAllIfDifferent(HomeScreen())
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
             onLibrariesClick = {
-                navigator.replaceAll(LibraryScreen())
+                navigator.replaceAllIfDifferent(LibraryScreen())
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
             onFavoritesClick = {
-                navigator.replaceAll(FavoritesScreen())
+                navigator.replaceAllIfDifferent(FavoritesScreen())
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
 
             onLibraryClick = {
-                navigator.replaceAll(LibraryScreen(it))
+                navigator.replaceAllIfDifferent(LibraryScreen(it))
                 if (width != FULL) coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
             onSettingsClick = { navigator.parent!!.push(SettingsScreen()) },
@@ -337,12 +443,12 @@ class MainScreen(
             libraries = vm.libraries.collectAsState().value,
             libraryActions = vm.getLibraryActions(),
             onLibrariesClick = {
-                navigator.replaceAll(LibraryScreen())
+                navigator.replaceAllIfDifferent(LibraryScreen())
                 coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
 
             onLibraryClick = {
-                navigator.replaceAll(LibraryScreen(it))
+                navigator.replaceAllIfDifferent(LibraryScreen(it))
                 coroutineScope.launch { vm.navBarState.snapTo(Closed) }
             },
         )

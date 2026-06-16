@@ -2,14 +2,18 @@ package io.github.vivitoto.vanga.ui.common.menus.bulk
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
@@ -41,7 +45,9 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -49,8 +55,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import io.github.vivitoto.vanga.ui.VangaCornerRadius
-import io.github.vivitoto.vanga.ui.VangaShape
+import androidx.compose.ui.window.PopupProperties
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -60,21 +65,20 @@ fun BulkActionsContainer(
     selectedCount: Int,
     allSelected: Boolean,
     onSelectAll: () -> Unit,
-    modifier: Modifier = Modifier,
     content: @Composable RowScope.() -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(VangaShape)
+            .clip(RoundedCornerShape(5.dp))
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
-        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
+        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, "取消选择") }
         Row(
             modifier = Modifier
-                .clip(VangaShape)
+                .clip(RoundedCornerShape(5.dp))
                 .clickable { onSelectAll() }
                 .cursorForHand()
                 .padding(end = 15.dp),
@@ -94,41 +98,69 @@ fun BulkActionsContainer(
 
 @Composable
 fun BottomPopupBulkActionsPanel(
-    onCancel: () -> Unit,
-    content: @Composable RowScope.() -> Unit,
+    onCancel: (() -> Unit)? = null,
+    content: @Composable RowScope.() -> Unit
 ) {
-    Popup(popupPositionProvider = BottomScreenPopupPositionProvider) {
-        Surface(
-            shape = RoundedCornerShape(topStart = VangaCornerRadius, topEnd = VangaCornerRadius),
-            tonalElevation = 3.dp,
-            shadowElevation = 6.dp,
+    Popup(
+        popupPositionProvider = rememberBottomCenterPopupPositionProvider(bottomPadding = 88.dp),
+        onDismissRequest = { onCancel?.invoke() },
+        properties = PopupProperties(focusable = onCancel != null),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            contentAlignment = Alignment.Center,
         ) {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
+            Surface(
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                tonalElevation = 6.dp,
+                shadowElevation = 6.dp,
                 modifier = Modifier
+                    .widthIn(max = 720.dp)
                     .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .height(64.dp)
-                    .padding(horizontal = 8.dp)
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
             ) {
-                IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
-                content()
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    if (onCancel != null) {
+                        IconButton(onClick = onCancel) { Icon(Icons.Default.Close, "取消选择") }
+                    }
+                    content()
+                }
             }
         }
     }
-
 }
 
-object BottomScreenPopupPositionProvider : PopupPositionProvider {
-    override fun calculatePosition(
-        anchorBounds: IntRect,
-        windowSize: IntSize,
-        layoutDirection: LayoutDirection,
-        popupContentSize: IntSize
-    ): IntOffset {
-        return IntOffset(0, (windowSize.height - popupContentSize.height).coerceAtLeast(0))
+@Composable
+private fun rememberBottomCenterPopupPositionProvider(bottomPadding: Dp): PopupPositionProvider {
+    val density = LocalDensity.current
+    val bottomPaddingPx = with(density) { bottomPadding.roundToPx() }
+    val navigationBarsPaddingPx = WindowInsets.navigationBars.getBottom(density)
+    return remember(bottomPaddingPx, navigationBarsPaddingPx) {
+        object : PopupPositionProvider {
+            override fun calculatePosition(
+                anchorBounds: IntRect,
+                windowSize: IntSize,
+                layoutDirection: LayoutDirection,
+                popupContentSize: IntSize
+            ): IntOffset {
+                val x = (windowSize.width - popupContentSize.width) / 2
+                val y = windowSize.height -
+                        popupContentSize.height -
+                        bottomPaddingPx -
+                        navigationBarsPaddingPx
+                return IntOffset(x.coerceAtLeast(0), y.coerceAtLeast(0))
+            }
+        }
     }
 }
 
@@ -253,7 +285,10 @@ private fun MoreActionsDropdown(actions: List<BulkActionButtonData>, compact: Bo
                             Text(actionData.description)
                         }
                     },
-                    onClick = actionData.onClick
+                    onClick = {
+                        showDropdown = false
+                        actionData.onClick()
+                    }
                 )
             }
         }

@@ -68,6 +68,7 @@ class LibrarySeriesTabState(
     )
 
     private val reloadEventsEnabled = MutableStateFlow(true)
+    private val pendingKomgaReload = MutableStateFlow(false)
     private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, BufferOverflow.DROP_OLDEST)
 
     fun initialize(filter: SeriesScreenFilter? = null) {
@@ -91,9 +92,7 @@ class LibrarySeriesTabState(
         startKomgaEventListener()
 
         reloadJobsFlow.onEach {
-            reloadEventsEnabled.first { it }
-            loadSeriesPage(currentSeriesPage)
-            delay(1000)
+            if (processKomgaReload()) delay(1000)
         }.launchIn(screenModelScope)
 
         filterState.state.drop(1).onEach { loadSeriesPage(1) }
@@ -102,7 +101,7 @@ class LibrarySeriesTabState(
 
     fun reload() {
         screenModelScope.launch {
-            loadSeriesPage(1)
+            loadSeriesPage(1, showLoading = true)
         }
     }
 
@@ -137,13 +136,24 @@ class LibrarySeriesTabState(
         if (selectedSeries.isNotEmpty() && !isInEditMode.value) onEditModeChange(true)
     }
 
-    private suspend fun loadSeriesPage(page: Int) {
+    private suspend fun processKomgaReload(): Boolean {
+        if (!reloadEventsEnabled.value) {
+            pendingKomgaReload.value = true
+            return false
+        }
+
+        pendingKomgaReload.value = false
+        loadSeriesPage(currentSeriesPage, showLoading = false)
+        return true
+    }
+
+    private suspend fun loadSeriesPage(page: Int, showLoading: Boolean = true) {
         notifications.runCatchingToNotifications {
-            val loadStateDelay = delayLoadState()
+            val loadStateDelay = if (showLoading || state.value !is LoadState.Success) delayLoadState() else null
             currentSeriesPage = page
             val seriesPage = getAllSeries(page, filterState.state.value)
 
-            loadStateDelay.cancel()
+            loadStateDelay?.cancel()
 
             currentSeriesPage = seriesPage.number + 1
             totalSeriesPages = seriesPage.totalPages
@@ -187,6 +197,7 @@ class LibrarySeriesTabState(
 
     fun startKomgaEventHandler() {
         reloadEventsEnabled.value = true
+        if (pendingKomgaReload.value) reloadJobsFlow.tryEmit(Unit)
     }
 
     private fun startKomgaEventListener() {

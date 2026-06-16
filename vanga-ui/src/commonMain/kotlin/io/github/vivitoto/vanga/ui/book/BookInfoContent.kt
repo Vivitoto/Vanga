@@ -4,10 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -18,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -26,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -61,6 +64,7 @@ private val authorsOrder = listOf(
     translatorRole
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookInfoColumn(
     publisher: String?,
@@ -83,8 +87,8 @@ fun BookInfoColumn(
             )
         }
 
-        val genreEntries = remember(genres) { genres.orEmpty().map { stringEntry(it) } }
-        if (genreEntries.isNotEmpty()) {
+        val genreEntries = remember(genres) { genres?.map { stringEntry(it) } }
+        if (genreEntries != null) {
             DescriptionChips(
                 label = "题材",
                 chipValues = genreEntries,
@@ -92,25 +96,22 @@ fun BookInfoColumn(
             )
         }
 
-        if (tags.isNotEmpty()) {
-            TagList(
-                tags = tags,
-                secondaryTags = null,
-                onTagClick = { onFilterClick(SeriesScreenFilter(tags = listOf(it))) },
-            )
-        }
+        TagList(
+            tags = tags,
+            secondaryTags = null,
+            onTagClick = { onFilterClick(SeriesScreenFilter(tags = listOf(it))) },
+        )
 
         val uriHandler = LocalUriHandler.current
         val linkEntries = remember(links) { links.map { LabeledEntry(it, it.label) } }
-        if (linkEntries.isNotEmpty()) {
-            DescriptionChips(
-                label = "链接",
-                chipValues = linkEntries,
-                onChipClick = { entry -> uriHandler.openUri(entry.url) },
-                icon = Icons.Default.Link,
-            )
-        }
+        DescriptionChips(
+            label = "链接",
+            chipValues = linkEntries,
+            onChipClick = { entry -> uriHandler.openUri(entry.url) },
+            icon = Icons.Default.Link,
+        )
 
+        Spacer(Modifier.size(0.dp))
         val authorEntries = remember(authors) {
             authors
                 .groupBy { it.role }
@@ -127,13 +128,16 @@ fun BookInfoColumn(
             )
         }
 
+        Spacer(Modifier.size(0.dp))
         Row {
             Text(
                 "大小",
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
-            SelectionContainer { Text(sizeInMiB, style = MaterialTheme.typography.labelLarge) }
+            SelectionContainer(Modifier.weight(1f)) {
+                Text(sizeInMiB, style = MaterialTheme.typography.labelLarge)
+            }
         }
 
         Row {
@@ -143,7 +147,9 @@ fun BookInfoColumn(
                 modifier = Modifier.width(120.dp)
             )
             if (mediaType != null) {
-                SelectionContainer { Text(mediaType, style = MaterialTheme.typography.labelLarge) }
+                SelectionContainer(Modifier.weight(1f)) {
+                    Text(mediaType, style = MaterialTheme.typography.labelLarge)
+                }
             }
         }
 
@@ -154,7 +160,9 @@ fun BookInfoColumn(
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.width(120.dp)
                 )
-                SelectionContainer { Text(isbn, style = MaterialTheme.typography.labelLarge) }
+                SelectionContainer(Modifier.weight(1f)) {
+                    Text(isbn, style = MaterialTheme.typography.labelLarge)
+                }
             }
         }
 
@@ -164,7 +172,45 @@ fun BookInfoColumn(
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.width(120.dp)
             )
-            SelectionContainer { Text(fileUrl, style = MaterialTheme.typography.labelLarge) }
+            SelectionContainer(Modifier.weight(1f)) {
+                Text(
+                    fileUrl,
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookPositionBadge(book: VangaBook) {
+    Surface(
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        tonalElevation = 1.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .heightIn(min = 40.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = "第 ${book.metadata.number} 本",
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = "共 ${book.media.pagesCount} 页",
+                style = MaterialTheme.typography.labelMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
@@ -180,137 +226,135 @@ fun BookInfoRow(
 
     Column(
         modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
+        if (onSeriesButtonClick != null) {
+            ElevatedButton(
+                onClick = onSeriesButtonClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .pointerHoverIcon(PointerIcon.Hand)
             ) {
-                if (onSeriesButtonClick != null) {
-                    ElevatedButton(
-                        onClick = onSeriesButtonClick,
-                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-                    ) {
-                        Icon(Icons.AutoMirrored.Outlined.LibraryBooks, null)
-                        Spacer(Modifier.width(3.dp))
-                        Text(text = book.seriesTitle, textDecoration = TextDecoration.Underline)
-                    }
-                }
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
+                Icon(Icons.AutoMirrored.Outlined.LibraryBooks, null)
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    text = book.seriesTitle,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+        }
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BookPositionBadge(book)
+            if (actions != null) {
+                actions()
+            }
+        }
+
+        if (book.deleted || book.remoteFileUnavailable || book.isLocalFileOutdated) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (book.deleted) {
                     SuggestionChip(
                         onClick = {},
-                        label = { Text("第 ${book.metadata.number} 本 · ${book.media.pagesCount} 页") },
+                        label = { Text("不可用") },
+                        border = null,
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
                     )
-                    if (book.deleted) {
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text("不可用") },
-                            border = null,
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            )
-                        )
-                    }
-                    if (book.remoteFileUnavailable) {
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text("远程文件不可用") },
-                            border = null,
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            )
-                        )
-                    }
-
-                    if (book.isLocalFileOutdated) {
-                        SuggestionChip(
-                            onClick = {},
-                            label = { Text("本地下载已过期") },
-                            border = null,
-                            colors = SuggestionChipDefaults.suggestionChipColors(
-                                containerColor = MaterialTheme.colorScheme.errorContainer
-                            )
-                        )
-                    }
                 }
-            }
-            if (actions != null) {
-                Row(
-                    modifier = Modifier.padding(start = 4.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    actions()
+                if (book.remoteFileUnavailable) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text("远程文件不可用") },
+                        border = null,
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    )
+                }
+
+                if (book.isLocalFileOutdated) {
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text("本地下载已过期") },
+                        border = null,
+                        colors = SuggestionChipDefaults.suggestionChipColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    )
                 }
             }
         }
-        SelectionContainer {
-            Column {
-                book.metadata.releaseDate?.let {
-                    Row {
-                        Text(
-                            text = "发布日期：",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.width(120.dp)
-                        )
 
-                        Text(
-                            it.toString(),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+        val releaseDate = book.metadata.releaseDate
+        val readProgress = book.readProgress
+        if (releaseDate != null || readProgress != null) {
+            SelectionContainer {
+                Column {
+                    releaseDate?.let {
+                        Row {
+                            Text(
+                                text = "发布日期：",
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.width(120.dp)
+                            )
+
+                            Text(
+                                it.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
-                }
 
-                val readProgress = book.readProgress
-                val pagesCount = book.media.pagesCount
-                if (readProgress != null) {
-                    if (!readProgress.completed) {
-                        val readProgressText = remember(pagesCount, readProgress) {
-                            buildString {
-                                val pagesLeft = pagesCount - readProgress.page
-                                val percentage =
-                                    (readProgress.page.toFloat() / pagesCount * 100)
-                                        .roundToInt()
-                                append(percentage)
-                                append("%, ")
-                                append(pagesLeft)
-                                append(" 页未读")
+                    val pagesCount = book.media.pagesCount
+                    if (readProgress != null) {
+                        if (!readProgress.completed) {
+                            val readProgressText = remember(pagesCount, readProgress) {
+                                buildString {
+                                    val pagesLeft = pagesCount - readProgress.page
+                                    val percentage =
+                                        (readProgress.page.toFloat() / pagesCount * 100)
+                                            .roundToInt()
+                                    append(percentage)
+                                    append("%, ")
+                                    append(pagesLeft)
+                                    append(" 页未读")
+                                }
+                            }
+
+                            Row {
+                                Text(
+                                    "阅读进度：",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.width(120.dp)
+                                )
+                                Text(readProgressText, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
 
                         Row {
+                            val readDate = remember(readProgress) {
+                                readProgress.readDate
+                                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                                    .format(localDateTimeFormat)
+                            }
                             Text(
-                                "阅读进度：",
+                                "上次阅读：",
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.width(120.dp)
                             )
-                            Text(readProgressText, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                readDate,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
-                    }
-
-                    Row {
-                        val readDate = remember(readProgress) {
-                            readProgress.readDate
-                                .toLocalDateTime(TimeZone.currentSystemDefault())
-                                .format(localDateTimeFormat)
-                        }
-                        Text(
-                            "上次阅读：",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.width(120.dp)
-                        )
-                        Text(
-                            readDate,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
                     }
                 }
             }

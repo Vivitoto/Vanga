@@ -185,7 +185,6 @@ private fun SearchBulkActionsToolbar(
                     .forEach(onSelectedItemSelect)
             }
         },
-        modifier = modifier,
     ) {
         when (LocalWindowWidth.current) {
             WindowSizeClass.FULL, WindowSizeClass.EXPANDED -> {

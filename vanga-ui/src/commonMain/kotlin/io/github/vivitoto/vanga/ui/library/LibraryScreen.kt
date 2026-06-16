@@ -3,11 +3,7 @@ package io.github.vivitoto.vanga.ui.library
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
@@ -15,7 +11,6 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -25,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -63,6 +59,8 @@ import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.series.KomgaSeriesStatus
 import kotlin.jvm.Transient
 
+val LocalLibraryScreenVisible = staticCompositionLocalOf { true }
+
 class LibraryScreen(
     val libraryId: KomgaLibraryId? = null,
     @Transient
@@ -77,15 +75,17 @@ class LibraryScreen(
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel(libraryId?.value) { viewModelFactory.getLibraryViewModel(libraryId) }
         val reloadEvents = LocalReloadEvents.current
+        val isVisible = LocalLibraryScreenVisible.current
 
         LaunchedEffect(libraryId) {
             vm.initialize(seriesFilter)
             reloadEvents.collect { vm.reload() }
         }
-        DisposableEffect(Unit) {
-            vm.startKomgaEventHandler()
-            onDispose { vm.stopKomgaEventHandler() }
+        LaunchedEffect(isVisible) {
+            if (isVisible) vm.startKomgaEventHandler()
+            else vm.stopKomgaEventHandler()
         }
+        DisposableEffect(Unit) { onDispose { vm.stopKomgaEventHandler() } }
 
         ScreenPullToRefreshBox(screenState = vm.state, onRefresh = vm::reload) {
             when (val state = vm.state.collectAsState().value) {
@@ -113,18 +113,20 @@ class LibraryScreen(
                     }
                 }
             }
-            BackPressHandler { navigator.pop() }
+            if (isVisible) BackPressHandler { navigator.pop() }
         }
     }
 
     @Composable
     private fun BrowseTab(seriesTabState: LibrarySeriesTabState) {
         val navigator = LocalNavigator.currentOrThrow
+        val isVisible = LocalLibraryScreenVisible.current
         LaunchedEffect(libraryId) { seriesTabState.initialize(seriesFilter) }
-        DisposableEffect(Unit) {
-            seriesTabState.startKomgaEventHandler()
-            onDispose { seriesTabState.stopKomgaEventHandler() }
+        LaunchedEffect(isVisible) {
+            if (isVisible) seriesTabState.startKomgaEventHandler()
+            else seriesTabState.stopKomgaEventHandler()
         }
+        DisposableEffect(Unit) { onDispose { seriesTabState.stopKomgaEventHandler() } }
 
         when (val state = seriesTabState.state.collectAsState().value) {
             is Error -> ErrorContent(
@@ -163,11 +165,13 @@ class LibraryScreen(
     @Composable
     private fun CollectionsTab(collectionsTabState: LibraryCollectionsTabState) {
         val navigator = LocalNavigator.currentOrThrow
+        val isVisible = LocalLibraryScreenVisible.current
         LaunchedEffect(libraryId) { collectionsTabState.initialize() }
-        DisposableEffect(Unit) {
-            collectionsTabState.startKomgaEventHandler()
-            onDispose { collectionsTabState.stopKomgaEventHandler() }
+        LaunchedEffect(isVisible) {
+            if (isVisible) collectionsTabState.startKomgaEventHandler()
+            else collectionsTabState.stopKomgaEventHandler()
         }
+        DisposableEffect(Unit) { onDispose { collectionsTabState.stopKomgaEventHandler() } }
 
         when (val state = collectionsTabState.state.collectAsState().value) {
             Uninitialized -> LoadingMaxSizeIndicator()
@@ -202,11 +206,13 @@ class LibraryScreen(
     @Composable
     private fun ReadListsTab(readListTabState: LibraryReadListsTabState) {
         val navigator = LocalNavigator.currentOrThrow
+        val isVisible = LocalLibraryScreenVisible.current
         LaunchedEffect(libraryId) { readListTabState.initialize() }
-        DisposableEffect(Unit) {
-            readListTabState.startKomgaEventHandler()
-            onDispose { readListTabState.stopKomgaEventHandler() }
+        LaunchedEffect(isVisible) {
+            if (isVisible) readListTabState.startKomgaEventHandler()
+            else readListTabState.stopKomgaEventHandler()
         }
+        DisposableEffect(Unit) { onDispose { readListTabState.stopKomgaEventHandler() } }
 
         when (val state = readListTabState.state.collectAsState().value) {
             Uninitialized -> LoadingMaxSizeIndicator()
@@ -251,75 +257,68 @@ fun LibraryToolBar(
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
 
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 6.dp),
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f)) {
-            if (library != null) {
-                Text(library.name, style = MaterialTheme.typography.titleMedium)
-            }
-
-            if (collectionsCount > 0 || readListsCount > 0) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    contentPadding = PaddingValues(end = 10.dp),
-                ) {
-                    item {
-                        FilterChip(
-                            onClick = onBrowseClick,
-                            selected = currentTab == SERIES,
-                            label = { Text("漫画系列") },
-                            colors = chipColors,
-                            border = null,
+        item {
+            if (library != null && isAdmin && !isOffline) {
+                Box {
+                    IconButton(
+                        onClick = { showOptionsMenu = true }
+                    ) {
+                        Icon(
+                            Icons.Rounded.MoreVert,
+                            contentDescription = "书库操作",
                         )
                     }
 
-                    if (collectionsCount > 0)
-                        item {
-                            FilterChip(
-                                onClick = onCollectionsClick,
-                                selected = currentTab == COLLECTIONS,
-                                label = { Text("合集") },
-                                colors = chipColors,
-                                border = null,
-                            )
-                        }
-
-                    if (readListsCount > 0)
-                        item {
-                            FilterChip(
-                                onClick = onReadListsClick,
-                                selected = currentTab == READ_LISTS,
-                                label = { Text("阅读清单") },
-                                colors = chipColors,
-                                border = null,
-                            )
-                        }
-                }
-            }
-        }
-
-        if (library != null && isAdmin && !isOffline) {
-            Box {
-                IconButton(
-                    onClick = { showOptionsMenu = true }
-                ) {
-                    Icon(
-                        Icons.Rounded.MoreVert,
-                        contentDescription = null,
+                    LibraryActionsMenu(
+                        library = library,
+                        actions = libraryActions,
+                        expanded = showOptionsMenu,
+                        onDismissRequest = { showOptionsMenu = false }
                     )
                 }
+            }
+            Text(library?.let { library.name } ?: "全部书库")
 
-                LibraryActionsMenu(
-                    library = library,
-                    actions = libraryActions,
-                    expanded = showOptionsMenu,
-                    onDismissRequest = { showOptionsMenu = false }
+            Spacer(Modifier.width(5.dp))
+        }
+
+
+        if (collectionsCount > 0 || readListsCount > 0)
+            item {
+                FilterChip(
+                    onClick = onBrowseClick,
+                    selected = currentTab == SERIES,
+                    label = { Text("漫画系列") },
+                    colors = chipColors,
+                    border = null,
                 )
             }
-        }
+
+        if (collectionsCount > 0)
+            item {
+                FilterChip(
+                    onClick = onCollectionsClick,
+                    selected = currentTab == COLLECTIONS,
+                    label = { Text("合集") },
+                    colors = chipColors,
+                    border = null,
+                )
+            }
+
+        if (readListsCount > 0)
+            item {
+                FilterChip(
+                    onClick = onReadListsClick,
+                    selected = currentTab == READ_LISTS,
+                    label = { Text("阅读清单") },
+                    colors = chipColors,
+                    border = null,
+                )
+            }
 
     }
 }

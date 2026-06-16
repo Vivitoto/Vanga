@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -70,6 +69,7 @@ class LibraryViewModel(
         private set
 
     private val reloadEventsEnabled = MutableStateFlow(true)
+    private val pendingKomgaReload = MutableStateFlow(false)
     private val reloadJobsFlow = MutableSharedFlow<Unit>(1, 0, DROP_OLDEST)
 
     val seriesTabState = LibrarySeriesTabState(
@@ -108,16 +108,14 @@ class LibraryViewModel(
         startKomgaEventListener()
 
         reloadJobsFlow.onEach {
-            reloadEventsEnabled.first { it }
-            loadItemCounts()
-            delay(1000)
+            if (processKomgaReload()) delay(1000)
         }.launchIn(screenModelScope)
     }
 
     fun reload() {
         mutableState.value = Loading
         screenModelScope.launch {
-            loadItemCounts()
+            loadItemCounts(showLoading = true)
             when (currentTab) {
                 SERIES -> seriesTabState.reload()
                 COLLECTIONS -> collectionsTabState.reload()
@@ -126,19 +124,26 @@ class LibraryViewModel(
         }
     }
 
-    private suspend fun loadItemCounts() {
+    private suspend fun processKomgaReload(): Boolean {
+        if (!reloadEventsEnabled.value) {
+            pendingKomgaReload.value = true
+            return false
+        }
+
+        pendingKomgaReload.value = false
+        loadItemCounts(showLoading = false)
+        return true
+    }
+
+    private suspend fun loadItemCounts(showLoading: Boolean = true) {
         if (state.value is Error) return
 
         appNotifications.runCatchingToNotifications {
-            mutableState.value = Loading
+            if (showLoading || state.value !is Success) mutableState.value = Loading
             val pageRequest = KomgaPageRequest(unpaged = true)
             val libraryIds = listOfNotNull(library.value?.id)
-            collectionsCount = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
-                .content
-                .size
-            readListsCount = readListsApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
-                .content
-                .size
+            collectionsCount = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest).content.size
+            readListsCount = readListsApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest).content.size
 
             if (collectionsCount == 0 && currentTab == COLLECTIONS) currentTab = SERIES
             if (readListsCount == 0 && currentTab == READ_LISTS) currentTab = SERIES
@@ -166,6 +171,7 @@ class LibraryViewModel(
 
     fun startKomgaEventHandler() {
         reloadEventsEnabled.value = true
+        if (pendingKomgaReload.value) reloadJobsFlow.tryEmit(Unit)
 
     }
 

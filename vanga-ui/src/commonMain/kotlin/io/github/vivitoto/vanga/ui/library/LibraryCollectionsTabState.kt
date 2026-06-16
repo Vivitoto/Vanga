@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -48,6 +47,7 @@ class LibraryCollectionsTabState(
         private set
 
     private val reloadEventsEnabled = MutableStateFlow(true)
+    private val pendingKomgaReload = MutableStateFlow(false)
     private val collectionsReloadJobsFlow = MutableSharedFlow<Unit>(1, 0, BufferOverflow.DROP_OLDEST)
 
     fun initialize() {
@@ -57,14 +57,12 @@ class LibraryCollectionsTabState(
         startKomgaEventListener()
 
         collectionsReloadJobsFlow.onEach {
-            reloadEventsEnabled.first { it }
-            loadCollections(currentPage)
-            delay(1000)
+            if (processKomgaReload()) delay(1000)
         }.launchIn(screenModelScope)
     }
 
     fun reload() {
-        screenModelScope.launch { loadCollections(1) }
+        screenModelScope.launch { loadCollections(1, showLoading = true) }
     }
 
     fun onCollectionDelete(collectionId: KomgaCollectionId) {
@@ -82,15 +80,25 @@ class LibraryCollectionsTabState(
         screenModelScope.launch { loadCollections(1) }
     }
 
-    private suspend fun loadCollections(page: Int) {
+    private suspend fun processKomgaReload(): Boolean {
+        if (!reloadEventsEnabled.value) {
+            pendingKomgaReload.value = true
+            return false
+        }
+
+        pendingKomgaReload.value = false
+        loadCollections(currentPage, showLoading = false)
+        return true
+    }
+
+    private suspend fun loadCollections(page: Int, showLoading: Boolean = true) {
         appNotifications.runCatchingToNotifications {
 
-            if (totalCollections > pageSize) mutableState.value = Loading
+            if (showLoading && totalCollections > pageSize) mutableState.value = Loading
 
             val pageRequest = KomgaPageRequest(unpaged = true)
             val libraryIds = listOfNotNull(library.value?.id)
-            val visibleCollections = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
-                .content
+            val visibleCollections = collectionApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest).content
             val visibleTotalPages = ((visibleCollections.size + pageSize - 1) / pageSize).coerceAtLeast(1)
             val visiblePage = page.coerceIn(1, visibleTotalPages)
 
@@ -111,6 +119,7 @@ class LibraryCollectionsTabState(
 
     fun startKomgaEventHandler() {
         reloadEventsEnabled.value = true
+        if (pendingKomgaReload.value) collectionsReloadJobsFlow.tryEmit(Unit)
     }
 
     private fun startKomgaEventListener() {

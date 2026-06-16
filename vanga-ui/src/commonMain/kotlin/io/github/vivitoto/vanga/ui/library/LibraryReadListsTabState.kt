@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -47,6 +46,7 @@ class LibraryReadListsTabState(
         private set
 
     private val reloadEventsEnabled = MutableStateFlow(true)
+    private val pendingKomgaReload = MutableStateFlow(false)
     private val readListsReloadJobsFlow = MutableSharedFlow<Unit>(1, 0, BufferOverflow.DROP_OLDEST)
 
     fun initialize() {
@@ -55,14 +55,12 @@ class LibraryReadListsTabState(
         startKomgaEventListener()
 
         readListsReloadJobsFlow.onEach {
-            reloadEventsEnabled.first { it }
-            loadReadLists(currentPage)
-            delay(1000)
+            if (processKomgaReload()) delay(1000)
         }.launchIn(screenModelScope)
     }
 
     fun reload() {
-        screenModelScope.launch { loadReadLists(1) }
+        screenModelScope.launch { loadReadLists(1, showLoading = true) }
     }
 
     fun onReadListDelete(readListId: KomgaReadListId) {
@@ -80,16 +78,26 @@ class LibraryReadListsTabState(
         screenModelScope.launch { loadReadLists(1) }
     }
 
-    private suspend fun loadReadLists(page: Int) {
+    private suspend fun processKomgaReload(): Boolean {
+        if (!reloadEventsEnabled.value) {
+            pendingKomgaReload.value = true
+            return false
+        }
+
+        pendingKomgaReload.value = false
+        loadReadLists(currentPage, showLoading = false)
+        return true
+    }
+
+    private suspend fun loadReadLists(page: Int, showLoading: Boolean = true) {
         appNotifications.runCatchingToNotifications {
 
-            if (totalReadLists > pageSize) mutableState.value = Loading
+            if (showLoading && totalReadLists > pageSize) mutableState.value = Loading
 
             val library = this.library?.value
             val libraryIds = if (library != null) listOf(library.id) else emptyList()
             val pageRequest = KomgaPageRequest(unpaged = true)
-            val visibleReadLists = readListApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest)
-                .content
+            val visibleReadLists = readListApi.getAll(libraryIds = libraryIds, pageRequest = pageRequest).content
             val visibleTotalPages = ((visibleReadLists.size + pageSize - 1) / pageSize).coerceAtLeast(1)
             val visiblePage = page.coerceIn(1, visibleTotalPages)
 
@@ -108,6 +116,7 @@ class LibraryReadListsTabState(
 
     fun startKomgaEventHandler() {
         reloadEventsEnabled.value = true
+        if (pendingKomgaReload.value) readListsReloadJobsFlow.tryEmit(Unit)
     }
 
     private fun startKomgaEventListener() {
