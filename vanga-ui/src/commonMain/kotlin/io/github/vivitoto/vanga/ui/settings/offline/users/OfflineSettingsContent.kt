@@ -1,14 +1,10 @@
 package io.github.vivitoto.vanga.ui.settings.offline.users
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
@@ -28,16 +24,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.offline.server.model.OfflineMediaServer
 import io.github.vivitoto.vanga.offline.server.model.OfflineMediaServerId
 import io.github.vivitoto.vanga.offline.user.model.OfflineUser
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsValueRow
 import snd.komga.client.user.KomgaUser
 import snd.komga.client.user.KomgaUserId
 
@@ -52,22 +52,17 @@ fun OfflineUserSettingsContent(
     onServerDelete: (OfflineMediaServerId) -> Unit,
     onUserDelete: (KomgaUserId) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
 
-        SettingsSectionHeader(
+        SettingsSectionCard(
             title = "离线身份",
-            description = "切换在线/离线阅读身份，并管理已缓存的离线用户数据。"
-        )
-
-        Column {
-            Text("当前用户：${currentUser?.email ?: "无"}")
-            Text("当前状态：${if (isOffline) "离线" else "在线"}")
-            Text("服务器：${if (currentUser?.id == OfflineUser.ROOT || onlineServerUrl == null) "无" else onlineServerUrl}")
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
+            SettingsValueRow("当前用户", currentUser?.email ?: "无")
+            SettingsValueRow("当前状态", if (isOffline) "离线" else "在线")
+            SettingsValueRow(
+                title = "服务器",
+                value = if (currentUser?.id == OfflineUser.ROOT || onlineServerUrl == null) "无" else onlineServerUrl,
+            )
             val canGoOffline = remember(isOffline, serverUsers, currentUser) {
                 when {
                     isOffline -> false
@@ -77,9 +72,29 @@ fun OfflineUserSettingsContent(
             }
 
             if (isOffline) {
-                FilledTonalButton(onClick = { goOnline() }) { Text("回到在线模式") }
+                SettingsRow(
+                    title = "在线模式",
+                    trailing = {
+                        FilledTonalButton(onClick = { goOnline() }) { Text("回到在线") }
+                    }
+                )
             } else if (canGoOffline) {
-                FilledTonalButton(onClick = { currentUser?.let { loginAs(it.id) } }) { Text("用当前账号离线阅读") }
+                SettingsRow(
+                    title = "离线阅读",
+                    trailing = {
+                        FilledTonalButton(onClick = { currentUser?.let { loginAs(it.id) } }) { Text("离线阅读") }
+                    }
+                )
+            }
+        }
+
+        SettingsSectionHeader(
+            title = "离线数据",
+        )
+
+        if (serverUsers.isEmpty()) {
+            SettingsCard {
+                Text("暂无离线用户数据", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
 
@@ -113,27 +128,29 @@ fun ServerCard(
 
     var showUsers by remember { mutableStateOf(expandByDefault || users.size == 1) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
-    Column(
+    SettingsCard(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable { showUsers = !showUsers }
-            .pointerHoverIcon(PointerIcon.Hand)
-            .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-
+            .pointerHoverIcon(PointerIcon.Hand),
     ) {
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row {
-                Text(server.url, textDecoration = TextDecoration.Underline)
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = server.url,
+                    textDecoration = TextDecoration.Underline,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "${users.size} 个离线用户",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
-            Icon(if (showUsers) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
-            Spacer(Modifier.weight(1f))
 
             if (onServerDelete != null) {
                 IconButton(onClick = { showDeleteConfirmation = true }) {
@@ -149,6 +166,7 @@ fun ServerCard(
                     )
                 }
             }
+            Icon(if (showUsers) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
         }
 
         if (showUsers) {
@@ -209,35 +227,33 @@ private fun UserCard(
 
 @Composable
 fun RootUserCard(goOffline: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    SettingsCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Icon(
-                    Icons.Default.SupervisorAccount,
-                    null,
-                    tint = MaterialTheme.colorScheme.tertiaryContainer
-                )
-                Text("全部离线内容")
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(
+                        Icons.Default.SupervisorAccount,
+                        null,
+                        tint = MaterialTheme.colorScheme.tertiaryContainer
+                    )
+                    Text("全部离线内容")
+                }
+
+                Text("可访问所有已下载书籍的特殊离线入口")
+                Text("阅读进度不会同步")
             }
 
-            Text("可访问所有已下载书籍的特殊离线入口")
-            Text("阅读进度不会同步")
-        }
 
-
-        FilledTonalButton(onClick = { goOffline() }) {
-            Text("切换")
+            FilledTonalButton(onClick = { goOffline() }) {
+                Text("切换")
+            }
         }
     }
 }

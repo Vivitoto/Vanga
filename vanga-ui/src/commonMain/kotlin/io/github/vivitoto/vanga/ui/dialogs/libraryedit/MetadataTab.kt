@@ -5,15 +5,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material3.Text
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.StateHolder
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
-import io.github.vivitoto.vanga.ui.common.components.ChildSwitchingCheckboxWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.tabs.DialogTab
 import io.github.vivitoto.vanga.ui.dialogs.tabs.TabItem
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 
 internal class MetadataTab(
     private val vm: LibraryEditDialogViewModel,
@@ -61,7 +65,7 @@ private fun MetadataTabContent(
     importLocalArtwork: StateHolder<Boolean>,
     importBarcodeIsbn: StateHolder<Boolean>,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         ComicInfoSettings(
             importComicInfoBook = importComicInfoBook,
             importComicInfoSeries = importComicInfoSeries,
@@ -76,8 +80,6 @@ private fun MetadataTabContent(
         MylarSettings(importMylarSeries)
         LocalArtworkSettings(importLocalArtwork)
         BarcodeISBNSettings(importBarcodeIsbn)
-
-
     }
 }
 
@@ -89,9 +91,12 @@ private fun ComicInfoSettings(
     importComicInfoCollection: StateHolder<Boolean>,
     importComicInfoReadList: StateHolder<Boolean>,
 ) {
-    Column {
-        ChildSwitchingCheckboxWithLabel(
-            label = { Text("从包含 ComicInfo.xml 的 CBR/CBZ 导入元数据") },
+    SettingsSectionCard(
+        title = "ComicInfo.xml",
+        description = "从包含 ComicInfo.xml 的 CBR/CBZ 导入元数据。",
+    ) {
+        SettingsChildCheckboxRow(
+            title = "全部 ComicInfo 元数据",
             children = listOf(
                 importComicInfoBook,
                 importComicInfoSeries,
@@ -100,35 +105,33 @@ private fun ComicInfoSettings(
                 importComicInfoReadList
             ),
         )
-        Column(
-            modifier = Modifier.padding(start = 10.dp)
-        ) {
-            CheckboxWithLabel(
-                label = { Text("书籍元数据") },
+        Column(modifier = Modifier.padding(start = 12.dp)) {
+            SettingsCheckboxRow(
+                title = "书籍元数据",
                 checked = importComicInfoBook.value,
                 onCheckedChange = importComicInfoBook.setValue,
             )
 
-            CheckboxWithLabel(
-                label = { Text("系列元数据") },
+            SettingsCheckboxRow(
+                title = "系列元数据",
                 checked = importComicInfoSeries.value,
                 onCheckedChange = importComicInfoSeries.setValue,
             )
 
-            CheckboxWithLabel(
-                label = { Text("将卷号追加到系列标题") },
+            SettingsCheckboxRow(
+                title = "将卷号追加到系列标题",
                 checked = importComicInfoSeriesAppendVolume.value,
                 onCheckedChange = importComicInfoSeriesAppendVolume.setValue,
             )
 
-            CheckboxWithLabel(
-                label = { Text("合集") },
+            SettingsCheckboxRow(
+                title = "合集",
                 checked = importComicInfoCollection.value,
                 onCheckedChange = importComicInfoCollection.setValue,
             )
 
-            CheckboxWithLabel(
-                label = { Text("阅读清单") },
+            SettingsCheckboxRow(
+                title = "阅读清单",
                 checked = importComicInfoReadList.value,
                 onCheckedChange = importComicInfoReadList.setValue,
             )
@@ -141,22 +144,25 @@ private fun EpubSettings(
     importEpubBook: StateHolder<Boolean>,
     importEpubSeries: StateHolder<Boolean>,
 ) {
-    Column {
-        ChildSwitchingCheckboxWithLabel(
-            label = { Text("从 EPUB 文件导入元数据") },
+    SettingsSectionCard(
+        title = "EPUB",
+        description = "从 EPUB 文件导入元数据。",
+    ) {
+        SettingsChildCheckboxRow(
+            title = "全部 EPUB 元数据",
             children = listOf(
                 importEpubBook,
                 importEpubSeries,
             ),
         )
-        Column(Modifier.padding(start = 10.dp)) {
-            CheckboxWithLabel(
-                label = { Text("书籍元数据") },
+        Column(Modifier.padding(start = 12.dp)) {
+            SettingsCheckboxRow(
+                title = "书籍元数据",
                 checked = importEpubBook.value,
                 onCheckedChange = importEpubBook.setValue,
             )
-            CheckboxWithLabel(
-                label = { Text("系列元数据") },
+            SettingsCheckboxRow(
+                title = "系列元数据",
                 checked = importEpubSeries.value,
                 onCheckedChange = importEpubSeries.setValue,
             )
@@ -168,15 +174,12 @@ private fun EpubSettings(
 private fun MylarSettings(
     importMylarSeries: StateHolder<Boolean>,
 ) {
-    Column {
-        Text("导入 Mylar 生成的元数据")
-        Column(Modifier.padding(start = 10.dp)) {
-            CheckboxWithLabel(
-                label = { Text("系列元数据") },
-                checked = importMylarSeries.value,
-                onCheckedChange = importMylarSeries.setValue,
-            )
-        }
+    SettingsSectionCard("Mylar", description = "导入 Mylar 生成的元数据。") {
+        SettingsCheckboxRow(
+            title = "系列元数据",
+            checked = importMylarSeries.value,
+            onCheckedChange = importMylarSeries.setValue,
+        )
     }
 }
 
@@ -184,16 +187,12 @@ private fun MylarSettings(
 private fun LocalArtworkSettings(
     importLocalArtwork: StateHolder<Boolean>,
 ) {
-
-    Column {
-        Text("导入本地媒体资源")
-        Column(Modifier.padding(start = 10.dp)) {
-            CheckboxWithLabel(
-                label = { Text("本地封面") },
-                checked = importLocalArtwork.value,
-                onCheckedChange = importLocalArtwork.setValue,
-            )
-        }
+    SettingsSectionCard("本地媒体资源", description = "导入本地媒体资源。") {
+        SettingsCheckboxRow(
+            title = "本地封面",
+            checked = importLocalArtwork.value,
+            onCheckedChange = importLocalArtwork.setValue,
+        )
     }
 }
 
@@ -201,15 +200,41 @@ private fun LocalArtworkSettings(
 private fun BarcodeISBNSettings(
     importBarcodeIsbn: StateHolder<Boolean>,
 ) {
+    SettingsSectionCard("条形码", description = "从条形码导入 ISBN。") {
+        SettingsCheckboxRow(
+            title = "ISBN 条形码",
+            checked = importBarcodeIsbn.value,
+            onCheckedChange = importBarcodeIsbn.setValue,
+        )
+    }
+}
 
-    Column {
-        Text("从条形码导入 ISBN")
-        Column(Modifier.padding(start = 10.dp)) {
-            CheckboxWithLabel(
-                label = { Text("ISBN 条形码") },
-                checked = importBarcodeIsbn.value,
-                onCheckedChange = importBarcodeIsbn.setValue,
+@Composable
+private fun SettingsChildCheckboxRow(
+    title: String,
+    children: List<StateHolder<Boolean>>,
+) {
+    val selectedCount = children.count { it.value }
+    val state = when (selectedCount) {
+        children.size -> ToggleableState.On
+        0 -> ToggleableState.Off
+        else -> ToggleableState.Indeterminate
+    }
+    SettingsRow(
+        title = title,
+        onClick = {
+            val nextValue = state == ToggleableState.Off
+            children.forEach { it.setValue(nextValue) }
+        },
+        trailing = {
+            TriStateCheckbox(
+                state = state,
+                onClick = null,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colorScheme.secondaryContainer,
+                    checkmarkColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
             )
         }
-    }
+    )
 }

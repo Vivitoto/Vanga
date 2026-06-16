@@ -50,6 +50,7 @@ import io.github.vivitoto.vanga.ui.LocalBookDownloadEvents
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.BookReadButton
 import io.github.vivitoto.vanga.ui.common.cards.coverShape
 import io.github.vivitoto.vanga.ui.common.components.ExpandableText
@@ -254,7 +255,7 @@ private fun BookHero(
 private fun DetailSection(content: @Composable () -> Unit) {
     Surface(
         modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
+        shape = VangaShape,
         tonalElevation = 1.dp,
     ) {
         Column(

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
@@ -41,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
@@ -193,7 +193,7 @@ private fun ProviderProgressCard(progress: ProviderProgressStatus) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(5.dp))
+            .clip(VangaShape)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(5.dp)
     ) {
@@ -244,7 +244,7 @@ private fun ProcessingProgressCard() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(5.dp))
+            .clip(VangaShape)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(5.dp)
     ) {

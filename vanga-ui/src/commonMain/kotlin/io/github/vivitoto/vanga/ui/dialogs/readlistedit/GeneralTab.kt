@@ -5,16 +5,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatAlignCenter
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.tabs.DialogTab
 import io.github.vivitoto.vanga.ui.dialogs.tabs.TabItem
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 
 internal class GeneralTab(
     private val vm: ReadListEditDialogViewModel,
@@ -51,18 +51,15 @@ internal class GeneralTab(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            HorizontalDivider()
-            Column {
-                Text(
-                    "默认情况下，阅读清单中的书籍按手动顺序排列。你可以关闭手动排序，改为按发布日期排序。",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                CheckboxWithLabel(
+            SettingsSectionCard(
+                title = "排序",
+                description = "默认情况下，阅读清单中的书籍按手动顺序排列。你可以关闭手动排序，改为按发布日期排序。",
+            ) {
+                SettingsCheckboxRow(
+                    title = "手动排序",
                     checked = vm.manualOrdering,
                     onCheckedChange = vm::manualOrdering::set,
-                    label = { Text("手动排序") }
                 )
-
             }
         }
     }

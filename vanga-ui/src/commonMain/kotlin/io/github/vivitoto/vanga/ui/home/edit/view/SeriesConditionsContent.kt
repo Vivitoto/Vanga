@@ -1,17 +1,13 @@
 package io.github.vivitoto.vanga.ui.home.edit.view
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.FlowRowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
@@ -49,6 +44,7 @@ import io.github.vivitoto.vanga.ui.home.edit.SharingLabelConditionState
 import io.github.vivitoto.vanga.ui.home.edit.TagConditionState
 import io.github.vivitoto.vanga.ui.home.edit.TitleConditionState
 import io.github.vivitoto.vanga.ui.home.edit.TitleSortConditionState
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
 import snd.komga.client.series.KomgaSeriesStatus
 
 @Composable
@@ -81,32 +77,32 @@ fun SeriesMatchConditionContent(
     state: SeriesMatchConditionState,
     onConditionRemove: () -> Unit
 ) {
-    Column(
+    SettingsCard(
         modifier = Modifier
-            .widthIn(min = 280.dp)
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.secondary,
-                RoundedCornerShape(10.dp)
-            ).padding(5.dp)
+            .fillMaxWidth()
+            .widthIn(min = 280.dp),
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
     ) {
-        FlowRow {
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                val type = state.matchType.collectAsState().value
-                DropdownChoiceMenu(
-                    selectedOption = LabeledEntry(type, type.label()),
-                    options = MatchType.entries.map { LabeledEntry(it, it.label()) },
-                    onOptionChange = { state.setMatchType(it.value) }
-                )
-                IconButton(onClick = onConditionRemove) {
-                    Icon(Icons.Default.Delete, null)
-                }
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            val type = state.matchType.collectAsState().value
+            DropdownChoiceMenu(
+                selectedOption = LabeledEntry(type, type.label()),
+                options = MatchType.entries.map { LabeledEntry(it, it.label()) },
+                onOptionChange = { state.setMatchType(it.value) },
+                inputFieldModifier = Modifier.widthIn(min = conditionInputMinWidth),
+                label = { Text("匹配方式") }
+            )
+            IconButton(onClick = onConditionRemove) {
+                Icon(Icons.Default.Delete, null)
             }
-
-            val conditions = state.conditions.collectAsState().value
-            MatchConditionChildContent(conditions, state::onConditionTypeChange, state::removeCondition)
-
         }
+        val conditions = state.conditions.collectAsState().value
+        MatchConditionChildContent(conditions, state::onConditionTypeChange, state::removeCondition)
+
         ConditionAddButton(
             conditions = remember { SeriesConditionType.entries.map { LabeledEntry(it, it.label()) } },
             onConditionAdd = state::addCondition,
@@ -121,24 +117,20 @@ private fun MatchConditionChildContent(
     onChildRemove: (SeriesConditionState) -> Unit
 ) {
     if (conditions.isEmpty()) return
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-            for (condition in conditions) {
-                val removeFunction = { onChildRemove(condition) }
-                val changeFunction =
-                    { type: SeriesConditionType -> onChildTypeChange(condition, type) }
-                ConditionContent(
-                    condition = condition,
-                    onConditionAdd = {},
-                    onConditionTypeChange = changeFunction,
-                    onConditionRemove = removeFunction
-                )
-
-                HorizontalDivider()
-            }
+        for (condition in conditions) {
+            val removeFunction = { onChildRemove(condition) }
+            val changeFunction =
+                { type: SeriesConditionType -> onChildTypeChange(condition, type) }
+            ConditionContent(
+                condition = condition,
+                onConditionAdd = {},
+                onConditionTypeChange = changeFunction,
+                onConditionRemove = removeFunction
+            )
         }
     }
 }
@@ -267,7 +259,7 @@ private fun SeriesConditionLayout(
     type: SeriesConditionType,
     onTypeChange: (SeriesConditionType) -> Unit,
     onConditionRemove: () -> Unit,
-    content: @Composable RowScope.() -> Unit
+    content: @Composable FlowRowScope.() -> Unit
 ) {
     SimpleConditionLayout(
         conditionType = remember { LabeledEntry(type, type.label()) },

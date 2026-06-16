@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.itemlist.ItemCardsSlider
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
@@ -51,7 +51,7 @@ fun BookReadListsContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
+                .clip(VangaShape)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable { show = !show }
                 .cursorForHand()

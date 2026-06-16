@@ -37,7 +37,8 @@ class FavoriteSyncSettingsScreen : Screen {
                     onPasswordChange = vm::onPasswordChange,
                     onRemotePathChange = vm::onRemotePathChange,
                     onTestConnection = vm::testConnection,
-                    onSyncNow = vm::syncNow,
+                    onSyncToLocal = vm::syncToLocal,
+                    onSyncToCloud = vm::syncToCloud,
                 )
             }
         }

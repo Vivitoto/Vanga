@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.vivitoto.vanga.ui.VangaShape
 
 @Composable
 fun <T> DescriptionChips(
@@ -96,8 +96,8 @@ fun NoPaddingChip(
 ) {
     Box(
         modifier = modifier
-            .border(Dp.Hairline, borderColor, RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
+            .border(Dp.Hairline, borderColor, VangaShape)
+            .clip(VangaShape)
             .background(color)
             .clickable { onClick() }
             .padding(10.dp, 5.dp)

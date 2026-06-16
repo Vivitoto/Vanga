@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
@@ -45,6 +44,7 @@ import androidx.compose.ui.window.Popup
 import kotlinx.datetime.format
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localTimeFormat
 import io.github.vivitoto.vanga.formatDecimal
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.platform.VerticalScrollbar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +114,7 @@ private fun NotificationsContent(
     Surface(
         modifier = Modifier.widthIn(max = 400.dp).heightIn(min = 200.dp, max = 600.dp),
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
-        shape = RoundedCornerShape(12.dp),
+        shape = VangaShape,
     ) {
         Column {
             Row(

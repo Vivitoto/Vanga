@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
@@ -56,6 +55,7 @@ import coil3.size.Size
 import coil3.size.SizeResolver
 import io.github.vivitoto.vanga.image.ReaderImage
 import io.github.vivitoto.vanga.image.coil.BookPageThumbnailRequest
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.components.AppSliderDefaults
 import io.github.vivitoto.vanga.ui.reader.image.PageMetadata
 import kotlin.math.roundToInt
@@ -177,7 +177,7 @@ private fun Slider(
             modifier = Modifier
                 .background(
                     color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(4.dp)
+                    shape = VangaShape
                 )
                 .border(BorderStroke(1.dp, MaterialTheme.colorScheme.surface))
                 .padding(4.dp)
@@ -234,8 +234,8 @@ private fun BookPageThumbnail(
 ) {
     Column(
         modifier = modifier
-            .border(BorderStroke(2.dp, MaterialTheme.colorScheme.surface), RoundedCornerShape(12.dp))
-            .clip(RoundedCornerShape(12.dp))
+            .border(BorderStroke(2.dp, MaterialTheme.colorScheme.surface), VangaShape)
+            .clip(VangaShape)
             .background(MaterialTheme.colorScheme.surfaceVariant),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

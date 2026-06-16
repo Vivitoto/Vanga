@@ -1,17 +1,13 @@
 package io.github.vivitoto.vanga.ui.settings.offline.downloads
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.Button
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -24,14 +20,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import io.github.vinceglb.filekit.PlatformFile
 import io.github.vivitoto.vanga.formatDecimal
 import io.github.vivitoto.vanga.offline.sync.model.DownloadEvent
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.dialogs.permissions.StoragePermissionRequestDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsValueRow
 import snd.komga.client.book.KomgaBookId
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -44,49 +43,42 @@ fun OfflineDownloadsContent(
     downloads: Collection<DownloadEvent>,
     onDownloadCancel: (KomgaBookId) -> Unit,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SettingsSectionHeader(
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsSectionCard(
             title = "下载与存储",
-            description = "管理离线书籍的保存位置和当前下载任务。"
-        )
+        ) {
+            SettingsValueRow(
+                title = "下载位置",
+                value = storageLocation?.let { rememberStorageLabel(it) } ?: "内部存储",
+            )
 
-        if (storageLocation != null) {
-            Column {
-                Text("下载位置")
-                Text(
-                    rememberStorageLabel(storageLocation),
-                    modifier = Modifier.padding(start = 10.dp),
-                )
-            }
-        }
-
-        var showDirectoryPickerDialog by remember { mutableStateOf(false) }
-        if (showDirectoryPickerDialog) {
-            StoragePermissionRequestDialog { directory ->
-                if (directory != null) {
-                    onStorageLocationChange(directory)
+            var showDirectoryPickerDialog by remember { mutableStateOf(false) }
+            if (showDirectoryPickerDialog) {
+                StoragePermissionRequestDialog { directory ->
+                    if (directory != null) {
+                        onStorageLocationChange(directory)
+                    }
+                    showDirectoryPickerDialog = false
                 }
-                showDirectoryPickerDialog = false
             }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Button(onClick = { showDirectoryPickerDialog = true }) { Text("更改位置") }
-            Button(onClick = onStorageLocationReset) { Text("恢复内部存储") }
+            SettingsRow(
+                title = "存储位置",
+                stackTrailing = true,
+                trailing = {
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Button(onClick = { showDirectoryPickerDialog = true }) { Text("更改") }
+                        Button(onClick = onStorageLocationReset) { Text("恢复") }
+                    }
+                }
+            )
         }
 
-        HorizontalDivider()
         SettingsSectionHeader("当前下载")
         if (downloads.isEmpty()) {
             EmptyState("暂无下载任务", body = "离线下载任务会显示在这里。")
         }
         for (event in downloads) {
-            Column(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(5.dp)
-                    .fillMaxWidth()
-            ) {
+            SettingsCard {
                 when (event) {
                     is DownloadEvent.BookDownloadProgress -> DownloadProgress(event, onDownloadCancel)
                     is DownloadEvent.BookDownloadCompleted -> DownloadCompleted(event)

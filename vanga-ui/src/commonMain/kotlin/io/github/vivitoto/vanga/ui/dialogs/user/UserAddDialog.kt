@@ -23,10 +23,11 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.common.components.PasswordTextField
 import io.github.vivitoto.vanga.ui.common.components.withTextFieldNavigation
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 
 @Composable
 fun UserAddDialog(
@@ -119,25 +120,23 @@ fun UserAddDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Column {
-                    Text("角色")
-
-                    CheckboxWithLabel(
+                SettingsSectionCard("角色") {
+                    SettingsCheckboxRow(
+                        title = "管理员",
                         checked = administratorRole,
                         onCheckedChange = onAdministratorRoleChange,
-                        label = { Text("管理员") }
                     )
 
-                    CheckboxWithLabel(
+                    SettingsCheckboxRow(
+                        title = "页面流式传输",
                         checked = pageStreamingRole,
                         onCheckedChange = onPageStreamingRoleChange,
-                        label = { Text("页面流式传输") }
                     )
 
-                    CheckboxWithLabel(
+                    SettingsCheckboxRow(
+                        title = "文件下载",
                         checked = fileDownloadRole,
                         onCheckedChange = onFileDownloadRoleChange,
-                        label = { Text("文件下载") }
                     )
                 }
             }

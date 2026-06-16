@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -47,6 +46,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.common.components.OutlinedHttpTextField
@@ -111,7 +111,7 @@ fun LoginContent(
                     modifier = Modifier
                         .widthIn(max = 460.dp)
                         .padding(horizontal = 24.dp),
-                    shape = RoundedCornerShape(32.dp),
+                    shape = VangaShape,
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .72f),
                     tonalElevation = 6.dp,
                     shadowElevation = 8.dp,

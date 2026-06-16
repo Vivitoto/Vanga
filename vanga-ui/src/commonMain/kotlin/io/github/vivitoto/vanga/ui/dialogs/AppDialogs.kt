@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilledTonalButton
@@ -27,6 +26,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.platform.VerticalScrollbar
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
@@ -76,7 +76,7 @@ fun BasicAppDialog(
         val focusManager = LocalFocusManager.current
         Surface(
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceContainerHighest),
-            shape = RoundedCornerShape(12.dp),
+            shape = VangaShape,
             color = color,
             modifier = modifier
                 .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }

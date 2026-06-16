@@ -35,6 +35,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyGridState
+import io.github.vivitoto.vanga.ui.VangaCornerRadius
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.components.OutlinedText
 import io.github.vivitoto.vanga.ui.platform.PlatformType
@@ -42,8 +44,8 @@ import io.github.vivitoto.vanga.ui.platform.cursorForHand
 
 const val defaultCardWidth = 240
 const val coverAspectRatio = 0.703f
-val coverShape = RoundedCornerShape(14.dp)
-private val itemCardShape = RoundedCornerShape(18.dp)
+val coverShape = VangaShape
+private val itemCardShape = VangaShape
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -110,6 +112,8 @@ fun overlayBorderModifier() =
 @Composable
 fun CardOutlinedText(
     text: String,
+    modifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier,
     textColor: Color = Color.Unspecified,
     maxLines: Int = Int.MAX_VALUE,
     style: TextStyle = MaterialTheme.typography.bodyMedium.copy(color = Color.White),
@@ -117,6 +121,8 @@ fun CardOutlinedText(
 ) {
     OutlinedText(
         text = text,
+        modifier = modifier,
+        textModifier = textModifier,
         maxLines = maxLines,
         fillColor = textColor,
         outlineColor = Color.Black,
@@ -139,7 +145,7 @@ fun SelectionRadioButton(
             selectedColor = MaterialTheme.colorScheme.tertiary,
         ),
         modifier = Modifier
-            .clip(RoundedCornerShape(topEnd = 17.dp, bottomEnd = 17.dp))
+            .clip(RoundedCornerShape(topEnd = VangaCornerRadius, bottomEnd = VangaCornerRadius))
             .background(MaterialTheme.colorScheme.surface.copy(alpha = .4f))
             .selectable(selected = isSelected, onClick = onSelect)
     )

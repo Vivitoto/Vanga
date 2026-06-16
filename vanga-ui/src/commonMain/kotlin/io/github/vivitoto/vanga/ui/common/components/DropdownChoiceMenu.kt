@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.RadioButtonChecked
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.VangaButtonShape
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.series.SeriesFilterState.TagExclusionMode
 import io.github.vivitoto.vanga.ui.series.SeriesFilterState.TagInclusionMode
@@ -91,7 +91,7 @@ fun <T> DropdownChoiceMenu(
             value = selectedOption?.label ?: "",
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
-                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                .clip(VangaShape)
                 .then(inputFieldModifier),
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
@@ -145,7 +145,7 @@ fun <T> DropdownMultiChoiceMenu(
             value = selectedOptions.joinToString { it.label }.ifBlank { placeholder ?: "任意" },
             modifier = Modifier
                 .menuAnchor(PrimaryNotEditable)
-                .clip(RoundedCornerShape(topStart = 5.dp, topEnd = 5.dp))
+                .clip(VangaShape)
                 .then(inputFieldModifier),
             label = label,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
@@ -187,6 +187,7 @@ private fun InputField(
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
         shadowElevation = 1.dp,
+        shape = VangaShape,
         color = color,
         modifier = Modifier
             .cursorForHand()
@@ -321,7 +322,7 @@ fun <T> FilterDropdownChoice(
         contentPadding = PaddingValues(5.dp),
         label = label?.let { { Text(it) } },
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(VangaShape),
         inputFieldModifier = Modifier.fillMaxWidth(),
         minHeight = FilterDropdownMinHeight,
     )
@@ -344,7 +345,7 @@ fun <T> FilterDropdownMultiChoice(
         label = label?.let { { FilterLabelAndCount(label, selectedOptions.size) } },
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(VangaShape),
         inputFieldModifier = Modifier.fillMaxWidth(),
         minHeight = FilterDropdownMinHeight,
     )
@@ -369,7 +370,7 @@ fun <T> FilterDropdownMultiChoiceWithSearch(
         label = label?.let { { FilterLabelAndCount(label, selectedOptions.size) } },
         placeholder = placeholder,
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(VangaShape),
         textFieldModifier = Modifier.fillMaxWidth(),
         minHeight = FilterDropdownMinHeight,
     )

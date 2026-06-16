@@ -55,12 +55,14 @@ import com.mohamedrejeb.richeditor.ui.material3.RichText
 import io.ktor.http.*
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.StateHolder
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.components.HttpTextField
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.COMPACT
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
 import io.github.vivitoto.vanga.ui.settings.komf.notifications.DiscordState.EmbedFieldState
 import io.github.vivitoto.vanga.ui.settings.komf.notifications.NotificationContextState
 import snd.komf.api.notifications.EmbedField
@@ -93,48 +95,48 @@ fun DiscordNotificationsContent(
     onTemplateSave: () -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        SettingsSectionCard(
+            title = "Webhook 列表",
+        ) {
+            discordWebhooks.forEach { webhook ->
+                Row {
+                    TextField(
+                        value = webhook,
+                        onValueChange = {},
+                        enabled = false,
+                        modifier = Modifier.weight(1f)
+                    )
 
-        Text("Webhook 列表")
-        discordWebhooks.forEach { webhook ->
-            Row {
-                TextField(
-                    value = webhook,
-                    onValueChange = {},
-                    enabled = false,
-                    modifier = Modifier.weight(1f)
-                )
-
-                IconButton(onClick = { onDiscordWebhookRemove(webhook) }, modifier = Modifier.cursorForHand()) {
-                    Icon(Icons.Default.Delete, null)
+                    IconButton(onClick = { onDiscordWebhookRemove(webhook) }, modifier = Modifier.cursorForHand()) {
+                        Icon(Icons.Default.Delete, null)
+                    }
                 }
             }
-        }
 
-        var showAddWebhookDialog by remember { mutableStateOf(false) }
+            var showAddWebhookDialog by remember { mutableStateOf(false) }
 
-        FilledTonalButton(
-            onClick = { showAddWebhookDialog = true },
-            modifier = Modifier.cursorForHand()
-        ) {
-            Text("添加 Webhook")
-        }
+            FilledTonalButton(
+                onClick = { showAddWebhookDialog = true },
+                modifier = Modifier.cursorForHand()
+            ) {
+                Text("添加 Webhook")
+            }
 
-        SwitchWithLabel(
-            checked = discordUploadSeriesCover.value,
-            onCheckedChange = { discordUploadSeriesCover.setValue(it) },
-            label = { Text("上传作品封面") }
-        )
-
-        if (showAddWebhookDialog) {
-            AddDiscordWebhookDialog(
-                onDismissRequest = { showAddWebhookDialog = false },
-                onWebhookAdd = onDiscordWebhookAdd
+            SettingsSwitchRow(
+                title = "上传作品封面",
+                checked = discordUploadSeriesCover.value,
+                onCheckedChange = { discordUploadSeriesCover.setValue(it) },
             )
-        }
 
-        HorizontalDivider()
+            if (showAddWebhookDialog) {
+                AddDiscordWebhookDialog(
+                    onDismissRequest = { showAddWebhookDialog = false },
+                    onWebhookAdd = onDiscordWebhookAdd
+                )
+            }
+        }
 
         TemplatesContent(
             titleTemplate = titleTemplate,
@@ -256,10 +258,11 @@ private fun TemplatesContent(
 ) {
     var showNotificationContextDialog by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("通知模板", style = MaterialTheme.typography.titleLarge)
+    SettingsSectionCard(
+        title = "通知模板",
+        description = "使用 Markdown 语法，模板使用 Apache Velocity 渲染。",
+    ) {
         Column {
-            Text("使用 Markdown 语法。模板使用 Apache Velocity 渲染")
             Text(
                 "Discord Markdown 入门",
                 color = MaterialTheme.colorScheme.secondary,
@@ -336,10 +339,12 @@ private fun TemplatesContent(
             }
         }
 
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-            if (LocalWindowWidth.current != COMPACT) {
-                Spacer(Modifier.weight(1f))
-            }
+        val actionsAlignment = if (LocalWindowWidth.current == COMPACT) Alignment.Start else Alignment.End
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(20.dp, actionsAlignment),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             ElevatedButton(
                 onClick = { showNotificationContextDialog = true },
                 modifier = Modifier.cursorForHand()
@@ -475,22 +480,18 @@ private fun TemplateFieldEditor(
     state: EmbedFieldState
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = state.nameTemplate,
-                onValueChange = { state.nameTemplate = it },
-                label = { Text("字段名称，最多 256 个字符") },
-                maxLines = 1,
-                modifier = Modifier.weight(1f),
-            )
-            CheckboxWithLabel(
-                checked = state.inline,
-                onCheckedChange = { state.inline = it },
-                label = { Text("行内显示") })
-        }
+        TextField(
+            value = state.nameTemplate,
+            onValueChange = { state.nameTemplate = it },
+            label = { Text("字段名称，最多 256 个字符") },
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        SettingsCheckboxRow(
+            title = "行内显示",
+            checked = state.inline,
+            onCheckedChange = { state.inline = it },
+        )
         TextField(
             value = state.valueTemplate,
             onValueChange = { state.valueTemplate = it },
@@ -512,7 +513,7 @@ private fun TemplatesPreview(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.medium
+        shape = VangaShape
     ) {
         Layout(content = {
             PreviewContent(
@@ -622,4 +623,3 @@ private fun PreviewContent(
         }
     }
 }
-

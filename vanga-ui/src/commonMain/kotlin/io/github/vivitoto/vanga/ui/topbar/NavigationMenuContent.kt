@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
@@ -56,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.common.menus.LibraryActionsMenu
@@ -274,7 +274,7 @@ private fun NavButton(
     TextButton(
         onClick = onClick,
         contentPadding = PaddingValues(0.dp),
-        shape = RoundedCornerShape(14.dp),
+        shape = VangaShape,
         colors = ButtonDefaults.textButtonColors(
             contentColor = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         ),
@@ -286,7 +286,7 @@ private fun NavButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(40.dp)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(VangaShape)
                 .background(
                     if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = .16f)
                     else MaterialTheme.colorScheme.surface.copy(alpha = 0f)

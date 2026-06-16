@@ -69,8 +69,12 @@ private fun MobileContainer(title: String, content: @Composable ColumnScope.() -
         HorizontalDivider()
 
         Column(
-            modifier = Modifier.weight(1f, false).imePadding().verticalScroll(rememberScrollState()).padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+                .weight(1f, false)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 16.dp, top = 14.dp, end = 16.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(SettingsSectionGap),
         ) {
             content()
         }
@@ -100,7 +104,7 @@ private fun DesktopContent(title: String, content: @Composable ColumnScope.() ->
 
         Column(
             modifier = Modifier.padding(horizontal = 30.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(SettingsSectionGap),
             content = content
         )
     }

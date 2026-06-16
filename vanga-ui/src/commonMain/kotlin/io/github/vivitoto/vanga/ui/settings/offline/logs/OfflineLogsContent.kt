@@ -1,15 +1,12 @@
 package io.github.vivitoto.vanga.ui.settings.offline.logs
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
@@ -23,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.toSystemTimeString
 import io.github.vivitoto.vanga.offline.sync.model.OfflineLogEntry
@@ -31,7 +27,8 @@ import io.github.vivitoto.vanga.ui.common.components.AppFilterChipDefaults
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
-import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import io.github.vivitoto.vanga.ui.settings.offline.logs.OfflineLogsState.TaskTab
 
 @Composable
@@ -44,13 +41,13 @@ fun OfflineLogsContent(
     onTabSelect: (TaskTab) -> Unit,
     onDelete: () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        SettingsSectionHeader(
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsSectionCard(
             title = "离线日志",
             description = "用于排查离线下载或同步失败；日常阅读不用关注。"
-        )
-
-        StatusFilters(selectedTab, onTabSelect, onDelete)
+        ) {
+            StatusFilters(selectedTab, onTabSelect, onDelete)
+        }
 
         if (totalPages > 1) {
             Pagination(
@@ -107,7 +104,6 @@ private fun StatusFilters(
 
         var showDeleteDialog by remember { mutableStateOf(false) }
 
-        Spacer(Modifier.weight(1f))
         FilledTonalButton(onClick = { showDeleteDialog = true }) { Text("清空记录") }
 
         if (showDeleteDialog) {
@@ -123,14 +119,7 @@ private fun StatusFilters(
 @Composable
 private fun LogsContent(logs: List<OfflineLogEntry>) {
     SelectionContainer {
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        SettingsCard {
             logs.forEachIndexed { index, task ->
                 if (index > 0) HorizontalDivider()
                 LogEntryContent(task)

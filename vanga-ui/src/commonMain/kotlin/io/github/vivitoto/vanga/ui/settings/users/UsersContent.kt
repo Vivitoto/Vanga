@@ -1,7 +1,6 @@
 package io.github.vivitoto.vanga.ui.settings.users
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +21,8 @@ import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +43,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateTimeFormat
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
 import io.github.vivitoto.vanga.ui.dialogs.user.PasswordChangeDialog
 import io.github.vivitoto.vanga.ui.dialogs.user.UserAddDialog
@@ -95,32 +97,34 @@ private fun UserCard(
     onUserReloadRequest: () -> Unit,
 ) {
     var expandActions by remember { mutableStateOf(false) }
-    Column(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable { expandActions = !expandActions }
-            .cursorForHand()
-            .padding(10.dp),
+            .cursorForHand(),
+        shape = VangaShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            UserInfo(user, latestActivity)
+        Column(modifier = Modifier.padding(10.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                UserInfo(user, latestActivity)
 
-            Spacer(Modifier.weight(1f))
-            Icon(if (expandActions) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
-        }
+                Spacer(Modifier.weight(1f))
+                Icon(if (expandActions) Icons.Default.ExpandLess else Icons.Default.ExpandMore, null)
+            }
 
 
-        Column(Modifier.animateContentSize()) {
-            if (expandActions) {
-                UserRoles(user)
+            Column(Modifier.animateContentSize()) {
+                if (expandActions) {
+                    UserRoles(user)
 
-                UserActions(
-                    currentUser = currentUser,
-                    user = user,
-                    onUserDelete = onUserDelete,
-                    onUserReloadRequest = onUserReloadRequest
-                )
+                    UserActions(
+                        currentUser = currentUser,
+                        user = user,
+                        onUserDelete = onUserDelete,
+                        onUserReloadRequest = onUserReloadRequest
+                    )
+                }
             }
         }
 

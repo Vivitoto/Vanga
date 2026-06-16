@@ -4,8 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
@@ -14,62 +13,71 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.dialogs.user.PasswordChangeDialog
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsValueRow
 import snd.komga.client.user.KomgaUser
 
 @Composable
 fun AccountSettingsContent(user: KomgaUser) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        EmailDetails(user)
-        RolesDetails(user)
-        PasswordDetails(user)
-    }
-}
-
-@Composable
-private fun EmailDetails(user: KomgaUser) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text("邮箱：${user.email}", fontWeight = FontWeight.Bold)
+        SettingsSectionCard(
+            title = "账号信息",
+        ) {
+            SettingsValueRow(
+                title = "邮箱",
+                value = user.email,
+            )
+            RolesDetails(user)
+            PasswordDetails(user)
+        }
     }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun RolesDetails(user: KomgaUser) {
-    Row(
-        verticalAlignment = Alignment.Top,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Text("角色：", fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 10.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            user.roles.forEach { role ->
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text(role) }
-                )
+    SettingsRow(
+        title = "角色",
+        trailing = {
+            FlowRow(
+                modifier = Modifier.widthIn(max = 360.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                user.roles.forEach { role ->
+                    SuggestionChip(
+                        onClick = {},
+                        label = { Text(role) }
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 @Composable
 private fun PasswordDetails(user: KomgaUser) {
 
     var showPasswordDialog by remember { mutableStateOf(false) }
-    FilledTonalButton(
-        onClick = { showPasswordDialog = true },
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-    ) {
-        Text("修改密码")
-    }
+    SettingsRow(
+        title = "密码",
+        trailing = {
+            FilledTonalButton(
+                onClick = { showPasswordDialog = true },
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
+            ) {
+                Text("修改")
+            }
+        },
+    )
     if (showPasswordDialog) {
         PasswordChangeDialog(user = user, onDismiss = { showPasswordDialog = false })
     }

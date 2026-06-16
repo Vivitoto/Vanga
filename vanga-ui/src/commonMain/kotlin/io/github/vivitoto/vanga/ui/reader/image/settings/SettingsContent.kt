@@ -1,10 +1,9 @@
 package io.github.vivitoto.vanga.ui.reader.image.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +39,7 @@ import io.github.vivitoto.vanga.ui.reader.image.common.PageSpreadProgressSlider
 import io.github.vivitoto.vanga.ui.reader.image.common.ProgressSlider
 import io.github.vivitoto.vanga.ui.reader.image.continuous.ContinuousReaderState
 import io.github.vivitoto.vanga.ui.reader.image.paged.PagedReaderState
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
 
 @Composable
 fun BoxScope.SettingsOverlay(
@@ -186,25 +186,28 @@ fun PagedReaderPagesInfo(
     pages: List<PagedReaderState.Page>,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         val readerStrings = LocalStrings.current.reader
         pages.forEach { page ->
             val pageImage = page.imageResult?.image
             val pageSize = pageImage?.originalSize?.collectAsState()?.value
             if (pageImage != null) {
                 val currentSize = pageImage.currentSize.collectAsState().value
-                Text("${readerStrings.pageNumber} ${page.metadata.pageNumber}")
+                SettingsCard {
+                    Text("${readerStrings.pageNumber} ${page.metadata.pageNumber}")
 
-                if (currentSize != null) {
-                    Text("${readerStrings.pageDisplaySize} ${currentSize.width} x ${currentSize.height}")
-                }
+                    if (currentSize != null) {
+                        Text("${readerStrings.pageDisplaySize} ${currentSize.width} x ${currentSize.height}")
+                    }
 
-                if (pageSize != null) {
-                    Text("${readerStrings.pageOriginalSize}: ${pageSize.width} x ${pageSize.height}")
+                    if (pageSize != null) {
+                        Text("${readerStrings.pageOriginalSize}: ${pageSize.width} x ${pageSize.height}")
+                    }
                 }
             }
-
-            HorizontalDivider(Modifier.padding(vertical = 5.dp))
         }
     }
 }
@@ -229,20 +232,23 @@ fun ContinuousReaderPagesInfo(
     }
 
     val readerStrings = LocalStrings.current.reader
-    Column(modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         for ((page, image) in visiblePages) {
-            Text("${readerStrings.pageNumber} ${page.pageNumber}.", style = MaterialTheme.typography.bodyMedium)
+            SettingsCard {
+                Text("${readerStrings.pageNumber} ${page.pageNumber}.", style = MaterialTheme.typography.bodyMedium)
 
-            val currentSize = image?.currentSize?.collectAsState()?.value
-            if (currentSize != null) {
-                Text("${readerStrings.pageDisplaySize} ${currentSize.width} x ${currentSize.height}")
+                val currentSize = image?.currentSize?.collectAsState()?.value
+                if (currentSize != null) {
+                    Text("${readerStrings.pageDisplaySize} ${currentSize.width} x ${currentSize.height}")
+                }
+
+                if (page.size != null) {
+                    Text("${readerStrings.pageOriginalSize}: ${page.size.width} x ${page.size.height}")
+                }
             }
-
-            if (page.size != null) {
-                Text("${readerStrings.pageOriginalSize}: ${page.size.width} x ${page.size.height}")
-            }
-
-            HorizontalDivider(Modifier.padding(vertical = 5.dp))
         }
     }
 }

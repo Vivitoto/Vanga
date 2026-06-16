@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -52,6 +51,7 @@ import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.settings.model.BooksLayout
 import io.github.vivitoto.vanga.settings.model.BooksLayout.GRID
 import io.github.vivitoto.vanga.settings.model.BooksLayout.LIST
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
@@ -162,7 +162,7 @@ private fun LoadIndicator() {
             .height(260.dp)
             .fillMaxWidth()
             .background(animatedColor.value)
-            .clip(RoundedCornerShape(10.dp))
+            .clip(VangaShape)
     )
 
 }
@@ -566,7 +566,7 @@ private fun TagsFilter(
         label = if (withLabel) strings.tags else null,
         placeholder = if (withLabel) null else strings.tags,
         contentPadding = PaddingValues(5.dp),
-        modifier = modifier.clip(RoundedCornerShape(5.dp)),
+        modifier = modifier.clip(VangaShape),
         inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
         inputFieldModifier = Modifier.fillMaxWidth()
     )
@@ -614,6 +614,7 @@ fun LazyGridScope.BooksList(
                 bookMenuActions = bookMenuActions,
                 isSelected = selectedBooks.any { it.id == book.id },
                 onSelect = onBookSelect?.let { { onBookSelect(book) } },
+                modifier = Modifier.padding(vertical = 5.dp),
             )
         }
     }

@@ -9,14 +9,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.settings.model.AppTheme
 
-val VangaButtonShape = RoundedCornerShape(14.dp)
+val VangaCornerRadius = 8.dp
+val VangaShape = RoundedCornerShape(VangaCornerRadius)
+val VangaButtonShape = VangaShape
 
 val VangaShapes = Shapes(
-    extraSmall = RoundedCornerShape(6.dp),
-    small = RoundedCornerShape(10.dp),
-    medium = VangaButtonShape,
-    large = RoundedCornerShape(18.dp),
-    extraLarge = RoundedCornerShape(24.dp),
+    extraSmall = VangaShape,
+    small = VangaShape,
+    medium = VangaShape,
+    large = VangaShape,
+    extraLarge = VangaShape,
 )
 
 enum class Theme(

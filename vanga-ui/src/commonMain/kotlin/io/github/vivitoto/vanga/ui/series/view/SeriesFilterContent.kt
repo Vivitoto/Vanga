@@ -14,8 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -33,8 +34,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.common.components.FilterDropdownChoice
@@ -98,9 +101,14 @@ fun SeriesFilterContent(
             filterState.onSearchTermChange(searchTerm)
         }
 
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = VangaShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        ) {
         if (isCompact) {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 NoPaddingTextField(
@@ -137,6 +145,7 @@ fun SeriesFilterContent(
             }
         } else {
             FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(spacing),
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -172,12 +181,18 @@ fun SeriesFilterContent(
             }
             }
         }
+        }
 
-        FlowRow(
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(spacing),
-            verticalArrangement = Arrangement.spacedBy(spacing),
+            shape = VangaShape,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         ) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(if (isCompact) 8.dp else 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(spacing),
+                verticalArrangement = Arrangement.spacedBy(spacing),
+            ) {
             FilterDropdownChoice(
                 selectedOption = LabeledEntry(currentFilter.sortOrder, strings.forSeriesSort(currentFilter.sortOrder)),
                 options = LibrarySeriesTabState.SeriesSort.entries.map { LabeledEntry(it, strings.forSeriesSort(it)) },
@@ -207,7 +222,7 @@ fun SeriesFilterContent(
                 inputFieldColor = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier
                     .then(filterItemModifier)
-                    .clip(RoundedCornerShape(5.dp)),
+                    .clip(VangaShape),
                 inputFieldModifier = Modifier.fillMaxWidth(),
                 minHeight = 44.dp,
             )
@@ -284,10 +299,11 @@ fun SeriesFilterContent(
                         .weight(1f)
                         .fillMaxWidth()
                         .height(40.dp)
+                        .clip(VangaShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable { filterState.onCompletionToggle() }
                         .cursorForHand()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clip(RoundedCornerShape(5.dp)),
+                        .padding(end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val checkboxState by derivedStateOf {
@@ -303,17 +319,23 @@ fun SeriesFilterContent(
                         onClick = filterState::onCompletionToggle,
                         modifier = Modifier.size(30.dp)
                     )
-                    Text(strings.complete, style = MaterialTheme.typography.labelLarge, maxLines = 2)
+                    Text(
+                        strings.complete,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
                 Row(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
                         .height(40.dp)
+                        .clip(VangaShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable { filterState.onFormatToggle() }
                         .cursorForHand()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .clip(RoundedCornerShape(5.dp)),
+                        .padding(end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val checkboxState by derivedStateOf {
@@ -329,9 +351,15 @@ fun SeriesFilterContent(
                         onClick = filterState::onFormatToggle,
                         modifier = Modifier.size(30.dp)
                     )
-                    Text(strings.oneshot, style = MaterialTheme.typography.labelLarge, maxLines = 2)
+                    Text(
+                        strings.oneshot,
+                        style = MaterialTheme.typography.labelLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
+        }
         }
 
     }

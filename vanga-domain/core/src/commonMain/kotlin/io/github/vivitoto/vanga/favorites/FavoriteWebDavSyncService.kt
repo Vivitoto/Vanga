@@ -71,6 +71,66 @@ class FavoriteWebDavSyncService(
         )
     }
 
+    suspend fun pullFromRemote(): FavoriteSyncResult {
+        val scope = localFavoritesScope(
+            serverUrl = serverUrlProvider(),
+            ownerLabel = ownerLabelProvider(),
+        )
+        val settings = settingsRepository.get(scope)
+        if (!settings.enabled) return FavoriteSyncResult.Disabled
+        if (!settings.isConfigured) return FavoriteSyncResult.NotConfigured
+        val remoteFileUrl = remoteFileUrl(settings, scope)
+
+        val localSeries = localFavoritesRepository.getSeriesItems(scope, includeDeleted = true)
+        val localBooks = localFavoritesRepository.getBookItems(scope, includeDeleted = true)
+        val remoteDocument = readRemote(settings, remoteFileUrl)
+
+        val mergedSeries = mergeItems(localSeries, remoteDocument?.series.orEmpty().mapNotNull { it.toLocalFavoriteItemOrNull() })
+        val mergedBooks = mergeItems(localBooks, remoteDocument?.books.orEmpty().mapNotNull { it.toLocalFavoriteItemOrNull() })
+
+        localFavoritesRepository.upsertSeriesItems(scope, mergedSeries)
+        localFavoritesRepository.upsertBookItems(scope, mergedBooks)
+
+        settingsRepository.putLastSyncedAt(scope, Clock.System.now())
+        return FavoriteSyncResult.Success(
+            seriesCount = mergedSeries.count { !it.deleted },
+            bookCount = mergedBooks.count { !it.deleted },
+            remoteUrl = remoteFileUrl,
+        )
+    }
+
+    suspend fun uploadToRemote(): FavoriteSyncResult {
+        val scope = localFavoritesScope(
+            serverUrl = serverUrlProvider(),
+            ownerLabel = ownerLabelProvider(),
+        )
+        val settings = settingsRepository.get(scope)
+        if (!settings.enabled) return FavoriteSyncResult.Disabled
+        if (!settings.isConfigured) return FavoriteSyncResult.NotConfigured
+        val remoteFileUrl = remoteFileUrl(settings, scope)
+
+        ensureCollections(settings, scope)
+
+        val localSeries = localFavoritesRepository.getSeriesItems(scope, includeDeleted = true)
+        val localBooks = localFavoritesRepository.getBookItems(scope, includeDeleted = true)
+
+        val now = Clock.System.now()
+        val document = FavoriteSyncDocument(
+            updatedAt = now.toString(),
+            serverHash = scope.serverHash,
+            userHash = scope.ownerHash,
+            series = localSeries.map { it.toRemoteEntry() },
+            books = localBooks.map { it.toRemoteEntry() },
+        )
+        writeRemote(settings, remoteFileUrl, document)
+        settingsRepository.putLastSyncedAt(scope, now)
+        return FavoriteSyncResult.Success(
+            seriesCount = localSeries.count { !it.deleted },
+            bookCount = localBooks.count { !it.deleted },
+            remoteUrl = remoteFileUrl,
+        )
+    }
+
     suspend fun testConnection(): FavoriteSyncResult {
         val scope = localFavoritesScope(serverUrlProvider(), ownerLabelProvider())
         val settings = settingsRepository.get(scope)

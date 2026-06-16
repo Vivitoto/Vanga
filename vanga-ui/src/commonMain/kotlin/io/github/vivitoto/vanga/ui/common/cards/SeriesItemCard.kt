@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
@@ -36,9 +35,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalLibraries
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.components.NoPaddingChip
@@ -215,7 +216,7 @@ private fun SeriesImageOverlay(
                         .padding(8.dp)
                         .background(
                             MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = .96f),
-                            RoundedCornerShape(999.dp)
+                            VangaShape
                         )
                         .padding(horizontal = 9.dp, vertical = 5.dp),
                     contentAlignment = Alignment.Center
@@ -236,7 +237,13 @@ private fun SeriesImageOverlay(
         ) {
             if (showTitle) {
 
-                CardOutlinedText(text = series.metadata.title, maxLines = 4)
+                CardOutlinedText(
+                    text = series.metadata.title,
+                    modifier = Modifier.fillMaxWidth(),
+                    textModifier = Modifier.fillMaxWidth(),
+                    maxLines = 2,
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Color.White, fontWeight = FontWeight.SemiBold),
+                )
                 if (series.deleted || libraryIsDeleted) {
                     CardOutlinedText(text = "不可用", textColor = MaterialTheme.colorScheme.error)
                 }
@@ -257,7 +264,7 @@ fun SeriesDetailedListCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = VangaShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = modifier

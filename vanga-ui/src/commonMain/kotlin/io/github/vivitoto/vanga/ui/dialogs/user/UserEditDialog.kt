@@ -3,15 +3,12 @@ package io.github.vivitoto.vanga.ui.dialogs.user
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockPerson
 import androidx.compose.material.icons.filled.RecentActors
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -20,7 +17,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dokar.chiptextfield.Chip
 import com.dokar.chiptextfield.m3.ChipTextField
@@ -30,13 +26,14 @@ import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
 import io.github.vivitoto.vanga.ui.OptionsStateHolder
 import io.github.vivitoto.vanga.ui.StateHolder
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.dialogs.tabs.DialogTab
 import io.github.vivitoto.vanga.ui.dialogs.tabs.TabDialog
 import io.github.vivitoto.vanga.ui.dialogs.tabs.TabItem
 import io.github.vivitoto.vanga.ui.dialogs.user.UserEditDialogViewModel.AgeRestriction
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.library.KomgaLibraryId
 import snd.komga.client.user.KomgaUser
@@ -92,23 +89,26 @@ class UserRolesTab(private val vm: UserEditDialogViewModel) : DialogTab {
         fileDownload: StateHolder<Boolean>
     ) {
         Column {
-            Text("${user.email} 的角色")
-            Spacer(Modifier.height(20.dp))
-            CheckboxWithLabel(
-                checked = administrator.value,
-                onCheckedChange = { administrator.setValue(it) },
-                label = { Text("管理员") }
-            )
-            CheckboxWithLabel(
-                checked = pageStreaming.value,
-                onCheckedChange = { pageStreaming.setValue(it) },
-                label = { Text("页面流式传输") }
-            )
-            CheckboxWithLabel(
-                checked = fileDownload.value,
-                onCheckedChange = { fileDownload.setValue(it) },
-                label = { Text("文件下载") }
-            )
+            SettingsSectionCard(
+                title = "角色",
+                description = user.email,
+            ) {
+                SettingsCheckboxRow(
+                    title = "管理员",
+                    checked = administrator.value,
+                    onCheckedChange = { administrator.setValue(it) },
+                )
+                SettingsCheckboxRow(
+                    title = "页面流式传输",
+                    checked = pageStreaming.value,
+                    onCheckedChange = { pageStreaming.setValue(it) },
+                )
+                SettingsCheckboxRow(
+                    title = "文件下载",
+                    checked = fileDownload.value,
+                    onCheckedChange = { fileDownload.setValue(it) },
+                )
+            }
         }
     }
 }
@@ -142,34 +142,29 @@ class UserSharedLibrariesTab(private val vm: UserEditDialogViewModel) : DialogTa
         onLibraryUncheck: (KomgaLibraryId) -> Unit,
     ) {
         Column {
-            Text("共享书库")
-            Spacer(Modifier.height(20.dp))
-            CheckboxWithLabel(
-                checked = shareAll,
-                onCheckedChange = onShareAllChange,
-                label = { Text("全部书库") }
-            )
-
-            HorizontalDivider()
-
-            allLibraries.forEach { library ->
-
-                CheckboxWithLabel(
-                    checked = sharedLibraries.contains(library.id),
-                    onCheckedChange = { isChecked ->
-                        if (!shareAll) {
-                            if (isChecked) onLibraryCheck(library.id) else onLibraryUncheck(library.id)
-                        }
-                    },
-                    label = {
-                        Text(
-                            library.name,
-                            color = if (shareAll) MaterialTheme.colorScheme.surfaceVariant else Color.Unspecified
-                        )
-                    },
-                    enabled = !shareAll
+            SettingsSectionCard("共享书库") {
+                SettingsCheckboxRow(
+                    title = "全部书库",
+                    checked = shareAll,
+                    onCheckedChange = onShareAllChange,
                 )
 
+                HorizontalDivider()
+
+                allLibraries.forEach { library ->
+
+                    SettingsCheckboxRow(
+                        title = library.name,
+                        checked = sharedLibraries.contains(library.id),
+                        onCheckedChange = { isChecked ->
+                            if (!shareAll) {
+                                if (isChecked) onLibraryCheck(library.id) else onLibraryUncheck(library.id)
+                            }
+                        },
+                        enabled = !shareAll
+                    )
+
+                }
             }
 
         }
@@ -256,4 +251,3 @@ class UserContentRestrictionTab(private val vm: UserEditDialogViewModel) : Dialo
         }
     }
 }
-

@@ -17,12 +17,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.MoreVert
@@ -54,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.filter
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.offline.sync.model.DownloadEvent
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalBookDownloadEvents
 import io.github.vivitoto.vanga.ui.LocalLibraries
 import io.github.vivitoto.vanga.ui.LocalPlatform
@@ -79,6 +79,7 @@ fun BookImageCard(
     onSelect: (() -> Unit)? = null,
     showSelectionControl: Boolean = false,
     showSeriesTitle: Boolean = false,
+    titleMaxLines: Int = 3,
     topStartContent: (@Composable () -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
@@ -104,6 +105,7 @@ fun BookImageCard(
                     book = book,
                     libraryIsDeleted = libraryIsDeleted,
                     showSeriesTitle = showSeriesTitle,
+                    titleMaxLines = titleMaxLines,
                     topStartContent = topStartContent,
                 ) {
                     BookThumbnail(
@@ -148,10 +150,14 @@ private fun BookImageOverlay(
     libraryIsDeleted: Boolean,
     showTitle: Boolean = true,
     showSeriesTitle: Boolean = false,
+    titleMaxLines: Int = 3,
     topStartContent: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    Box(contentAlignment = Alignment.TopStart) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.TopStart,
+    ) {
         content()
         if (showTitle)
             CardGradientOverlay()
@@ -161,7 +167,7 @@ private fun BookImageOverlay(
                 contentAlignment = Alignment.TopStart
             ) { topStartContent() }
         }
-        Column {
+        Column(Modifier.fillMaxSize()) {
             Row {
                 if (book.downloaded) {
                     val tint =
@@ -184,10 +190,12 @@ private fun BookImageOverlay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(Modifier.padding(10.dp)) {
+            Column(Modifier.fillMaxWidth().padding(10.dp)) {
                 if (showSeriesTitle && !book.oneshot) {
                     CardOutlinedText(
                         text = book.seriesTitle,
+                        modifier = Modifier.fillMaxWidth(),
+                        textModifier = Modifier.fillMaxWidth(),
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium.copy(color = Color(195, 195, 195)),
                     )
@@ -195,7 +203,9 @@ private fun BookImageOverlay(
                 if (showTitle) {
                     CardOutlinedText(
                         text = book.metadata.title,
-                        maxLines = 3
+                        modifier = Modifier.fillMaxWidth(),
+                        textModifier = Modifier.fillMaxWidth(),
+                        maxLines = titleMaxLines
                     )
                 }
                 if (book.deleted || libraryIsDeleted) {
@@ -261,7 +271,7 @@ private fun BookUnreadBadge() {
             .padding(6.dp)
             .background(
                 MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = .96f),
-                RoundedCornerShape(999.dp)
+                VangaShape
             )
             .padding(horizontal = 8.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
@@ -370,7 +380,7 @@ fun BookDetailedListCard(
     val coverWidth = 104.dp
     val coverHeight = coverWidth / coverAspectRatio
     Card(
-        shape = RoundedCornerShape(20.dp),
+        shape = VangaShape,
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         modifier = modifier

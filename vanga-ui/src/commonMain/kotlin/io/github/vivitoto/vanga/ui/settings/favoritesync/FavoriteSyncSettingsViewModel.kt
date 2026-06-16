@@ -60,6 +60,50 @@ class FavoriteSyncSettingsViewModel(
         }
     }
 
+    fun syncToLocal() {
+        notifications.runCatchingToNotifications(screenModelScope) {
+            try {
+                busy.value = true
+                saveCurrent()
+                val result = syncService.pullFromRemote()
+                load()
+                when (result) {
+                    FavoriteSyncResult.Disabled -> notifications.add(AppNotification.Normal("收藏同步未启用"))
+                    FavoriteSyncResult.NotConfigured -> notifications.add(AppNotification.Error("请先填写 WebDAV 地址和远端目录"))
+                    is FavoriteSyncResult.ConnectionOk -> notifications.add(AppNotification.Success("WebDAV 连接正常"))
+                    is FavoriteSyncResult.Success -> notifications.add(
+                        AppNotification.Success("已同步至本地：${result.seriesCount} 个系列，${result.bookCount} 本书")
+                    )
+                }
+            } finally {
+                busy.value = false
+            }
+        }
+    }
+
+    fun pullFromRemote() = syncToLocal()
+
+    fun syncToCloud() {
+        notifications.runCatchingToNotifications(screenModelScope) {
+            try {
+                busy.value = true
+                saveCurrent()
+                val result = syncService.uploadToRemote()
+                load()
+                when (result) {
+                    FavoriteSyncResult.Disabled -> notifications.add(AppNotification.Normal("收藏同步未启用"))
+                    FavoriteSyncResult.NotConfigured -> notifications.add(AppNotification.Error("请先填写 WebDAV 地址和远端目录"))
+                    is FavoriteSyncResult.ConnectionOk -> notifications.add(AppNotification.Success("WebDAV 连接正常"))
+                    is FavoriteSyncResult.Success -> notifications.add(
+                        AppNotification.Success("已同步至云端：${result.seriesCount} 个系列，${result.bookCount} 本书")
+                    )
+                }
+            } finally {
+                busy.value = false
+            }
+        }
+    }
+
     fun syncNow() {
         notifications.runCatchingToNotifications(screenModelScope) {
             try {
@@ -71,7 +115,7 @@ class FavoriteSyncSettingsViewModel(
                     is FavoriteSyncResult.ConnectionOk -> notifications.add(AppNotification.Success("WebDAV 连接正常"))
                     is FavoriteSyncResult.Success -> {
                         load()
-                        notifications.add(AppNotification.Success("收藏同步完成：${result.seriesCount} 个系列，${result.bookCount} 本书"))
+                        notifications.add(AppNotification.Success("已更新本机并上传到 WebDAV：${result.seriesCount} 个系列，${result.bookCount} 本书"))
                     }
                 }
             } finally {

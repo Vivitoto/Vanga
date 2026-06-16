@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,12 +34,14 @@ import androidx.compose.ui.window.Popup
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.OptionsStateHolder
 import io.github.vivitoto.vanga.ui.StateHolder
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.withTextFieldNavigation
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
-import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import snd.komga.client.settings.KomgaThumbnailSize
 
 @Composable
@@ -111,103 +114,112 @@ fun GeneralSettingsContent(
     val strings = LocalStrings.current.settings
     var showAdvancedServerSettings by remember { mutableStateOf(false) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        SettingsSectionHeader(
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsSectionCard(
             title = "封面与缩略图",
-            description = "影响书库列表和详情页的封面清晰度。普通用户通常只需要改这里。"
-        )
-
-        Row(horizontalArrangement = Arrangement.spacedBy(40.dp)) {
-            DropdownChoiceMenu(
-                selectedOption = LabeledEntry(thumbnailSize.value, strings.forThumbnailSize(thumbnailSize.value)),
-                options = thumbnailSize.options.map { LabeledEntry(it, strings.forThumbnailSize(it)) },
-                onOptionChange = { thumbnailSize.onValueChange(it.value) },
-                label = { Text(strings.thumbnailSize) }
+        ) {
+            SettingsRow(
+                title = strings.thumbnailSize,
+                supportingText = "更大的缩略图更清晰，但会占用更多存储和生成时间。",
+                trailing = {
+                    DropdownChoiceMenu(
+                        selectedOption = LabeledEntry(thumbnailSize.value, strings.forThumbnailSize(thumbnailSize.value)),
+                        options = thumbnailSize.options.map { LabeledEntry(it, strings.forThumbnailSize(it)) },
+                        onOptionChange = { thumbnailSize.onValueChange(it.value) },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        minHeight = 44.dp,
+                        inputFieldModifier = Modifier.widthIn(min = 160.dp),
+                        modifier = Modifier.widthIn(min = 160.dp),
+                    )
+                }
             )
-        }
-
-        FilledTonalButton(onClick = { showAdvancedServerSettings = !showAdvancedServerSettings }) {
-            Text(if (showAdvancedServerSettings) "收起高级服务器配置" else "高级服务器配置")
+            SettingsRow(
+                title = "更多服务器配置",
+                trailing = {
+                    FilledTonalButton(onClick = { showAdvancedServerSettings = !showAdvancedServerSettings }) {
+                        Text(if (showAdvancedServerSettings) "收起" else "打开")
+                    }
+                }
+            )
         }
 
         if (showAdvancedServerSettings) {
-            SettingsSectionHeader(
+            SettingsSectionCard(
                 title = "高级服务器配置",
                 description = "这些设置会影响服务器行为，部分修改需要重启服务器后生效。"
-            )
-
-            Column {
-                CheckboxWithLabel(
+            ) {
+                SettingsCheckboxRow(
+                    title = strings.deleteEmptyCollections,
                     checked = deleteEmptyCollections.value,
                     onCheckedChange = deleteEmptyCollections.setValue,
-                    label = { Text(strings.deleteEmptyCollections) },
                 )
 
-                CheckboxWithLabel(
+                SettingsCheckboxRow(
+                    title = strings.deleteEmptyReadLists,
                     checked = deleteEmptyReadLists.value,
                     onCheckedChange = deleteEmptyReadLists.setValue,
-                    label = { Text(strings.deleteEmptyReadLists) },
+                )
+
+                TextField(
+                    value = taskPoolSize.value?.toString() ?: "",
+                    onValueChange = { newValue ->
+                        if (newValue.isBlank()) taskPoolSize.setValue(null)
+                        else newValue.toIntOrNull()?.let { taskPoolSize.setValue(it) }
+                    },
+                    label = { Text(strings.taskPoolSize) },
+                    supportingText = {
+                        val error = taskPoolSize.errorMessage
+                        if (error != null)
+                            Text(text = error, color = MaterialTheme.colorScheme.error)
+                    },
+                    modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
+                )
+
+                TextField(
+                    value = rememberMeDurationDays.value?.toString() ?: "",
+                    onValueChange = { newValue ->
+                        if (newValue.isBlank()) rememberMeDurationDays.setValue(null)
+                        else newValue.toIntOrNull()?.let { rememberMeDurationDays.setValue(it) }
+
+                    },
+                    label = { Text(strings.rememberMeDurationDays) },
+                    supportingText = {
+                        val error = rememberMeDurationDays.errorMessage
+                        if (error != null)
+                            Text(text = error, color = MaterialTheme.colorScheme.error)
+                        else Text(strings.requiresRestart)
+                    },
+                    modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
+                )
+
+                SettingsCheckboxRow(
+                    title = strings.renewRememberMeKey,
+                    checked = renewRememberMeKey.value,
+                    onCheckedChange = renewRememberMeKey.setValue,
+                    supportingText = strings.requiresRestart,
+                )
+
+                TextField(
+                    value = serverPort.value?.toString() ?: "",
+                    onValueChange = { newValue ->
+                        if (newValue.isBlank()) serverPort.setValue(null)
+                        else newValue.toIntOrNull()?.let { serverPort.setValue(it) }
+
+                    },
+                    placeholder = { Text(configServerPort.toString()) },
+                    label = { Text(strings.serverPort) },
+                    supportingText = { Text(strings.requiresRestart) },
+                    modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
+                )
+
+                TextField(
+                    value = serverContextPath.value ?: "",
+                    onValueChange = { serverContextPath.setValue(it) },
+                    label = { Text(strings.serverContextPath) },
+                    supportingText = { Text(strings.requiresRestart) },
+                    modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
                 )
             }
-
-            TextField(
-                value = taskPoolSize.value?.toString() ?: "",
-                onValueChange = { newValue ->
-                    if (newValue.isBlank()) taskPoolSize.setValue(null)
-                    else newValue.toIntOrNull()?.let { taskPoolSize.setValue(it) }
-                },
-                label = { Text(strings.taskPoolSize) },
-                supportingText = {
-                    val error = taskPoolSize.errorMessage
-                    if (error != null)
-                        Text(text = error, color = MaterialTheme.colorScheme.error)
-                },
-                modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
-            )
-
-            TextField(
-                value = rememberMeDurationDays.value?.toString() ?: "",
-                onValueChange = { newValue ->
-                    if (newValue.isBlank()) rememberMeDurationDays.setValue(null)
-                    else newValue.toIntOrNull()?.let { rememberMeDurationDays.setValue(it) }
-
-                },
-                label = { Text(strings.rememberMeDurationDays) },
-                supportingText = {
-                    val error = rememberMeDurationDays.errorMessage
-                    if (error != null)
-                        Text(text = error, color = MaterialTheme.colorScheme.error)
-                    else Text(strings.requiresRestart)
-                },
-                modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
-            )
-
-            CheckboxWithLabel(
-                checked = renewRememberMeKey.value,
-                onCheckedChange = renewRememberMeKey.setValue,
-                label = { Text(strings.renewRememberMeKey) },
-            )
-
-            TextField(
-                value = serverPort.value?.toString() ?: "",
-                onValueChange = { newValue ->
-                    if (newValue.isBlank()) serverPort.setValue(null)
-                    else newValue.toIntOrNull()?.let { serverPort.setValue(it) }
-
-                },
-                placeholder = { Text(configServerPort.toString()) },
-                label = { Text(strings.serverPort) },
-                supportingText = { Text(strings.requiresRestart) },
-                modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
-            )
-
-            TextField(
-                value = serverContextPath.value ?: "",
-                onValueChange = { serverContextPath.setValue(it) },
-                label = { Text(strings.serverContextPath) },
-                supportingText = { Text(strings.requiresRestart) },
-                modifier = Modifier.fillMaxWidth().withTextFieldNavigation(),
-            )
         }
 
     }
@@ -288,7 +300,7 @@ fun ChangesConfirmationPopup(
         ) {
             Surface(
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceVariant),
-                shape = MaterialTheme.shapes.medium,
+                shape = VangaShape,
                 modifier = Modifier
                     .fillMaxWidth(.92f)
                     .widthIn(max = 600.dp)

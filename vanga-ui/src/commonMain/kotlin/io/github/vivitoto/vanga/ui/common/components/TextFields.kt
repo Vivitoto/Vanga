@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -72,6 +71,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import io.github.vivitoto.vanga.formatDecimal
+import io.github.vivitoto.vanga.ui.VangaShape
 
 @Composable
 fun PasswordTextField(
@@ -109,7 +109,8 @@ fun PasswordTextField(
                 Icon(imageVector = image, description)
             }
         },
-        modifier = modifier.heightIn(min = 56.dp).withTextFieldNavigation()
+        modifier = modifier.heightIn(min = 56.dp).withTextFieldNavigation(),
+        shape = VangaShape,
     )
 }
 
@@ -145,7 +146,7 @@ fun NoPaddingTextField(
     text: String,
     placeholder: String,
     onTextChange: (String) -> Unit,
-    shape: Shape = RoundedCornerShape(5.dp),
+    shape: Shape = VangaShape,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(),
     trailingIcon: @Composable () -> Unit = {},
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
@@ -237,6 +238,7 @@ fun HttpTextField(
         supportingText = supportingText,
         singleLine = singleLine,
         interactionSource = interactionSource,
+        shape = VangaShape,
     )
 }
 
@@ -276,6 +278,7 @@ fun OutlinedHttpTextField(
         placeholder = placeholder,
         supportingText = supportingText,
         singleLine = singleLine,
+        shape = VangaShape,
     )
 }
 
@@ -329,7 +332,7 @@ fun NumberField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource? = null,
-    shape: Shape = TextFieldDefaults.shape,
+    shape: Shape = VangaShape,
     colors: TextFieldColors = TextFieldDefaults.colors()
 ) {
     TextField(
@@ -395,7 +398,8 @@ fun NumberFieldWithIncrements(
             enabled = value != null,
             label = label,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.weight(1f, false)
+            modifier = Modifier.weight(1f, false),
+            shape = VangaShape,
         )
         Column(Modifier.widthIn(min = 25.dp)) {
             val ripple = ripple()
@@ -407,7 +411,7 @@ fun NumberFieldWithIncrements(
                     .pointerHoverIcon(PointerIcon.Hand)
                     .indication(remember { MutableInteractionSource() }, ripple)
                     .doWhilePointerPressed { value?.let { onvValueChange((it + stepSize).coerceAtMost(maxValue)) } }
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(VangaShape)
                     .clickable(enabled = value != null) { }
             )
             Icon(
@@ -418,7 +422,7 @@ fun NumberFieldWithIncrements(
                     .pointerHoverIcon(PointerIcon.Hand)
                     .indication(remember { MutableInteractionSource() }, ripple)
                     .doWhilePointerPressed { value?.let { onvValueChange((it - stepSize).coerceAtLeast(minValue)) } }
-                    .clip(RoundedCornerShape(5.dp))
+                    .clip(VangaShape)
                     .clickable(enabled = value != null) { }
             )
         }

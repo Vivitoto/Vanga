@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronLeft
 import androidx.compose.material.icons.rounded.ChevronRight
@@ -24,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry.Companion.intEntry
 
 @Composable
@@ -138,7 +138,7 @@ fun PageSizeSelectionDropdown(
         inputFieldColor = MaterialTheme.colorScheme.surface,
         inputFieldModifier = Modifier
             .widthIn(min = 70.dp)
-            .clip(RoundedCornerShape(5.dp))
+            .clip(VangaShape)
             .padding(end = 10.dp)
     )
 }

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalCoverBlurSettings
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.VangaButtonShape
@@ -135,7 +135,7 @@ private fun ResultCardOverlay(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered = interactionSource.collectIsHoveredAsState()
     val selectionModifier = if (isSelected) {
-        Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.secondary), RoundedCornerShape(5.dp))
+        Modifier.border(BorderStroke(3.dp, MaterialTheme.colorScheme.secondary), VangaShape)
     } else if (isHovered.value) overlayBorderModifier()
     else Modifier
 

@@ -18,7 +18,6 @@ import io.github.vivitoto.vanga.ui.book.bookScreen
 import io.github.vivitoto.vanga.ui.common.components.ErrorContent
 import io.github.vivitoto.vanga.ui.home.edit.FilterEditScreen
 import io.github.vivitoto.vanga.ui.platform.ScreenPullToRefreshBox
-import io.github.vivitoto.vanga.ui.reader.readerScreen
 import io.github.vivitoto.vanga.ui.series.seriesScreen
 import snd.komga.client.library.KomgaLibraryId
 
@@ -71,12 +70,7 @@ class HomeScreen(private val libraryId: KomgaLibraryId? = null) : ReloadableScre
 
                         cardWidth = vm.cardWidth.collectAsState().value,
                         onSeriesClick = { navigator push seriesScreen(it) },
-                        seriesMenuActions = vm.seriesMenuActions(),
-                        bookMenuActions = vm.bookMenuActions(),
                         onBookClick = { navigator push bookScreen(it) },
-                        onBookReadClick = { book, markProgress ->
-                            navigator.parent?.push(readerScreen(book, markProgress))
-                        },
                     )
 
             }

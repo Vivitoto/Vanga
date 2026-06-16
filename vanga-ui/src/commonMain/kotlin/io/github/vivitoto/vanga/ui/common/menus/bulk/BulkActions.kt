@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import io.github.vivitoto.vanga.ui.VangaCornerRadius
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -66,13 +68,13 @@ fun BulkActionsContainer(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .clip(RoundedCornerShape(5.dp))
+            .clip(VangaShape)
             .background(MaterialTheme.colorScheme.secondary.copy(alpha = .3f))
     ) {
         IconButton(onClick = onCancel) { Icon(Icons.Default.Close, null) }
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(5.dp))
+                .clip(VangaShape)
                 .clickable { onSelectAll() }
                 .cursorForHand()
                 .padding(end = 15.dp),
@@ -97,7 +99,7 @@ fun BottomPopupBulkActionsPanel(
 ) {
     Popup(popupPositionProvider = BottomScreenPopupPositionProvider) {
         Surface(
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            shape = RoundedCornerShape(topStart = VangaCornerRadius, topEnd = VangaCornerRadius),
             tonalElevation = 3.dp,
             shadowElevation = 6.dp,
         ) {

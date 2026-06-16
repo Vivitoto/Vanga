@@ -3,16 +3,12 @@ package io.github.vivitoto.vanga.ui.settings.updates
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
@@ -23,9 +19,12 @@ import kotlinx.datetime.toLocalDateTime
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateFormat
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.update.UpdateProgressDialog
 import io.github.vivitoto.vanga.ui.platform.PlatformType
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
+import io.github.vivitoto.vanga.ui.settings.SettingsValueRow
 import io.github.vivitoto.vanga.updates.AppRelease
 import io.github.vivitoto.vanga.updates.AppVersion
 import io.github.vivitoto.vanga.updates.UpdateProgress
@@ -48,42 +47,51 @@ fun AppUpdatesContent(
     downloadProgress: UpdateProgress?,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
 
-        SwitchWithLabel(
-            checked = checkForUpdates,
-            onCheckedChange = onCheckForUpdatesChange,
-            label = { Text("启动时检查更新") }
-        )
-        HorizontalDivider(Modifier.padding(bottom = 20.dp))
-        VersionDetails(currentVersion, latestVersion, lastChecked, versionCheckInProgress)
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            verticalAlignment = Alignment.Bottom,
+        SettingsSectionCard(
+            title = "版本更新",
         ) {
+            SettingsSwitchRow(
+                title = "启动时检查更新",
+                checked = checkForUpdates,
+                onCheckedChange = onCheckForUpdatesChange,
+            )
+            VersionDetails(currentVersion, latestVersion, lastChecked, versionCheckInProgress)
 
-            FilledTonalButton(
-                onClick = { onCheckForUpdates() },
-            ) { Text("检查更新") }
+            SettingsRow(
+                title = "手动检查",
+                trailing = {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        FilledTonalButton(
+                            onClick = { onCheckForUpdates() },
+                        ) { Text("检查") }
 
-            if (LocalPlatform.current != PlatformType.WEB_KOMF &&
-                latestVersion != null && currentVersion < latestVersion
-            ) {
-                FilledTonalButton(
-                    onClick = { onUpdate() },
-                ) { Text("更新") }
-            }
+                        if (LocalPlatform.current != PlatformType.WEB_KOMF &&
+                            latestVersion != null && currentVersion < latestVersion
+                        ) {
+                            FilledTonalButton(
+                                onClick = { onUpdate() },
+                            ) { Text("更新") }
+                        }
+                    }
+                }
+            )
         }
 
         val latestRelease = remember(releases, latestVersion) {
             latestVersion?.let { version -> releases.firstOrNull { it.version == version } }
         }
         if (latestRelease != null) {
-            HorizontalDivider(Modifier.padding(vertical = 20.dp))
-            Text("最新版本更新说明", style = MaterialTheme.typography.headlineMedium)
-            ReleaseDetails(latestRelease)
+            SettingsSectionCard(
+                title = "最新版本更新说明",
+            ) {
+                ReleaseDetails(latestRelease)
+            }
         }
 
         if (downloadProgress != null) {
@@ -104,7 +112,7 @@ private fun ReleaseDetails(release: AppRelease) {
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(release.version.toString(), style = MaterialTheme.typography.headlineMedium)
+            Text(release.version.toString(), style = MaterialTheme.typography.titleMedium)
             val publishDate = remember {
                 release.publishDate.toLocalDateTime(TimeZone.currentSystemDefault()).format(localDateFormat)
             }
@@ -130,41 +138,34 @@ private fun VersionDetails(
     versionCheckInProgress: Boolean,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(5.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
+        SettingsValueRow(
+            title = "当前版本",
+            value = "$currentVersion",
+        )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text("当前版本：", modifier = Modifier.widthIn(min = 200.dp))
-            Text("$currentVersion")
+        val localDate = remember(lastChecked) {
+            lastChecked?.toLocalDateTime(TimeZone.currentSystemDefault())?.format(localDateFormat)
         }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (latestVersion != null) {
-                Text("最新版本：", modifier = Modifier.widthIn(200.dp))
-                Text("$latestVersion")
-
-                if (lastChecked != null) {
-                    lastChecked.toString()
-                    val localDate = remember(lastChecked) {
-                        lastChecked.toLocalDateTime(TimeZone.currentSystemDefault()).format(localDateFormat)
-                    }
+        SettingsRow(
+            title = "最新版本",
+            supportingText = localDate?.let { "检查时间：$it" } ?: "尚未完成版本检查。",
+            trailing = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Text(
-                        "检查时间：$localDate",
-                        style = MaterialTheme.typography.labelMedium,
+                        text = latestVersion?.toString() ?: "未知",
+                        color = MaterialTheme.colorScheme.primary,
                     )
+                    if (versionCheckInProgress) {
+                        AppCircularProgressIndicator(size = 20.dp, strokeWidth = 2.dp)
+                    }
                 }
-
-                if (versionCheckInProgress) {
-                    AppCircularProgressIndicator(size = 20.dp, strokeWidth = 2.dp)
-                }
-            }
-        }
+            },
+        )
 
     }
 }

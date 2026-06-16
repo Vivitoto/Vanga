@@ -8,8 +8,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -76,13 +77,17 @@ fun <T> SimpleConditionLayout(
     options: List<LabeledEntry<T>>,
     onConditionTypeChange: (T) -> Unit,
     onConditionRemove: () -> Unit,
-    content: @Composable RowScope.() -> Unit,
+    content: @Composable FlowRowScope.() -> Unit,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        IconButton(onClick = onConditionRemove) { Icon(Icons.Default.Delete, null) }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.weight(1f),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             DropdownChoiceMenu(
                 conditionType,
@@ -93,6 +98,7 @@ fun <T> SimpleConditionLayout(
             )
             content()
         }
+        IconButton(onClick = onConditionRemove) { Icon(Icons.Default.Delete, null) }
     }
 }
 
@@ -106,7 +112,7 @@ fun TagConditionContent(state: TagConditionState) {
 }
 
 @Composable
-fun RowScope.ReadStatusConditionContent(state: ReadStatusConditionState) {
+fun FlowRowScope.ReadStatusConditionContent(state: ReadStatusConditionState) {
     val value = state.value.collectAsState().value
     EqualityOpDropDownContent(
         operator = state.operator.collectAsState().value,
@@ -118,7 +124,7 @@ fun RowScope.ReadStatusConditionContent(state: ReadStatusConditionState) {
 }
 
 @Composable
-fun RowScope.TitleConditionContent(state: TitleConditionState) {
+fun FlowRowScope.TitleConditionContent(state: TitleConditionState) {
     StringOpContent(
         operator = state.operator.collectAsState().value,
         onOperatorChange = state::setOp,
@@ -128,7 +134,7 @@ fun RowScope.TitleConditionContent(state: TitleConditionState) {
 }
 
 @Composable
-fun RowScope.LibraryConditionContent(
+fun FlowRowScope.LibraryConditionContent(
     state: LibraryConditionState,
 ) {
     val value = state.value.collectAsState().value
@@ -150,7 +156,7 @@ fun RowScope.LibraryConditionContent(
 }
 
 @Composable
-fun RowScope.AuthorConditionContent(
+fun FlowRowScope.AuthorConditionContent(
     state: AuthorConditionState,
 ) {
     val operator = state.operator.collectAsState().value
@@ -188,7 +194,7 @@ fun RowScope.AuthorConditionContent(
 }
 
 @Composable
-fun RowScope.ReleaseDateConditionContent(
+fun FlowRowScope.ReleaseDateConditionContent(
     state: ReleaseDateConditionState,
 ) {
     DateOpContent(
@@ -202,7 +208,7 @@ fun RowScope.ReleaseDateConditionContent(
 }
 
 @Composable
-fun RowScope.DeletedConditionContent(
+fun FlowRowScope.DeletedConditionContent(
     state: DeletedConditionState,
 ) {
     BooleanOpContent(
@@ -212,7 +218,7 @@ fun RowScope.DeletedConditionContent(
 }
 
 @Composable
-fun RowScope.OneShotConditionContent(
+fun FlowRowScope.OneShotConditionContent(
     state: OneShotConditionState,
 ) {
     BooleanOpContent(
@@ -222,7 +228,7 @@ fun RowScope.OneShotConditionContent(
 }
 
 @Composable
-fun RowScope.EqualityNullableOpContent(
+fun FlowRowScope.EqualityNullableOpContent(
     state: EqualityNullableOpState<String>,
     options: List<String>,
 ) {
@@ -248,7 +254,7 @@ fun RowScope.EqualityNullableOpContent(
 }
 
 @Composable
-fun RowScope.BooleanOpContent(
+fun FlowRowScope.BooleanOpContent(
     operator: BooleanOpState.Op,
     onOperatorChange: (BooleanOpState.Op) -> Unit,
 ) {
@@ -262,7 +268,7 @@ fun RowScope.BooleanOpContent(
 }
 
 @Composable
-fun <T> RowScope.EqualityOpDropDownContent(
+fun <T> FlowRowScope.EqualityOpDropDownContent(
     operator: EqualityOpState.Op,
     onOpChange: (EqualityOpState.Op) -> Unit,
     selectedValue: LabeledEntry<T>?,
@@ -400,7 +406,7 @@ fun <T> SearchableOptionSelectionField(
 }
 
 @Composable
-fun RowScope.StringOpContent(
+fun FlowRowScope.StringOpContent(
     operator: StringOpState.Op,
     onOperatorChange: (StringOpState.Op) -> Unit,
     value: String?,
@@ -427,7 +433,7 @@ fun RowScope.StringOpContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun RowScope.DateOpContent(
+private fun FlowRowScope.DateOpContent(
     operator: DateOpState.Op,
     onOperatorChange: (DateOpState.Op) -> Unit,
 

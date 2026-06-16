@@ -52,8 +52,6 @@ import io.github.vivitoto.vanga.ui.common.menus.bulk.BulkActionsContainer
 import io.github.vivitoto.vanga.ui.common.menus.bulk.MixedBulkActionsContent
 import io.github.vivitoto.vanga.ui.common.menus.bulk.SelectedItem
 import io.github.vivitoto.vanga.ui.common.menus.bulk.containsSelectedItem
-import io.github.vivitoto.vanga.ui.common.menus.BookMenuActions
-import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass
 import io.github.vivitoto.vanga.ui.platform.PlatformType
 import snd.komga.client.series.KomgaSeries
@@ -73,10 +71,7 @@ fun HomeContent(
 
     cardWidth: Dp,
     onSeriesClick: (KomgaSeries) -> Unit,
-    seriesMenuActions: SeriesMenuActions,
-    bookMenuActions: BookMenuActions,
     onBookClick: (VangaBook) -> Unit,
-    onBookReadClick: (VangaBook, Boolean) -> Unit,
 ) {
     val gridState = rememberLazyGridState()
     val coroutineScope = rememberCoroutineScope()
@@ -111,10 +106,7 @@ fun HomeContent(
             gridState = gridState,
             cardWidth = cardWidth,
             onSeriesClick = onSeriesClick,
-            seriesMenuActions = seriesMenuActions,
-            bookMenuActions = bookMenuActions,
             onBookClick = onBookClick,
-            onBookReadClick = onBookReadClick,
             selectionMode = selectionMode,
             selectedItems = selectedItems,
             onSelectedItemSelect = onSelectedItemSelect,
@@ -275,10 +267,7 @@ private fun DisplayContent(
     gridState: LazyGridState,
     cardWidth: Dp,
     onSeriesClick: (KomgaSeries) -> Unit,
-    seriesMenuActions: SeriesMenuActions,
-    bookMenuActions: BookMenuActions,
     onBookClick: (VangaBook) -> Unit,
-    onBookReadClick: (VangaBook, Boolean) -> Unit,
     selectionMode: Boolean,
     selectedItems: List<SelectedItem>,
     onSelectedItemSelect: (SelectedItem) -> Unit,
@@ -297,9 +286,7 @@ private fun DisplayContent(
                     is BookFilterData -> BookFilterEntry(
                         label = data.filter.label,
                         books = data.books,
-                        bookMenuActions = bookMenuActions,
                         onBookClick = onBookClick,
-                        onBookReadClick = onBookReadClick,
                         selectionMode = selectionMode,
                         selectedItems = selectedItems,
                         onSelectedItemSelect = onSelectedItemSelect,
@@ -309,7 +296,6 @@ private fun DisplayContent(
                         label = data.filter.label,
                         series = data.series,
                         onSeriesClick = onSeriesClick,
-                        seriesMenuActions = seriesMenuActions,
                         selectionMode = selectionMode,
                         selectedItems = selectedItems,
                         onSelectedItemSelect = onSelectedItemSelect,
@@ -324,9 +310,7 @@ private fun DisplayContent(
 private fun LazyGridScope.BookFilterEntry(
     label: String,
     books: List<VangaBook>,
-    bookMenuActions: BookMenuActions,
     onBookClick: (VangaBook) -> Unit,
-    onBookReadClick: (VangaBook, Boolean) -> Unit,
     selectionMode: Boolean,
     selectedItems: List<SelectedItem>,
     onSelectedItemSelect: (SelectedItem) -> Unit,
@@ -349,12 +333,13 @@ private fun LazyGridScope.BookFilterEntry(
                 if (selectionMode) onSelectedItemSelect(selectedItem)
                 else onBookClick(book)
             },
-            onBookReadClick = if (selectionMode) null else { markProgress: Boolean -> onBookReadClick(book, markProgress) },
-            bookMenuActions = if (selectionMode) null else bookMenuActions,
+            onBookReadClick = null,
+            bookMenuActions = null,
             isSelected = selectedItems.containsSelectedItem(selectedItem),
             onSelect = { onSelectedItemSelect(selectedItem) },
             showSelectionControl = selectionMode,
             showSeriesTitle = true,
+            titleMaxLines = 2,
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -364,7 +349,6 @@ private fun LazyGridScope.SeriesFilterEntries(
     label: String,
     series: List<KomgaSeries>,
     onSeriesClick: (KomgaSeries) -> Unit,
-    seriesMenuActions: SeriesMenuActions,
     selectionMode: Boolean,
     selectedItems: List<SelectedItem>,
     onSelectedItemSelect: (SelectedItem) -> Unit,
@@ -391,7 +375,7 @@ private fun LazyGridScope.SeriesFilterEntries(
             isSelected = selectedItems.containsSelectedItem(selectedItem),
             onSeriesSelect = { onSelectedItemSelect(selectedItem) },
             showSelectionControl = selectionMode,
-            seriesMenuActions = if (selectionMode) null else seriesMenuActions,
+            seriesMenuActions = null,
             modifier = Modifier.fillMaxSize()
         )
     }

@@ -35,7 +35,7 @@ import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.settings.appearance.AppSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.navigation.SettingsNavigationMenu
 
-val settingsDesktopNavMenuWidth = 250.dp
+val settingsDesktopNavMenuWidth = 280.dp
 val settingsDesktopContentWidth = 700.dp
 val settingsDesktopTopPadding = 50.dp
 

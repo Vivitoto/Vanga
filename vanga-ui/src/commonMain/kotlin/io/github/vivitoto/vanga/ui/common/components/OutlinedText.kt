@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.TextUnit
 fun OutlinedText(
     text: String,
     modifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier,
     fillColor: Color = Color.Unspecified,
     outlineColor: Color,
     fontSize: TextUnit = TextUnit.Unspecified,
@@ -48,7 +49,7 @@ fun OutlinedText(
     ) {
         Text(
             text = text,
-            modifier = Modifier.semantics { hideFromAccessibility() },
+            modifier = textModifier.semantics { hideFromAccessibility() },
             color = outlineColor,
             fontSize = fontSize,
             fontStyle = fontStyle,
@@ -71,6 +72,7 @@ fun OutlinedText(
 
         Text(
             text = text,
+            modifier = textModifier,
             color = fillColor,
             fontSize = fontSize,
             fontStyle = fontStyle,

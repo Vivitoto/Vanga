@@ -16,10 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
 import io.github.vivitoto.vanga.ui.dialogs.DialogConfirmCancelButtons
 import io.github.vivitoto.vanga.ui.dialogs.DialogSimpleHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
 import snd.komf.api.KomfServerLibraryId
 import snd.komf.api.KomfServerSeriesId
 import snd.komga.client.library.KomgaLibrary
@@ -130,11 +131,13 @@ private fun DialogContent(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Text(text = dialogText)
-        SwitchWithLabel(
-            checked = removeComicInfo,
-            onCheckedChange = onRemoveComicInfoChange,
-            label = { Text("移除 ComicInfo.xml？") },
-            supportingText = { Text("需要文件写入权限") }
-        )
+        SettingsCard {
+            SettingsSwitchRow(
+                title = "移除 ComicInfo.xml？",
+                supportingText = "需要文件写入权限",
+                checked = removeComicInfo,
+                onCheckedChange = onRemoveComicInfoChange,
+            )
+        }
     }
 }

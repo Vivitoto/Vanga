@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.ui.settings.appearance
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -9,9 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +21,11 @@ import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.common.components.AppSliderDefaults
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
-import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
+import io.github.vivitoto.vanga.ui.settings.SettingsValueRow
 import kotlin.math.roundToInt
 
 private val themeOptions = listOf(
@@ -47,81 +48,80 @@ fun AppearanceSettingsContent(
     onBookCoversBlurredChange: (Boolean) -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         val strings = LocalStrings.current.settings
 
-        SettingsSectionHeader(
+        SettingsSectionCard(
             title = "主题",
-            description = "调整 Vanga 的明暗模式。",
-        )
-
-        DropdownChoiceMenu(
-            label = { Text("主题模式") },
-            selectedOption = LabeledEntry(currentTheme, strings.forAppTheme(currentTheme)),
-            options = themeOptions.map { LabeledEntry(it, strings.forAppTheme(it)) },
-            onOptionChange = { onThemeChange(it.value) },
-            inputFieldModifier = Modifier.widthIn(min = 250.dp)
-        )
-
-        HorizontalDivider()
-
-        SettingsSectionHeader(
-            title = "封面模糊",
-            description = "隐藏封面细节，可分别控制首页/书库、合集和单本。",
-        )
-        SwitchWithLabel(
-            checked = libraryCoversBlurred,
-            onCheckedChange = onLibraryCoversBlurredChange,
-            label = { Text("书库封面模糊") },
-            supportingText = { Text("作用于首页和书库里的系列/书库封面。") },
-        )
-        SwitchWithLabel(
-            checked = collectionCoversBlurred,
-            onCheckedChange = onCollectionCoversBlurredChange,
-            label = { Text("合集封面模糊") },
-            supportingText = { Text("作用于合集和阅读列表封面。") },
-        )
-        SwitchWithLabel(
-            checked = bookCoversBlurred,
-            onCheckedChange = onBookCoversBlurredChange,
-            label = { Text("单本封面模糊") },
-            supportingText = { Text("作用于单本漫画/图书封面和详情页单本封面。") },
-        )
-
-        HorizontalDivider()
-
-        SettingsSectionHeader(
-            title = "封面卡片",
-            description = "控制首页、书库和搜索结果里的封面大小。",
-        )
-        Text("封面宽度：${cardWidth.value.roundToInt()} dp", modifier = Modifier.padding(top = 10.dp))
-        Slider(
-            value = cardWidth.value,
-            onValueChange = { onCardWidthChange(it.roundToInt().dp) },
-            steps = 19,
-            valueRange = 150f..350f,
-            colors = AppSliderDefaults.colors(),
-            modifier = Modifier.cursorForHand().padding(end = 20.dp),
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 400.dp, max = 520.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Top
         ) {
-            Card(
-                Modifier
-                    .width(cardWidth)
-                    .aspectRatio(0.703f)
-            ) {
-
-            }
-
-
+            SettingsRow(
+                title = "明暗模式",
+                trailing = {
+                    DropdownChoiceMenu(
+                        selectedOption = LabeledEntry(currentTheme, strings.forAppTheme(currentTheme)),
+                        options = themeOptions.map { LabeledEntry(it, strings.forAppTheme(it)) },
+                        onOptionChange = { onThemeChange(it.value) },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        minHeight = 44.dp,
+                        inputFieldModifier = Modifier.widthIn(min = 132.dp),
+                        modifier = Modifier.widthIn(min = 132.dp),
+                    )
+                }
+            )
         }
 
-    }
+        SettingsSectionCard(
+            title = "封面模糊",
+        ) {
+            SettingsSwitchRow(
+                title = "书库封面模糊",
+                checked = libraryCoversBlurred,
+                onCheckedChange = onLibraryCoversBlurredChange,
+            )
+            SettingsSwitchRow(
+                title = "合集封面模糊",
+                checked = collectionCoversBlurred,
+                onCheckedChange = onCollectionCoversBlurredChange,
+            )
+            SettingsSwitchRow(
+                title = "单本封面模糊",
+                checked = bookCoversBlurred,
+                onCheckedChange = onBookCoversBlurredChange,
+            )
+        }
 
+        SettingsSectionCard(
+            title = "封面卡片",
+        ) {
+            SettingsValueRow(
+                title = "封面宽度",
+                value = "${cardWidth.value.roundToInt()} dp",
+            )
+            Slider(
+                value = cardWidth.value,
+                onValueChange = { onCardWidthChange(it.roundToInt().dp) },
+                steps = 19,
+                valueRange = 150f..350f,
+                colors = AppSliderDefaults.colors(),
+                modifier = Modifier.fillMaxWidth().cursorForHand().padding(horizontal = 2.dp),
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 340.dp, max = 520.dp)
+                    .padding(top = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top
+            ) {
+                Card(
+                    Modifier
+                        .width(cardWidth)
+                        .aspectRatio(0.703f)
+                ) {
+
+                }
+            }
+        }
+    }
 }

@@ -197,7 +197,7 @@ data class BookBulkActionsState(
             ))
         add(
             BulkActionButtonData(
-                description = "加入 Vanga 本地收藏",
+                description = "加入收藏",
                 icon = Icons.Default.Star,
                 onClick = { coroutineScope.launch { favoriteActions.addBooksToLocalFavorites(books) } }
             )

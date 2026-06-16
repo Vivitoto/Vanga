@@ -27,7 +27,7 @@ fun MixedBulkActionsContent(
     val buttons = remember(items, actions) {
         listOf(
             BulkActionButtonData(
-                description = "加入 Vanga 本地收藏",
+                description = "加入收藏",
                 icon = Icons.Default.Star,
                 onClick = { coroutineScope.launch { actions.addItemsToLocalFavorites(items) } }
             )
@@ -101,7 +101,7 @@ private suspend fun addToLocalFavorites(
         uniqueBooks.forEach { favoriteReadListService.addFavorite(it.id) }
         uniqueSeries.forEach { favoriteCollectionService.addFavorite(it.id) }
     }.onSuccess {
-        notifications.add(AppNotification.Success("已加入 Vanga 本地收藏：${favoriteSummary(uniqueBooks, uniqueSeries)}"))
+        notifications.add(AppNotification.Success("已加入收藏：${favoriteSummary(uniqueBooks, uniqueSeries)}"))
         onFavoritesChanged()
         runCatching { favoriteSyncService.syncNow() }
             .onSuccess { result ->

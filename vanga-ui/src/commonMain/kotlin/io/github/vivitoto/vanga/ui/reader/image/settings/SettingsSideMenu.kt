@@ -2,18 +2,15 @@ package io.github.vivitoto.vanga.ui.reader.image.settings
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -29,7 +26,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Help
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,11 +61,13 @@ import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.NumberFieldWithIncrements
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.platform.PlatformType
-import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.reader.image.continuous.ContinuousReaderState
 import io.github.vivitoto.vanga.ui.reader.image.paged.PagedReaderState
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
 import kotlin.math.roundToInt
 
 @Composable
@@ -142,22 +140,25 @@ fun SettingsSideMenuOverlay(
                 BookTitles(book)
             }
 
-            HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
             val strings = LocalStrings.current
             val readerStrings = strings.reader
             val zoomPercentage = remember(zoom) { (zoom * 100).roundToInt() }
-            Text("${readerStrings.zoom}: $zoomPercentage%")
-            Column {
-                DropdownChoiceMenu(
-                    selectedOption = LabeledEntry(readerType, readerStrings.forReaderType(readerType)),
-                    options = remember {
-                        ReaderType.entries
-                            .map { LabeledEntry(it, readerStrings.forReaderType(it)) }
-                    },
-                    onOptionChange = { onReaderTypeChange(it.value) },
-                    inputFieldModifier = Modifier.fillMaxWidth(),
-                    label = { Text(readerStrings.readerType) },
-                    inputFieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
+            SettingsSectionCard(title = "阅读模式") {
+                SettingsRow(
+                    title = readerStrings.readerType,
+                    stackTrailing = true,
+                    trailing = {
+                        DropdownChoiceMenu(
+                            selectedOption = LabeledEntry(readerType, readerStrings.forReaderType(readerType)),
+                            options = remember {
+                                ReaderType.entries
+                                    .map { LabeledEntry(it, readerStrings.forReaderType(it)) }
+                            },
+                            onOptionChange = { onReaderTypeChange(it.value) },
+                            inputFieldModifier = Modifier.fillMaxWidth(),
+                            minHeight = 44.dp,
+                        )
+                    }
                 )
                 when (readerType) {
                     PAGED -> PagedReaderSettingsContent(pagedReaderState)
@@ -165,24 +166,29 @@ fun SettingsSideMenuOverlay(
                 }
             }
 
-            HorizontalDivider()
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .clickable { onShowImageSettingsChange(!showImageSettings) }
-                    .cursorForHand()
-                    .padding(10.dp)
-            ) {
-                Text("图片设置")
-                Spacer(Modifier.weight(1f))
-                Icon(
-                    Icons.Filled.ArrowDropDown,
-                    null,
-                    Modifier.rotate(if (showImageSettings) 180f else 0f)
+            SettingsCard {
+                SettingsRow(
+                    title = "图片设置",
+                    onClick = { onShowImageSettingsChange(!showImageSettings) },
+                    trailing = {
+                        Icon(
+                            Icons.Filled.ArrowDropDown,
+                            null,
+                            Modifier.rotate(if (showImageSettings) 180f else 0f)
+                        )
+                    }
                 )
             }
             AnimatedVisibility(showImageSettings) {
-                Column {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    CommonImageSettings(
+                        modifier = Modifier.padding(start = 5.dp),
+                        stretchToFit = stretchToFit,
+                        onStretchToFitChange = onStretchToFitChange,
+                        cropBorders = cropBorders,
+                        onCropBordersChange = onCropBordersChange,
+                    )
+
                     SamplingModeSettings(
                         availableUpsamplingModes = availableUpsamplingModes,
                         upsamplingMode = upsamplingMode,
@@ -195,12 +201,8 @@ fun SettingsSideMenuOverlay(
                         modifier = Modifier.padding(start = 5.dp)
                     )
 
-                    CommonImageSettings(
+                    ImageFlashSettings(
                         modifier = Modifier.padding(start = 5.dp),
-                        stretchToFit = stretchToFit,
-                        onStretchToFitChange = onStretchToFitChange,
-                        cropBorders = cropBorders,
-                        onCropBordersChange = onCropBordersChange,
                         flashEnabled = flashEnabled,
                         onFlashEnabledChange = onFlashEnabledChange,
                         flashEveryNPages = flashEveryNPages,
@@ -212,40 +214,43 @@ fun SettingsSideMenuOverlay(
                     )
                 }
             }
-            HorizontalDivider()
-            when (readerType) {
-                PAGED -> {
-                    PagedReaderPagesInfo(
-                        pages = pagedReaderState.currentSpread.collectAsState().value.pages,
-                        modifier = Modifier.padding(start = 10.dp)
-                    )
-                }
 
-                CONTINUOUS -> {
-                    var showPagesInfo by remember { mutableStateOf(false) }
-                    val readerStrings = LocalStrings.current.reader
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .clickable { showPagesInfo = !showPagesInfo }
-                            .cursorForHand()
-                            .padding(10.dp)
-                    ) {
-                        Text(readerStrings.pagesInfo)
-                        Spacer(Modifier.weight(1f))
-                        Icon(
-                            Icons.Filled.ArrowDropDown,
-                            null,
-                            Modifier.rotate(if (showPagesInfo) 180f else 0f)
+            SettingsSectionCard(title = "阅读状态") {
+                SettingsRow(
+                    title = readerStrings.zoom,
+                    trailing = {
+                        Text("$zoomPercentage%")
+                    }
+                )
+                when (readerType) {
+                    PAGED -> {
+                        PagedReaderPagesInfo(
+                            pages = pagedReaderState.currentSpread.collectAsState().value.pages,
+                            modifier = Modifier.padding(start = 2.dp)
                         )
                     }
 
-                    AnimatedVisibility(showPagesInfo) {
-                        ContinuousReaderPagesInfo(
-                            lazyListState = continuousReaderState.lazyListState,
-                            waitForImage = continuousReaderState::waitForImage,
-                            modifier = Modifier.padding(start = 10.dp)
+                    CONTINUOUS -> {
+                        var showPagesInfo by remember { mutableStateOf(false) }
+                        SettingsRow(
+                            title = readerStrings.pagesInfo,
+                            onClick = { showPagesInfo = !showPagesInfo },
+                            trailing = {
+                                Icon(
+                                    Icons.Filled.ArrowDropDown,
+                                    null,
+                                    Modifier.rotate(if (showPagesInfo) 180f else 0f)
+                                )
+                            }
                         )
+
+                        AnimatedVisibility(showPagesInfo) {
+                            ContinuousReaderPagesInfo(
+                                lazyListState = continuousReaderState.lazyListState,
+                                waitForImage = continuousReaderState::waitForImage,
+                                modifier = Modifier.padding(start = 2.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -262,42 +267,56 @@ private fun ColumnScope.ContinuousReaderSettingsContent(state: ContinuousReaderS
     val strings = LocalStrings.current.continuousReader
 
     val readingDirection = state.readingDirection.collectAsState()
-    DropdownChoiceMenu(
-        selectedOption = LabeledEntry(readingDirection.value, strings.forReadingDirection(readingDirection.value)),
-        options = remember {
-            ContinuousReadingDirection.entries.map { LabeledEntry(it, strings.forReadingDirection(it)) }
-        },
-        onOptionChange = { state.onReadingDirectionChange(it.value) },
-        inputFieldModifier = Modifier.fillMaxWidth(),
-        label = { Text(strings.readingDirection) },
-        inputFieldColor = MaterialTheme.colorScheme.surfaceContainerHighest
+    SettingsRow(
+        title = strings.readingDirection,
+        stackTrailing = true,
+        trailing = {
+            DropdownChoiceMenu(
+                selectedOption = LabeledEntry(readingDirection.value, strings.forReadingDirection(readingDirection.value)),
+                options = remember {
+                    ContinuousReadingDirection.entries.map { LabeledEntry(it, strings.forReadingDirection(it)) }
+                },
+                onOptionChange = { state.onReadingDirectionChange(it.value) },
+                inputFieldModifier = Modifier.fillMaxWidth(),
+                minHeight = 44.dp,
+            )
+        }
     )
 
-    Row(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-        val padding = state.sidePaddingFraction.collectAsState().value
-        NumberFieldWithIncrements(
-            value = padding * 200,
-            label = { Text("两侧留白", style = MaterialTheme.typography.labelMedium) },
-            onvValueChange = { state.onSidePaddingChange(it / 200) },
-            stepSize = 5f,
-            minValue = 0f,
-            maxValue = 80f,
-            digitsAfterDecimal = 1,
-            modifier = Modifier.weight(1f)
-        )
-        val spacing = state.pageSpacing.collectAsState(Dispatchers.Main.immediate).value
-        NumberFieldWithIncrements(
-            value = spacing.toFloat(),
-            label = { Text("页面间距", style = MaterialTheme.typography.labelMedium) },
-            onvValueChange = { state.onPageSpacingChange(it.roundToInt()) },
-            stepSize = 1f,
-            minValue = 0f,
-            maxValue = 9999f,
-            digitsAfterDecimal = 0,
-            modifier = Modifier.weight(1f).padding(end = 10.dp)
-        )
-    }
-    Spacer(Modifier.height(10.dp))
+    val padding = state.sidePaddingFraction.collectAsState().value
+    val spacing = state.pageSpacing.collectAsState(Dispatchers.Main.immediate).value
+    SettingsRow(
+        title = "连续阅读布局",
+        supportingText = "两侧留白 ${(padding * 200).roundToInt()}% · 页面间距 $spacing",
+        stackTrailing = true,
+        trailing = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                NumberFieldWithIncrements(
+                    value = padding * 200,
+                    label = { Text("两侧留白", style = MaterialTheme.typography.labelMedium) },
+                    onvValueChange = { state.onSidePaddingChange(it / 200) },
+                    stepSize = 5f,
+                    minValue = 0f,
+                    maxValue = 80f,
+                    digitsAfterDecimal = 1,
+                    modifier = Modifier.weight(1f)
+                )
+                NumberFieldWithIncrements(
+                    value = spacing.toFloat(),
+                    label = { Text("页面间距", style = MaterialTheme.typography.labelMedium) },
+                    onvValueChange = { state.onPageSpacingChange(it.roundToInt()) },
+                    stepSize = 1f,
+                    minValue = 0f,
+                    maxValue = 9999f,
+                    digitsAfterDecimal = 0,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    )
 }
 
 @Composable
@@ -306,52 +325,64 @@ private fun ColumnScope.PagedReaderSettingsContent(
 ) {
     val strings = LocalStrings.current.pagedReader
     val scaleType = pageState.scaleType.collectAsState().value
-    Column {
-        DropdownChoiceMenu(
-            selectedOption = LabeledEntry(scaleType, strings.forScaleType(scaleType)),
-            options = remember { LayoutScaleType.entries.map { LabeledEntry(it, strings.forScaleType(it)) } },
-            onOptionChange = { pageState.onScaleTypeChange(it.value) },
-            inputFieldModifier = Modifier.fillMaxWidth(),
-            label = { Text(strings.scaleType) },
-            inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-
-        val readingDirection = pageState.readingDirection.collectAsState().value
-        DropdownChoiceMenu(
-            selectedOption = LabeledEntry(
-                readingDirection,
-                strings.forReadingDirection(readingDirection)
-            ),
-            options = remember {
-                PagedReadingDirection.entries.map { LabeledEntry(it, strings.forReadingDirection(it)) }
-            },
-            onOptionChange = { pageState.onReadingDirectionChange(it.value) },
-            inputFieldModifier = Modifier.fillMaxWidth(),
-            label = { Text(strings.readingDirection) },
-            inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-
-        val layout = pageState.layout.collectAsState().value
-        DropdownChoiceMenu(
-            selectedOption = LabeledEntry(layout, strings.forLayout(layout)),
-            options = remember { PageDisplayLayout.entries.map { LabeledEntry(it, strings.forLayout(it)) } },
-            onOptionChange = { pageState.onLayoutChange(it.value) },
-            inputFieldModifier = Modifier.fillMaxWidth(),
-            label = { Text(strings.layout) },
-            inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-
-        val layoutOffset = pageState.layoutOffset.collectAsState().value
-        AnimatedVisibility(
-            visible = layout == PageDisplayLayout.DOUBLE_PAGES || layout == PageDisplayLayout.DOUBLE_PAGES_NO_COVER,
-        ) {
-            SwitchWithLabel(
-                checked = layoutOffset,
-                onCheckedChange = pageState::onLayoutOffsetChange,
-                label = { Text(strings.offsetPages) },
-                contentPadding = PaddingValues(horizontal = 10.dp)
+    SettingsRow(
+        title = strings.scaleType,
+        stackTrailing = true,
+        trailing = {
+            DropdownChoiceMenu(
+                selectedOption = LabeledEntry(scaleType, strings.forScaleType(scaleType)),
+                options = remember { LayoutScaleType.entries.map { LabeledEntry(it, strings.forScaleType(it)) } },
+                onOptionChange = { pageState.onScaleTypeChange(it.value) },
+                inputFieldModifier = Modifier.fillMaxWidth(),
+                minHeight = 44.dp,
             )
         }
+    )
+
+    val readingDirection = pageState.readingDirection.collectAsState().value
+    SettingsRow(
+        title = strings.readingDirection,
+        stackTrailing = true,
+        trailing = {
+            DropdownChoiceMenu(
+                selectedOption = LabeledEntry(
+                    readingDirection,
+                    strings.forReadingDirection(readingDirection)
+                ),
+                options = remember {
+                    PagedReadingDirection.entries.map { LabeledEntry(it, strings.forReadingDirection(it)) }
+                },
+                onOptionChange = { pageState.onReadingDirectionChange(it.value) },
+                inputFieldModifier = Modifier.fillMaxWidth(),
+                minHeight = 44.dp,
+            )
+        }
+    )
+
+    val layout = pageState.layout.collectAsState().value
+    SettingsRow(
+        title = strings.layout,
+        stackTrailing = true,
+        trailing = {
+            DropdownChoiceMenu(
+                selectedOption = LabeledEntry(layout, strings.forLayout(layout)),
+                options = remember { PageDisplayLayout.entries.map { LabeledEntry(it, strings.forLayout(it)) } },
+                onOptionChange = { pageState.onLayoutChange(it.value) },
+                inputFieldModifier = Modifier.fillMaxWidth(),
+                minHeight = 44.dp,
+            )
+        }
+    )
+
+    val layoutOffset = pageState.layoutOffset.collectAsState().value
+    AnimatedVisibility(
+        visible = layout == PageDisplayLayout.DOUBLE_PAGES || layout == PageDisplayLayout.DOUBLE_PAGES_NO_COVER,
+    ) {
+        SettingsSwitchRow(
+            title = strings.offsetPages,
+            checked = layoutOffset,
+            onCheckedChange = pageState::onLayoutOffsetChange,
+        )
     }
 }
 
@@ -411,60 +442,68 @@ private fun SamplingModeSettings(
     val strings = LocalStrings.current.imageSettings
 
     Column(modifier) {
-        if (availableUpsamplingModes.size > 1) {
-            DropdownChoiceMenu(
-                selectedOption = LabeledEntry(
-                    upsamplingMode,
-                    strings.forUpsamplingMode(upsamplingMode)
-                ),
-                options = remember(availableUpsamplingModes) {
-                    availableUpsamplingModes.map {
-                        LabeledEntry(
-                            it,
-                            strings.forUpsamplingMode(it)
+        SettingsSectionCard(title = "图片采样") {
+            if (availableUpsamplingModes.size > 1) {
+                SettingsRow(
+                    title = strings.upsamplingMode,
+                    stackTrailing = true,
+                    trailing = {
+                        DropdownChoiceMenu(
+                            selectedOption = LabeledEntry(
+                                upsamplingMode,
+                                strings.forUpsamplingMode(upsamplingMode)
+                            ),
+                            options = remember(availableUpsamplingModes) {
+                                availableUpsamplingModes.map {
+                                    LabeledEntry(
+                                        it,
+                                        strings.forUpsamplingMode(it)
+                                    )
+                                }
+                            },
+                            onOptionChange = { onUpsamplingModeChange(it.value) },
+                            inputFieldModifier = Modifier.fillMaxWidth(),
+                            minHeight = 44.dp,
                         )
                     }
-                },
-                onOptionChange = { onUpsamplingModeChange(it.value) },
-                inputFieldModifier = Modifier.fillMaxWidth(),
-                label = { Text(strings.upsamplingMode) },
-                inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        }
+                )
+            }
 
-        if (availableDownsamplingKernels.size > 1) {
-            DropdownChoiceMenu(
-                selectedOption = LabeledEntry(
-                    downsamplingKernel,
-                    strings.forDownsamplingKernel(downsamplingKernel)
-                ),
-                options = remember(availableDownsamplingKernels) {
-                    availableDownsamplingKernels.map {
-                        LabeledEntry(
-                            it,
-                            strings.forDownsamplingKernel(it)
+            if (availableDownsamplingKernels.size > 1) {
+                SettingsRow(
+                    title = strings.downsamplingKernel,
+                    stackTrailing = true,
+                    trailing = {
+                        DropdownChoiceMenu(
+                            selectedOption = LabeledEntry(
+                                downsamplingKernel,
+                                strings.forDownsamplingKernel(downsamplingKernel)
+                            ),
+                            options = remember(availableDownsamplingKernels) {
+                                availableDownsamplingKernels.map {
+                                    LabeledEntry(
+                                        it,
+                                        strings.forDownsamplingKernel(it)
+                                    )
+                                }
+                            },
+                            onOptionChange = { onDownsamplingKernelChange(it.value) },
+                            inputFieldModifier = Modifier.fillMaxWidth(),
+                            minHeight = 44.dp,
                         )
                     }
-                },
-                onOptionChange = { onDownsamplingKernelChange(it.value) },
-                inputFieldModifier = Modifier.fillMaxWidth(),
-                label = { Text(strings.downsamplingKernel) },
-                inputFieldColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        }
+                )
+            }
 
-
-        val platform = LocalPlatform.current
-        if (platform != PlatformType.WEB_KOMF) {
-            SwitchWithLabel(
-                checked = linearLightDownsampling,
-                onCheckedChange = onLinearLightDownsamplingChange,
-                label = { Text("线性光降采样") },
-                supportingText = {
-                    Text("较慢，但可能更准确", style = MaterialTheme.typography.labelMedium)
-                },
-                contentPadding = PaddingValues(horizontal = 10.dp)
-            )
+            val platform = LocalPlatform.current
+            if (platform != PlatformType.WEB_KOMF) {
+                SettingsSwitchRow(
+                    title = "线性光降采样",
+                    supportingText = "较慢，但可能更准确",
+                    checked = linearLightDownsampling,
+                    onCheckedChange = onLinearLightDownsamplingChange,
+                )
+            }
         }
     }
 }

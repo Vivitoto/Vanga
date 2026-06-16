@@ -5,15 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
@@ -33,8 +29,10 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.ui.common.components.DropdownMultiChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
 import io.github.vivitoto.vanga.ui.settings.komf.SavableHttpTextField
 import io.github.vivitoto.vanga.ui.settings.komf.SavableTextField
 import snd.komf.api.mediaserver.KomfMediaServerLibrary
@@ -59,8 +57,11 @@ fun KomfSettingsContent(
         val coroutineScope = rememberCoroutineScope()
         var komfEnabledConfirmed by remember { mutableStateOf(komfEnabled || !integrationToggleEnabled) }
         if (integrationToggleEnabled) {
-            Column {
-                SwitchWithLabel(
+            SettingsSectionCard(
+                title = "Komf 集成",
+            ) {
+                SettingsSwitchRow(
+                    title = "启用 Komf 集成",
                     checked = komfEnabled,
                     onCheckedChange = {
                         coroutineScope.launch {
@@ -68,34 +69,37 @@ fun KomfSettingsContent(
                             komfEnabledConfirmed = true
                         }
                     },
-                    label = { Text("启用 Komf 集成") },
-                    supportingText = {
-                        Text("添加用于元数据更新和编辑的功能")
-                    }
                 )
 
-                Row {
-                    Spacer(Modifier.weight(1f))
-                    ElevatedButton(
-                        onClick = { uriHandler.openUri("https://github.com/Snd-R/komf") },
-                    ) {
-                        Text("Komf 项目链接")
+                SettingsRow(
+                    title = "项目主页",
+                    trailing = {
+                        ElevatedButton(
+                            onClick = { uriHandler.openUri("https://github.com/Snd-R/komf") },
+                        ) {
+                            Text("打开")
+                        }
                     }
-                }
+                )
             }
         }
 
         AnimatedVisibility(komfEnabled || !integrationToggleEnabled) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                KomfConnectionDetails(
-                    komfUrl = komfUrl,
-                    onKomfUrlChange = onKomfUrlChange,
-                    komfConnectionError = komfConnectionError
-                )
+                SettingsSectionCard(
+                    title = "Komf 服务连接",
+                ) {
+                    KomfConnectionDetails(
+                        komfUrl = komfUrl,
+                        onKomfUrlChange = onKomfUrlChange,
+                        komfConnectionError = komfConnectionError
+                    )
+                }
 
                 AnimatedVisibility(komfConnectionError == null) {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                    SettingsSectionCard(
+                        title = "媒体服务器连接",
+                    ) {
                         when {
                             komgaState != null && kavitaState != null -> KomgaAndKavitaConnectionSettings(
                                 komgaState = komgaState,
@@ -285,20 +289,15 @@ private fun MediaServerEventListenerSettings(
     onNotificationsLibraryFilterSelect: (KomfMediaServerLibraryId) -> Unit,
     libraries: List<KomfMediaServerLibrary>
 ) {
-    Column {
-        SwitchWithLabel(
+    SettingsSectionCard(
+        title = "事件监听",
+        description = "新增作品或单本时启动处理任务。",
+    ) {
+        SettingsSwitchRow(
+            title = "启用事件监听",
             checked = enableEventListener,
             onCheckedChange = onEnableEventListenerChange,
-            label = { Text("事件监听") },
-            supportingText = {
-                Text(
-                    "新增作品或单本时启动处理任务",
-                    style = MaterialTheme.typography.labelLarge,
-                )
-            }
         )
-
-        Spacer(Modifier.height(10.dp))
 
         AnimatedVisibility(enableEventListener) {
             EventListenerContent(
@@ -310,7 +309,6 @@ private fun MediaServerEventListenerSettings(
             )
         }
     }
-
 }
 
 @Composable

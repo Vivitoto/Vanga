@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -28,7 +27,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -55,12 +53,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.format
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.dateTimeFormat
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
 import io.github.vivitoto.vanga.ui.common.components.AppCircularProgressIndicator
 import io.github.vivitoto.vanga.ui.common.components.AppFilterChipDefaults
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import snd.komf.api.job.KomfMetadataJob
 import snd.komf.api.job.KomfMetadataJobStatus
 import snd.komf.api.job.KomfMetadataJobStatus.COMPLETED
@@ -85,13 +85,14 @@ fun KomfJobsContent(
     isLoading: Boolean,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Column {
+        SettingsSectionCard(
+            title = "任务筛选",
+        ) {
             StatusFilters(
                 selectedStatus = selectedStatus,
                 onStatusSelect = onStatusSelect,
                 onDeleteAll = onDeleteAll
             )
-            HorizontalDivider()
         }
         Pagination(
             totalPages = totalPages,
@@ -163,7 +164,7 @@ private fun JobCard(
 
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(5.dp))
+            .clip(VangaShape)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .heightIn(min = 70.dp)
             .padding(end = 5.dp),
@@ -226,7 +227,7 @@ private fun JobCard(
                             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .9f),
                             border = BorderStroke(Dp.Hairline, MaterialTheme.colorScheme.surface),
                             modifier = Modifier.widthIn(max = 400.dp),
-                            shape = MaterialTheme.shapes.medium
+                            shape = VangaShape
                         ) {
                             job.message?.let {
                                 Text(it, modifier = Modifier.padding(10.dp))
@@ -294,7 +295,7 @@ private fun StatusFilters(
         var showConfirmationDialog by remember { mutableStateOf(false) }
         FilledTonalButton(
             onClick = { showConfirmationDialog = true },
-            shape = RoundedCornerShape(12.dp),
+            shape = VangaShape,
             colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
             modifier = Modifier.cursorForHand()
         ) {

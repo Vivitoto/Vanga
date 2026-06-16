@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +47,7 @@ import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.collection.SeriesCollectionsContent
 import io.github.vivitoto.vanga.ui.collection.SeriesCollectionsState
 import io.github.vivitoto.vanga.ui.common.TagList
@@ -137,6 +137,11 @@ fun SeriesContent(
                 state = scrollState,
                 columns = GridCells.Adaptive(gridMinWidth),
                 horizontalArrangement = Arrangement.spacedBy(15.dp),
+                verticalArrangement = if (currentTab == SeriesTab.BOOKS && booksData.layout == BooksLayout.GRID) {
+                    Arrangement.spacedBy(15.dp)
+                } else {
+                    Arrangement.Top
+                },
                 modifier = contentPadding,
             ) {
 
@@ -332,7 +337,7 @@ fun Series(
 
         Surface(
             modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
-            shape = MaterialTheme.shapes.large,
+            shape = VangaShape,
             tonalElevation = 1.dp,
         ) {
             Column(
@@ -363,7 +368,7 @@ fun Series(
         if (series.hasChipMetadata()) {
             Surface(
                 modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
-                shape = MaterialTheme.shapes.large,
+                shape = VangaShape,
                 tonalElevation = 1.dp,
             ) {
                 Column(Modifier.padding(16.dp)) {
@@ -476,6 +481,5 @@ private fun TabRow(
                 )
             }
         }
-        HorizontalDivider()
     }
 }

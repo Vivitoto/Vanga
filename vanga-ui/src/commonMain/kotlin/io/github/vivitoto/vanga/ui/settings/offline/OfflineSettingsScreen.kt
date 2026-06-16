@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +47,7 @@ class OfflineSettingsScreen : Screen {
         SettingsScreenContainer("离线模式") {
             var selectedTab by rememberSaveable { mutableStateOf(0) }
 
-            SecondaryTabRow(selectedTabIndex = selectedTab) {
+            ScrollableTabRow(selectedTabIndex = selectedTab, edgePadding = 0.dp) {
                 Tab(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },

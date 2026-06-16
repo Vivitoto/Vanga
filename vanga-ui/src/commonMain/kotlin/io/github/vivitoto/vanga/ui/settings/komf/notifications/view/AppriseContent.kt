@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -38,11 +39,13 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.ktor.http.*
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
-import io.github.vivitoto.vanga.ui.common.components.SwitchWithLabel
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.COMPACT
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
+import io.github.vivitoto.vanga.ui.settings.SettingsSwitchRow
 import io.github.vivitoto.vanga.ui.settings.komf.notifications.NotificationContextState
 
 @Composable
@@ -64,46 +67,46 @@ fun AppriseContent(
 ) {
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        SettingsSectionCard(
+            title = "URL 列表",
+        ) {
+            urls.forEach { url ->
+                Row {
+                    TextField(
+                        value = url,
+                        onValueChange = {},
+                        enabled = false,
+                        modifier = Modifier.weight(1f)
+                    )
 
-        Text("URL 列表")
-        urls.forEach { url ->
-
-            Row {
-                TextField(
-                    value = url,
-                    onValueChange = {},
-                    enabled = false,
-                    modifier = Modifier.weight(1f)
-                )
-
-                IconButton(onClick = { onUrlRemove(url) }, modifier = Modifier.cursorForHand()) {
-                    Icon(Icons.Default.Delete, null)
+                    IconButton(onClick = { onUrlRemove(url) }, modifier = Modifier.cursorForHand()) {
+                        Icon(Icons.Default.Delete, null)
+                    }
                 }
             }
-        }
-        var showAddUrlDialog by remember { mutableStateOf(false) }
-        FilledTonalButton(
-            onClick = { showAddUrlDialog = true },
-            modifier = Modifier.cursorForHand()
-        ) {
-            Text("添加 URL")
-        }
-        SwitchWithLabel(
-            checked = uploadSeriesCover,
-            onCheckedChange = onUploadSeriesCoverChange,
-            label = { Text("上传作品封面") }
-        )
 
-        if (showAddUrlDialog) {
-            AddUrlDialog(
-                onDismissRequest = { showAddUrlDialog = false },
-                onUrlAdd = onUrlAdd
+            var showAddUrlDialog by remember { mutableStateOf(false) }
+            FilledTonalButton(
+                onClick = { showAddUrlDialog = true },
+                modifier = Modifier.cursorForHand()
+            ) {
+                Text("添加 URL")
+            }
+            SettingsSwitchRow(
+                title = "上传作品封面",
+                checked = uploadSeriesCover,
+                onCheckedChange = onUploadSeriesCoverChange,
             )
-        }
 
-        HorizontalDivider()
+            if (showAddUrlDialog) {
+                AddUrlDialog(
+                    onDismissRequest = { showAddUrlDialog = false },
+                    onUrlAdd = onUrlAdd
+                )
+            }
+        }
         TemplatesEditor(
             titleTemplate = titleTemplate,
             onTitleTemplateChange = onTitleTemplateChange,
@@ -159,11 +162,13 @@ fun AddUrlDialog(
                     visualTransformation = if (isFocused) VisualTransformation.None else PasswordVisualTransformation(),
                 )
                 if (isError) {
-                    CheckboxWithLabel(
-                        checked = confirmInvalidUrl,
-                        onCheckedChange = { confirmInvalidUrl = !confirmInvalidUrl },
-                        label = { Text("仍然应用") }
-                    )
+                    SettingsCard {
+                        SettingsCheckboxRow(
+                            title = "仍然应用",
+                            checked = confirmInvalidUrl,
+                            onCheckedChange = { confirmInvalidUrl = it },
+                        )
+                    }
                 }
             }
         },
@@ -208,10 +213,11 @@ private fun TemplatesEditor(
 ) {
     var showNotificationContextDialog by remember { mutableStateOf(false) }
     val uriHandler = LocalUriHandler.current
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("通知模板", style = MaterialTheme.typography.titleLarge)
+    SettingsSectionCard(
+        title = "通知模板",
+        description = "使用系统中已安装的 Apprise 可执行文件，模板使用 Apache Velocity 渲染。",
+    ) {
         Column {
-            Text("使用系统中已安装的 Apprise 可执行文件。\n模板使用 Apache Velocity 渲染")
             Text(
                 "Apprise GitHub 页面",
                 color = MaterialTheme.colorScheme.secondary,
@@ -229,27 +235,27 @@ private fun TemplatesEditor(
                 }.padding(2.dp).cursorForHand()
             )
         }
-        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            TextField(
-                value = titleTemplate,
-                onValueChange = onTitleTemplateChange,
-                label = { Text("标题") },
-                maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
-            )
-            TextField(
-                value = bodyTemplate,
-                onValueChange = onBodyTemplateChange,
-                label = { Text("正文") },
-                minLines = 2,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        TextField(
+            value = titleTemplate,
+            onValueChange = onTitleTemplateChange,
+            label = { Text("标题") },
+            maxLines = 1,
+            modifier = Modifier.fillMaxWidth()
+        )
+        TextField(
+            value = bodyTemplate,
+            onValueChange = onBodyTemplateChange,
+            label = { Text("正文") },
+            minLines = 2,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(20.dp)) {
-            if (LocalWindowWidth.current != COMPACT) {
-                Spacer(Modifier.weight(1f))
-            }
+        val actionsAlignment = if (LocalWindowWidth.current == COMPACT) Alignment.Start else Alignment.End
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(20.dp, actionsAlignment),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             ElevatedButton(
                 onClick = { showNotificationContextDialog = true },
                 modifier = Modifier.cursorForHand()

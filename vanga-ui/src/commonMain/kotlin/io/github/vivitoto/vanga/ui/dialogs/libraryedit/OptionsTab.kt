@@ -1,5 +1,6 @@
 package io.github.vivitoto.vanga.ui.dialogs.libraryedit
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -7,14 +8,16 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.OptionsStateHolder
 import io.github.vivitoto.vanga.ui.StateHolder
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.dialogs.tabs.DialogTab
 import io.github.vivitoto.vanga.ui.dialogs.tabs.TabItem
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import snd.komga.client.library.SeriesCover
 
 internal class OptionsTab(
@@ -49,36 +52,38 @@ private fun OptionsTabContent(
     seriesCover: OptionsStateHolder<SeriesCover>,
 ) {
     val strings = LocalStrings.current.libraryEdit
-    Column {
-        CheckboxWithLabel(
-            checked = hashFiles.value,
-            onCheckedChange = hashFiles.setValue,
-            label = { Text(strings.hashFiles) }
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsSectionCard("文件处理") {
+            SettingsCheckboxRow(
+                title = strings.hashFiles,
+                checked = hashFiles.value,
+                onCheckedChange = hashFiles.setValue,
+            )
 
-        CheckboxWithLabel(
-            checked = hashPages.value,
-            onCheckedChange = hashPages.setValue,
-            label = { Text(strings.hashPages) }
-        )
+            SettingsCheckboxRow(
+                title = strings.hashPages,
+                checked = hashPages.value,
+                onCheckedChange = hashPages.setValue,
+            )
 
-        CheckboxWithLabel(
-            checked = analyzeDimensions.value,
-            onCheckedChange = analyzeDimensions.setValue,
-            label = { Text(strings.analyzeDimensions) }
-        )
+            SettingsCheckboxRow(
+                title = strings.analyzeDimensions,
+                checked = analyzeDimensions.value,
+                onCheckedChange = analyzeDimensions.setValue,
+            )
 
-        CheckboxWithLabel(
-            checked = repairExtensions.value,
-            onCheckedChange = repairExtensions.setValue,
-            label = { Text(strings.repairExtensions) }
-        )
+            SettingsCheckboxRow(
+                title = strings.repairExtensions,
+                checked = repairExtensions.value,
+                onCheckedChange = repairExtensions.setValue,
+            )
 
-        CheckboxWithLabel(
-            checked = convertToCbz.value,
-            onCheckedChange = convertToCbz.setValue,
-            label = { Text(strings.convertToCbz) }
-        )
+            SettingsCheckboxRow(
+                title = strings.convertToCbz,
+                checked = convertToCbz.value,
+                onCheckedChange = convertToCbz.setValue,
+            )
+        }
 
         DropdownChoiceMenu(
             selectedOption = LabeledEntry(

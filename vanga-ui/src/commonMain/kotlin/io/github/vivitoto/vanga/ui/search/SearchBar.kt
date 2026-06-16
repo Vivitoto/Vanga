@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.cards.BookSimpleImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesSimpleImageCard
 import io.github.vivitoto.vanga.ui.common.components.NoPaddingTextField
@@ -149,7 +149,7 @@ private fun ColumnScope.SearchResultsDropDownBox(
                 onDismiss()
                 onSearchAllClick(currentQuery)
             }
-            .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer, VangaShape)
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -233,7 +233,7 @@ private fun EntryContainer(
             .fillMaxWidth()
             .clickable { onClick() }
             .cursorForHand(),
-        shape = RoundedCornerShape(16.dp),
+        shape = VangaShape,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .78f),
     ) {
         Row(

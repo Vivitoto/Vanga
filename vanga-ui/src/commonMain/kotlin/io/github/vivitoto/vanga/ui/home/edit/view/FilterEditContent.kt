@@ -2,14 +2,12 @@ package io.github.vivitoto.vanga.ui.home.edit.view
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
@@ -21,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -30,6 +27,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,7 +37,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -51,13 +49,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
@@ -102,48 +101,53 @@ private fun Toolbar(
     onEditEnd: () -> Unit,
     onReset: () -> Unit,
 ) {
-    Row(
-        modifier = Modifier.animateContentSize(),
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    Card(
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
+        shape = VangaShape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
-        Spacer(Modifier.width(20.dp))
-        FilterChip(
-            onClick = {},
-            selected = true,
-            label = {
-                Icon(Icons.Default.Tune, null)
-            },
-            colors = FilterChipDefaults.filterChipColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                selectedContainerColor = MaterialTheme.colorScheme.primary,
-                selectedLabelColor = MaterialTheme.colorScheme.onPrimary
-            ),
-            border = null,
-        )
-
-        ElevatedButton(
-            onClick = { onEditEnd() },
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text("完成")
-            Icon(Icons.Default.Check, null)
-        }
-
-        var showResetDialog by remember { mutableStateOf(false) }
-        ElevatedButton(
-            onClick = { showResetDialog = true },
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-        ) {
-            Text("重置为默认")
-            Icon(Icons.Default.Restore, null)
-        }
-        if (showResetDialog) {
-            ConfirmationDialog(
-                body = "将首页筛选器重置为默认？",
-                onDialogConfirm = onReset,
-                onDialogDismiss = { showResetDialog = false }
+            FilterChip(
+                onClick = {},
+                selected = true,
+                label = {
+                    Icon(Icons.Default.Tune, null)
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    selectedContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                border = null,
             )
+
+            ElevatedButton(
+                onClick = { onEditEnd() },
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
+                Text("完成")
+                Icon(Icons.Default.Check, null)
+            }
+
+            var showResetDialog by remember { mutableStateOf(false) }
+            ElevatedButton(
+                onClick = { showResetDialog = true },
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
+                Text("重置为默认", maxLines = 1)
+                Icon(Icons.Default.Restore, null)
+            }
+            if (showResetDialog) {
+                ConfirmationDialog(
+                    body = "将首页筛选器重置为默认？",
+                    onDialogConfirm = onReset,
+                    onDialogDismiss = { showResetDialog = false }
+                )
+            }
         }
     }
 }
@@ -230,97 +234,99 @@ private fun ReorderableCollectionItemScope.FilterContent(
     var showEdit by remember { mutableStateOf(false) }
     val label = filterState.label.collectAsState().value
     var labelText by remember { mutableStateOf(label) }
-    Column(
+    Card(
         modifier = Modifier
             .padding(vertical = 5.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                if (isDragging) MaterialTheme.colorScheme.surfaceBright
-                else MaterialTheme.colorScheme.surface
-            )
-            .then(
-                if (isDragging) Modifier.border(
-                    4.dp,
-                    MaterialTheme.colorScheme.secondary,
-                    RoundedCornerShape(10.dp)
-                )
-                else Modifier
-            )
+            .fillMaxWidth(),
+        shape = VangaShape,
+        colors = CardDefaults.cardColors(
+            containerColor = if (isDragging) {
+                MaterialTheme.colorScheme.surfaceBright
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            }
+        ),
+        border = if (isDragging) BorderStroke(2.dp, MaterialTheme.colorScheme.secondary) else null,
     ) {
-        HorizontalDivider()
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .animateContentSize()
-
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            val platform = LocalPlatform.current
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.heightIn(min = 46.dp).then(
-                    if (platform != MOBILE) Modifier.draggableHandle().cursorForMove()
-                    else Modifier
-                )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize()
+
             ) {
-                Icon(
-                    imageVector = Icons.Default.DragHandle,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 15.dp).size(32.dp)
-                        .then(if (platform == MOBILE) Modifier.draggableHandle() else Modifier)
-                )
-                if (showEdit) {
-                    OutlinedTextField(
-                        value = labelText,
-                        label = { Text("名称") },
-                        onValueChange = {
-                            labelText = it
-                            filterState.label.value = it
-                        },
-                        modifier = Modifier.padding(horizontal = 14.dp)
+                val platform = LocalPlatform.current
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.heightIn(min = 46.dp).then(
+                        if (platform != MOBILE) Modifier.draggableHandle().cursorForMove()
+                        else Modifier
                     )
-                } else {
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .padding(horizontal = 14.dp)
-                            .widthIn(min = 280.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DragHandle,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 15.dp).size(32.dp)
+                            .then(if (platform == MOBILE) Modifier.draggableHandle() else Modifier)
+                    )
+                    if (showEdit) {
+                        OutlinedTextField(
+                            value = labelText,
+                            label = { Text("名称") },
+                            onValueChange = {
+                                labelText = it
+                                filterState.label.value = it
+                            },
+                            modifier = Modifier.padding(horizontal = 14.dp)
+                        )
+                    } else {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier
+                                .padding(horizontal = 14.dp)
+                                .widthIn(min = 180.dp, max = 360.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+
+                ElevatedButton(
+                    onClick = { showEdit = !showEdit },
+                    modifier = Modifier.cursorForHand()
+                ) {
+                    Text(if (showEdit) "收起" else "编辑")
+                    Icon(
+                        imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                    )
+                }
+
+                ElevatedButton(
+                    onClick = {
+                        showDeleteConfirmation = true
+                    },
+                    modifier = Modifier.cursorForHand()
+                ) {
+                    Text("删除")
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null,
                     )
                 }
             }
 
-            ElevatedButton(
-                onClick = { showEdit = !showEdit },
-                modifier = Modifier.cursorForHand()
-            ) {
-                Text(if (showEdit) "收起" else "编辑")
-                Icon(
-                    imageVector = if (showEdit) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                )
-            }
-
-            ElevatedButton(
-                onClick = {
-                    showDeleteConfirmation = true
-                },
-                modifier = Modifier.cursorForHand()
-            ) {
-                Text("删除")
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                )
-            }
-        }
-
-
-        AnimatedVisibility(showEdit, modifier = Modifier.padding(5.dp)) {
-            when (filterState) {
-                is BookFilterEditState -> BookFilterEditContent(filterState)
-                is SeriesFilterEditState -> SeriesFilterEditContent(filterState)
+            AnimatedVisibility(showEdit, modifier = Modifier.padding(5.dp)) {
+                when (filterState) {
+                    is BookFilterEditState -> BookFilterEditContent(filterState)
+                    is SeriesFilterEditState -> SeriesFilterEditContent(filterState)
+                }
             }
         }
     }

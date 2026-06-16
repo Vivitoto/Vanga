@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,15 +23,15 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateFormat
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.settings.SettingsCard
 import snd.komga.client.announcements.KomgaJsonFeed.KomgaAnnouncement
 
 @Composable
 fun AnnouncementsContent(announcements: List<KomgaAnnouncement>) {
-    Column(verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        announcements.forEachIndexed { index, announcement ->
-            Announcement(announcement)
-            if (index < announcements.lastIndex) {
-                HorizontalDivider()
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        announcements.forEach { announcement ->
+            SettingsCard {
+                Announcement(announcement)
             }
         }
     }
@@ -40,7 +39,7 @@ fun AnnouncementsContent(announcements: List<KomgaAnnouncement>) {
 
 @Composable
 private fun Announcement(announcement: KomgaAnnouncement) {
-    Column {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         announcement.title?.let { title ->
             AnnouncementTitle(title, announcement.url)
         }

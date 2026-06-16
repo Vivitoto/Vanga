@@ -7,18 +7,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Cached
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
@@ -32,7 +35,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,14 +48,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
-import io.github.vivitoto.vanga.ui.platform.PlatformType.DESKTOP
 import io.github.vivitoto.vanga.ui.platform.PlatformType.MOBILE
-import io.github.vivitoto.vanga.ui.platform.PlatformType.WEB_KOMF
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.settings.account.AccountSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.analysis.MediaAnalysisScreen
@@ -97,14 +100,14 @@ fun SettingsNavigationMenu(
             currentScreen is KomfJobsScreen
     var showAdvancedSettings by remember(advancedScreenSelected) { mutableStateOf(advancedScreenSelected) }
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState())
+        modifier = modifier.verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         val isOffline = LocalOfflineMode.current.collectAsState().value
         if (!isOffline) {
-            Text("账号与同步", style = MaterialTheme.typography.titleSmall)
+            NavigationSectionLabel("账号与同步")
             NavigationButton(
                 label = "我的账号",
-                description = "查看邮箱、角色和修改密码",
                 icon = Icons.Default.Person,
                 onClick = { onNavigation(AccountSettingsScreen()) },
                 isSelected = currentScreen is AccountSettingsScreen,
@@ -113,7 +116,6 @@ fun SettingsNavigationMenu(
 
             NavigationButton(
                 label = "登录记录",
-                description = "查看当前账号的登录活动",
                 icon = Icons.Default.RecentActors,
                 onClick = { onNavigation(AuthenticationActivityScreen(true)) },
                 isSelected = currentScreen is AuthenticationActivityScreen && currentScreen.forMe,
@@ -129,13 +131,12 @@ fun SettingsNavigationMenu(
                 color = contentColor,
             )
 
-            HorizontalDivider(Modifier.padding(vertical = 10.dp))
+            Spacer(Modifier.height(6.dp))
         }
 
-        Text("阅读与显示", style = MaterialTheme.typography.titleSmall)
+        NavigationSectionLabel("阅读与显示")
         NavigationButton(
             label = "外观",
-            description = "主题和封面卡片大小",
             icon = Icons.Default.Settings,
             onClick = { onNavigation(AppSettingsScreen()) },
             isSelected = currentScreen is AppSettingsScreen,
@@ -143,7 +144,6 @@ fun SettingsNavigationMenu(
         )
         NavigationButton(
             label = "图片阅读器",
-            description = "翻页、音量键和图片缓存",
             icon = Icons.Default.Image,
             onClick = { onNavigation(ImageReaderSettingsScreen()) },
             isSelected = currentScreen is ImageReaderSettingsScreen,
@@ -152,7 +152,6 @@ fun SettingsNavigationMenu(
         if (webviewIsAvailable()) {
             NavigationButton(
                 label = "EPUB 阅读器",
-                description = "选择 EPUB 阅读内核",
                 icon = Icons.Default.MenuBook,
                 onClick = { onNavigation(EpubReaderSettingsScreen()) },
                 isSelected = currentScreen is EpubReaderSettingsScreen,
@@ -160,12 +159,11 @@ fun SettingsNavigationMenu(
             )
         }
 
-        HorizontalDivider(Modifier.padding(vertical = 10.dp))
+        Spacer(Modifier.height(6.dp))
 
-        Text("离线与存储", style = MaterialTheme.typography.titleSmall)
+        NavigationSectionLabel("离线与存储")
         NavigationButton(
             label = "离线模式",
-            description = "离线用户、下载位置和下载日志",
             icon = Icons.Default.Download,
             onClick = { onNavigation(OfflineSettingsScreen()) },
             isSelected = currentScreen is OfflineSettingsScreen,
@@ -173,12 +171,11 @@ fun SettingsNavigationMenu(
         )
 
         if (!isOffline) {
-            HorizontalDivider(Modifier.padding(vertical = 10.dp))
+            Spacer(Modifier.height(6.dp))
             if (isAdmin) {
-                Text("服务器管理", style = MaterialTheme.typography.titleSmall)
+                NavigationSectionLabel("服务器管理")
                 NavigationButton(
                     label = "服务器设置",
-                    description = "服务器基础配置和维护入口",
                     icon = Icons.Default.Settings,
                     onClick = { onNavigation(ServerSettingsScreen()) },
                     isSelected = currentScreen is ServerSettingsScreen,
@@ -187,7 +184,6 @@ fun SettingsNavigationMenu(
 
                 NavigationButton(
                     label = "用户管理",
-                    description = "新增、编辑或删除服务器用户",
                     icon = Icons.Default.SupervisorAccount,
                     onClick = { onNavigation(UsersScreen()) },
                     isSelected = currentScreen is UsersScreen,
@@ -205,7 +201,6 @@ fun SettingsNavigationMenu(
 
                 NavigationButton(
                     label = "公告",
-                    description = "管理服务器公告",
                     icon = Icons.Default.Info,
                     onClick = { onNavigation(AnnouncementsScreen()) },
                     isSelected = currentScreen is AnnouncementsScreen,
@@ -213,13 +208,12 @@ fun SettingsNavigationMenu(
                 )
                 NavigationButton(
                     label = "服务器登录记录",
-                    description = "查看所有用户的登录活动",
                     icon = Icons.Default.RecentActors,
                     onClick = { onNavigation(AuthenticationActivityScreen(false)) },
                     isSelected = currentScreen is AuthenticationActivityScreen && !currentScreen.forMe,
                     color = contentColor,
                 )
-                HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                Spacer(Modifier.height(6.dp))
             }
 
             if (isAdmin) {
@@ -229,13 +223,13 @@ fun SettingsNavigationMenu(
                     icon = Icons.Default.Extension,
                     onClick = { showAdvancedSettings = !showAdvancedSettings },
                     isSelected = advancedScreenSelected,
+                    expanded = showAdvancedSettings,
                     color = contentColor,
                 )
                 AnimatedVisibility(showAdvancedSettings) {
-                    Column {
+                    Column(Modifier.padding(start = 18.dp)) {
                         NavigationButton(
                             label = "Komf 连接",
-                            description = "连接元数据自动化服务",
                             icon = Icons.Default.Extension,
                             onClick = { onNavigation(KomfSettingsScreen()) },
                             isSelected = currentScreen is KomfSettingsScreen,
@@ -261,7 +255,6 @@ fun SettingsNavigationMenu(
                                 )
                                 NavigationButton(
                                     label = "通知",
-                                    description = "配置任务通知渠道",
                                     icon = Icons.Default.Info,
                                     onClick = { onNavigation(KomfNotificationSettingsScreen()) },
                                     isSelected = currentScreen is KomfNotificationSettingsScreen,
@@ -269,7 +262,6 @@ fun SettingsNavigationMenu(
                                 )
                                 NavigationButton(
                                     label = "任务记录",
-                                    description = "查看 Komf 后台任务历史",
                                     icon = Icons.Default.Cached,
                                     onClick = { onNavigation(KomfJobsScreen()) },
                                     isSelected = currentScreen is KomfJobsScreen,
@@ -279,16 +271,15 @@ fun SettingsNavigationMenu(
                         }
                     }
                 }
-                HorizontalDivider(Modifier.padding(vertical = 10.dp))
+                Spacer(Modifier.height(6.dp))
             }
         }
 
         if (updatesEnabled) {
-            if (isOffline) HorizontalDivider(Modifier.padding(vertical = 10.dp))
-            Text("应用", style = MaterialTheme.typography.titleSmall)
+            if (isOffline) Spacer(Modifier.height(6.dp))
+            NavigationSectionLabel("应用")
             NavigationButton(
                 label = "版本更新",
-                description = "检查 Vanga 新版本",
                 icon = Icons.Default.Cached,
                 onClick = { onNavigation(AppUpdatesScreen()) },
                 isSelected = currentScreen is AppUpdatesScreen,
@@ -318,6 +309,18 @@ fun SettingsNavigationMenu(
     }
 }
 
+@Composable
+private fun NavigationSectionLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(start = 4.dp, top = 4.dp, bottom = 2.dp),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
 
 @Composable
 fun NavigationButton(
@@ -328,30 +331,36 @@ fun NavigationButton(
     onClick: () -> Unit,
     warn: Boolean = false,
     error: Boolean = false,
+    expanded: Boolean? = null,
     color: Color
 ) {
-    val containerColor = if (isSelected) MaterialTheme.colorScheme.surfaceContainer else color
+    val platform = LocalPlatform.current
+    val containerColor = when {
+        isSelected -> MaterialTheme.colorScheme.surface
+        platform == MOBILE -> MaterialTheme.colorScheme.surfaceVariant
+        else -> MaterialTheme.colorScheme.surface.copy(alpha = 0.56f)
+    }
 
-    val height = when {
-        description != null && LocalPlatform.current == MOBILE -> 64.dp
-        description != null -> 56.dp
-        LocalPlatform.current == MOBILE -> 50.dp
-        else -> 40.dp
+    val minHeight = when {
+        description != null && platform == MOBILE -> 66.dp
+        description != null -> 60.dp
+        platform == MOBILE -> 50.dp
+        else -> 44.dp
     }
 
     Surface(
         onClick = { if (!isSelected) onClick() },
-        shape = RoundedCornerShape(3.dp),
+        shape = VangaShape,
         color = containerColor,
         modifier = Modifier
-            .height(height)
+            .heightIn(min = minHeight)
             .fillMaxWidth()
             .cursorForHand()
     ) {
         Row(
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)
         ) {
             if (icon != null) {
                 Icon(
@@ -364,15 +373,19 @@ fun NavigationButton(
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    label,
+                    text = label,
                     style = MaterialTheme.typography.titleMedium,
                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
                 if (description != null) {
                     Text(
-                        description,
+                        text = description,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = if (platform == MOBILE) 2 else 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -389,6 +402,18 @@ fun NavigationButton(
                     imageVector = Icons.Default.PriorityHigh,
                     contentDescription = "提醒",
                     tint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.size(20.dp),
+                )
+            } else {
+                val trailingIcon = when (expanded) {
+                    true -> Icons.Default.ExpandLess
+                    false -> Icons.Default.ExpandMore
+                    null -> Icons.Default.ChevronRight
+                }
+                Icon(
+                    imageVector = trailingIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
                     modifier = Modifier.size(20.dp),
                 )
             }

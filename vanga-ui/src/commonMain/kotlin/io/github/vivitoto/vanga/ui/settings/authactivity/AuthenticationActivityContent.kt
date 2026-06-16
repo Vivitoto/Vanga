@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Card
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -116,7 +115,7 @@ private fun AuthenticationInfoCard(
                 }
             }
 
-            HorizontalDivider(Modifier.padding(vertical = 5.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 buildAnnotatedString {
                     withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("设备信息：") }

@@ -3,7 +3,6 @@ package io.github.vivitoto.vanga.ui.dialogs.libraryedit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,11 +26,12 @@ import com.dokar.chiptextfield.rememberChipTextFieldState
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.OptionsStateHolder
 import io.github.vivitoto.vanga.ui.StateHolder
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.dialogs.tabs.DialogTab
 import io.github.vivitoto.vanga.ui.dialogs.tabs.TabItem
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import snd.komga.client.library.ScanInterval
 
 internal class ScannerTab(
@@ -74,23 +74,25 @@ private fun ScannerTabContent(
 ) {
     val strings = LocalStrings.current.libraryEdit
 
-    Column {
-        CheckboxWithLabel(
-            checked = emptyTrashAfterScan.value,
-            onCheckedChange = emptyTrashAfterScan.setValue,
-            label = { Text(strings.emptyTrashAfterScan) }
-        )
-        CheckboxWithLabel(
-            checked = scanForceModifiedTime.value,
-            onCheckedChange = scanForceModifiedTime.setValue,
-            label = { Text(strings.scanForceModifiedTime) }
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsSectionCard("扫描行为") {
+            SettingsCheckboxRow(
+                title = strings.emptyTrashAfterScan,
+                checked = emptyTrashAfterScan.value,
+                onCheckedChange = emptyTrashAfterScan.setValue,
+            )
+            SettingsCheckboxRow(
+                title = strings.scanForceModifiedTime,
+                checked = scanForceModifiedTime.value,
+                onCheckedChange = scanForceModifiedTime.setValue,
+            )
 
-        CheckboxWithLabel(
-            checked = scanOnStartup.value,
-            onCheckedChange = scanOnStartup.setValue,
-            label = { Text(strings.scanOnStartup) }
-        )
+            SettingsCheckboxRow(
+                title = strings.scanOnStartup,
+                checked = scanOnStartup.value,
+                onCheckedChange = scanOnStartup.setValue,
+            )
+        }
 
         DropdownChoiceMenu(
             selectedOption = LabeledEntry(scanInterval.value, strings.forScanInterval(scanInterval.value)),
@@ -100,7 +102,6 @@ private fun ScannerTabContent(
             label = { Text(strings.scanInterval) }
         )
 
-        Spacer(Modifier.size(20.dp))
         TextField(
             value = oneshotsDirectory.value,
             onValueChange = oneshotsDirectory.setValue,

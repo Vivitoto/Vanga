@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -24,6 +23,7 @@ import io.github.vivitoto.vanga.settings.model.ContinuousReadingDirection
 import io.github.vivitoto.vanga.settings.model.ContinuousReadingDirection.LEFT_TO_RIGHT
 import io.github.vivitoto.vanga.settings.model.ContinuousReadingDirection.RIGHT_TO_LEFT
 import io.github.vivitoto.vanga.settings.model.ContinuousReadingDirection.TOP_TO_BOTTOM
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
@@ -251,7 +251,7 @@ private fun ShortcutKeys(keys: List<String>, modifier: Modifier) {
 private fun ShortcutKey(label: String) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
-        shape = RoundedCornerShape(2.dp),
+        shape = VangaShape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
     ) {
         Text(

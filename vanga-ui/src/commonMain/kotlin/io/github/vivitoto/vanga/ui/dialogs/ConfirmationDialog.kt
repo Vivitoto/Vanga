@@ -21,8 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.vivitoto.vanga.ui.common.components.CheckboxWithLabel
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.settings.SettingsCheckboxRow
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -47,10 +47,10 @@ fun ConfirmationDialog(
             Column(Modifier.padding(10.dp)) {
                 Text(body, modifier = Modifier.padding(20.dp))
                 if (confirmText != null) {
-                    CheckboxWithLabel(
+                    SettingsCheckboxRow(
+                        title = confirmText,
                         checked = confirmed,
                         onCheckedChange = { confirmed = it },
-                        label = { Text(confirmText) }
                     )
                 }
             }

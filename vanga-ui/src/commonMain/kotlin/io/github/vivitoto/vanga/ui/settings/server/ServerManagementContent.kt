@@ -2,10 +2,8 @@ package io.github.vivitoto.vanga.ui.settings.server
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,14 +11,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
-import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
+import io.github.vivitoto.vanga.ui.settings.SettingsRow
+import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 
 @Composable
 fun ServerManagementContent(
@@ -34,55 +31,64 @@ fun ServerManagementContent(
     var showShutdownDialog by remember { mutableStateOf(false) }
     var showDangerActions by remember { mutableStateOf(false) }
     Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        SettingsSectionHeader(
+        SettingsSectionCard(
             title = "书库维护",
             description = "扫描书库、处理后台任务，以及执行少量高风险服务器操作。"
-        )
-        Button(
-            title = "扫描全部书库",
-            description = "检查目录里新增或移除的书籍。\n适合日常增量更新。",
-            buttonText = "扫描",
-            level = WarningLevel.NORMAL,
-            onClick = { onScanAllLibraries(false) }
-        )
-        Button(
-            title = "深度扫描全部书库",
-            description = "强制重新比对文件和数据库，耗时更久。\n只有普通扫描不准时再用。",
-            buttonText = "深度扫描",
-            level = WarningLevel.NORMAL,
-            onClick = { onScanAllLibraries(true) }
-        )
-
-        HorizontalDivider()
-        FilledTonalButton(onClick = { showDangerActions = !showDangerActions }) {
-            Text(if (showDangerActions) "收起危险操作" else "危险操作")
+        ) {
+            Button(
+                title = "扫描全部书库",
+                description = "检查目录里新增或移除的书籍。适合日常增量更新。",
+                buttonText = "扫描",
+                level = WarningLevel.NORMAL,
+                onClick = { onScanAllLibraries(false) }
+            )
+            Button(
+                title = "深度扫描全部书库",
+                description = "强制重新比对文件和数据库，耗时更久。只有普通扫描不准时再用。",
+                buttonText = "深度扫描",
+                level = WarningLevel.NORMAL,
+                onClick = { onScanAllLibraries(true) }
+            )
+            SettingsRow(
+                title = "更多服务器操作",
+                supportingText = "显示会影响服务器状态或删除记录的危险操作。",
+                trailing = {
+                    FilledTonalButton(onClick = { showDangerActions = !showDangerActions }) {
+                        Text(if (showDangerActions) "收起" else "显示")
+                    }
+                }
+            )
         }
 
         if (showDangerActions) {
-            Text("这些操作会影响服务器状态或删除记录，确认后再执行。", style = MaterialTheme.typography.bodyMedium)
-            Button(
-                title = "清空全部书库回收站",
-                description = "删除已标记为不可用的媒体记录。\n确认文件不会恢复后再操作。",
-                buttonText = "清空",
-                level = WarningLevel.NORMAL,
-                onClick = { showEmptyTrashDialog = true }
-            )
-            Button(
-                title = "取消全部任务",
-                description = "停止当前正在运行的服务器任务。",
-                buttonText = "取消任务",
-                level = WarningLevel.WARNING,
-                onClick = { onCancelAllTasks() }
-            )
-            Button(
-                title = "关闭服务器",
-                description = "停止服务器服务进程。\n除非你知道如何重新启动，否则不要操作。",
-                buttonText = "关闭",
-                level = WarningLevel.DANGER,
-                onClick = { showShutdownDialog = true }
-            )
+            SettingsSectionCard(
+                title = "危险操作",
+                description = "这些操作会影响服务器状态或删除记录，确认后再执行。",
+            ) {
+                Button(
+                    title = "清空全部书库回收站",
+                    description = "删除已标记为不可用的媒体记录。确认文件不会恢复后再操作。",
+                    buttonText = "清空",
+                    level = WarningLevel.NORMAL,
+                    onClick = { showEmptyTrashDialog = true }
+                )
+                Button(
+                    title = "取消全部任务",
+                    description = "停止当前正在运行的服务器任务。",
+                    buttonText = "取消任务",
+                    level = WarningLevel.WARNING,
+                    onClick = { onCancelAllTasks() }
+                )
+                Button(
+                    title = "关闭服务器",
+                    description = "停止服务器服务进程。除非你知道如何重新启动，否则不要操作。",
+                    buttonText = "关闭",
+                    level = WarningLevel.DANGER,
+                    onClick = { showShutdownDialog = true }
+                )
+            }
         }
 
         if (showEmptyTrashDialog) {
@@ -119,34 +125,32 @@ private fun Button(
     level: WarningLevel,
     onClick: () -> Unit
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(title, fontWeight = FontWeight.Bold)
-            Text(description, style = MaterialTheme.typography.labelLarge)
-        }
+    val colors = when (level) {
+        WarningLevel.NORMAL -> ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
 
-        val colors = when (level) {
-            WarningLevel.NORMAL -> ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+        WarningLevel.WARNING -> ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+        )
 
-            WarningLevel.WARNING -> ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-
-
-            WarningLevel.DANGER -> ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            )
-        }
-
-        FilledTonalButton(onClick = onClick, colors = colors, modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)) {
-            Text(buttonText)
-        }
+        WarningLevel.DANGER -> ButtonDefaults.filledTonalButtonColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer
+        )
     }
+
+    SettingsRow(
+        title = title,
+        supportingText = description,
+        trailing = {
+            FilledTonalButton(onClick = onClick, colors = colors, modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)) {
+                Text(buttonText)
+            }
+        }
+    )
 }
 
 private enum class WarningLevel { NORMAL, WARNING, DANGER }

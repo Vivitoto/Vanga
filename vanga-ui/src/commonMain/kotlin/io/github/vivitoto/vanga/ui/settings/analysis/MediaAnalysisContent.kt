@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LocalStrings
+import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 
@@ -69,7 +70,7 @@ private fun BookAnalysisCard(
     val strings = LocalStrings.current
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = MaterialTheme.shapes.medium,
+        shape = VangaShape,
         modifier = modifier.fillMaxWidth()
     ) {
         Column(

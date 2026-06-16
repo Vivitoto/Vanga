@@ -2,16 +2,16 @@ package io.github.vivitoto.vanga.ui.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -59,20 +59,23 @@ class MobileSettingsScreen : Screen {
                     Text("设置", style = MaterialTheme.typography.titleLarge)
                 }
 
-                HorizontalDivider()
-
-                SettingsNavigationMenu(
-                    currentScreen = currentNavigator.lastItem,
-                    onNavigation = { currentNavigator.push(it) },
-                    hasMediaErrors = vm.hasMediaErrors,
-                    komfEnabled = vm.komfEnabledFlow.collectAsState().value,
-                    updatesEnabled = vm.updatesEnabled,
-                    newVersionIsAvailable = vm.newVersionIsAvailable,
-                    onLogout = vm::logout,
-                    user = vm.user.collectAsState().value,
-                    contentColor = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.weight(1f, false)
-                )
+                SettingsCard(
+                    modifier = Modifier.weight(1f, false),
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f),
+                    contentPadding = PaddingValues(8.dp),
+                ) {
+                    SettingsNavigationMenu(
+                        currentScreen = currentNavigator.lastItem,
+                        onNavigation = { currentNavigator.push(it) },
+                        hasMediaErrors = vm.hasMediaErrors,
+                        komfEnabled = vm.komfEnabledFlow.collectAsState().value,
+                        updatesEnabled = vm.updatesEnabled,
+                        newVersionIsAvailable = vm.newVersionIsAvailable,
+                        onLogout = vm::logout,
+                        user = vm.user.collectAsState().value,
+                        contentColor = MaterialTheme.colorScheme.surface,
+                    )
+                }
 
                 Spacer(Modifier.windowInsetsBottomHeight(WindowInsets.systemBars))
             }
