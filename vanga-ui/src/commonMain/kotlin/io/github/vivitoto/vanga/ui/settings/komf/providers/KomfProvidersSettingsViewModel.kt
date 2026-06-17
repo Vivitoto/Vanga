@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 import io.github.vivitoto.vanga.AppNotifications
 import io.github.vivitoto.vanga.ui.LoadState
 import io.github.vivitoto.vanga.ui.settings.komf.KomfSharedState
@@ -48,6 +49,7 @@ import snd.komf.client.KomfConfigClient
 
 class KomfProvidersSettingsViewModel(
     private val komfConfigClient: KomfConfigClient,
+    private val komfAverCompatibilityClient: KomfAverCompatibilityClient,
     private val appNotifications: AppNotifications,
     val komfSharedState: KomfSharedState,
 ) : StateScreenModel<LoadState<Unit>>(LoadState.Uninitialized) {
@@ -62,7 +64,9 @@ class KomfProvidersSettingsViewModel(
             komga.plus(kavita)
         }
     }
-    var defaultProvidersConfig by mutableStateOf(ProvidersConfigState(this::updateConfig, null, null))
+    var defaultProvidersConfig by mutableStateOf(
+        ProvidersConfigState(this::updateConfig, this::updateAverProviderConfig, null, null, KomfAverProviderConfigs())
+    )
         private set
     var libraryProvidersConfigs by mutableStateOf<Map<KomfMediaServerLibraryId, ProvidersConfigState>>(emptyMap())
         private set
@@ -81,17 +85,35 @@ class KomfProvidersSettingsViewModel(
             .onFailure { mutableState.value = LoadState.Error(it) }
             .onSuccess { config ->
                 mutableState.value = LoadState.Success(Unit)
-                config.onEach { initFields(it) }.launchIn(screenModelScope)
+                config.onEach { initFields(it, loadAverProvidersConfig()) }.launchIn(screenModelScope)
             }
     }
 
-    private fun initFields(config: KomfConfig) {
+    private suspend fun loadAverProvidersConfig(): KomfAverProvidersConfig {
+        return appNotifications.runCatchingToNotifications { komfAverCompatibilityClient.getProvidersConfig() }
+            .getOrElse { KomfAverProvidersConfig.Empty }
+    }
+
+    private fun initFields(config: KomfConfig, averConfig: KomfAverProvidersConfig) {
         defaultProvidersConfig =
-            ProvidersConfigState(this::updateConfig, null, config.metadataProviders.defaultProviders)
-        libraryProvidersConfigs = config.metadataProviders.libraryProviders
-            .map { (libraryId, config) ->
+            ProvidersConfigState(
+                this::updateConfig,
+                this::updateAverProviderConfig,
+                null,
+                config.metadataProviders.defaultProviders,
+                averConfig.defaultProviders
+            )
+        val libraryIds = config.metadataProviders.libraryProviders.keys + averConfig.libraryProviders.keys
+        libraryProvidersConfigs = libraryIds
+            .map { libraryId ->
                 val komgaLibraryId = KomfMediaServerLibraryId(libraryId)
-                komgaLibraryId to ProvidersConfigState(this::updateConfig, komgaLibraryId, config)
+                komgaLibraryId to ProvidersConfigState(
+                    this::updateConfig,
+                    this::updateAverProviderConfig,
+                    komgaLibraryId,
+                    config.metadataProviders.libraryProviders[libraryId],
+                    averConfig.libraryProviders[libraryId] ?: KomfAverProviderConfigs()
+                )
             }.toMap()
         comicVineClientId = config.metadataProviders.comicVineClientId
         malClientId = config.metadataProviders.malClientId
@@ -103,13 +125,33 @@ class KomfProvidersSettingsViewModel(
         val configUpdate = KomfConfigUpdateRequest(metadataProviders = Some(request))
         screenModelScope.launch {
             appNotifications.runCatchingToNotifications { komfConfigClient.updateConfig(configUpdate) }
-                .onFailure { initFields(komfSharedState.getConfig().first()) }
+                .onFailure { initFields(komfSharedState.getConfig().first(), loadAverProvidersConfig()) }
+        }
+    }
+
+    private fun updateAverProviderConfig(
+        libraryId: KomfMediaServerLibraryId?,
+        provider: KomfProviders,
+        update: JsonObject,
+    ) {
+        screenModelScope.launch {
+            appNotifications.runCatchingToNotifications {
+                komfAverCompatibilityClient.updateProviderConfig(libraryId?.value, provider, update)
+            }.onFailure {
+                initFields(komfSharedState.getConfig().first(), loadAverProvidersConfig())
+            }
         }
     }
 
     fun onNewLibraryTabAdd(libraryId: KomfMediaServerLibraryId) {
         libraryProvidersConfigs = libraryProvidersConfigs.plus(
-            libraryId to ProvidersConfigState(this::updateConfig, libraryId, null)
+            libraryId to ProvidersConfigState(
+                this::updateConfig,
+                this::updateAverProviderConfig,
+                libraryId,
+                null,
+                KomfAverProviderConfigs()
+            )
         )
         val providersUpdate = MetadataProvidersConfigUpdateRequest(
             libraryProviders = Some(mapOf(libraryId.value to ProvidersConfigUpdateRequest()))
@@ -124,6 +166,17 @@ class KomfProvidersSettingsViewModel(
             libraryProviders = Some(mapOf(libraryId.value to null))
         )
         updateConfig(providersUpdate)
+        removeAverLibraryConfig(libraryId)
+    }
+
+    private fun removeAverLibraryConfig(libraryId: KomfMediaServerLibraryId) {
+        screenModelScope.launch {
+            appNotifications.runCatchingToNotifications {
+                komfAverCompatibilityClient.removeLibraryConfig(libraryId.value)
+            }.onFailure {
+                initFields(komfSharedState.getConfig().first(), loadAverProvidersConfig())
+            }
+        }
     }
 
     fun onNameMatchingModeChange(mode: KomfNameMatchingMode) {
@@ -150,8 +203,10 @@ class KomfProvidersSettingsViewModel(
 
     class ProvidersConfigState(
         private val onMetadataUpdate: (MetadataProvidersConfigUpdateRequest) -> Unit,
-        private val libraryId: KomfMediaServerLibraryId?,
+        private val onAverProviderUpdate: (KomfMediaServerLibraryId?, KomfProviders, JsonObject) -> Unit,
+        val libraryId: KomfMediaServerLibraryId?,
         config: ProvidersConfigDto?,
+        averConfig: KomfAverProviderConfigs,
     ) {
         private val aniList = AniListConfigState(ANILIST, config?.aniList, this::onAniListConfigUpdate)
         private val bangumi = GenericProviderConfigState(BANGUMI, config?.bangumi, this::onProviderConfigUpdate)
@@ -169,28 +224,36 @@ class KomfProvidersSettingsViewModel(
         private val yenPress = GenericProviderConfigState(YEN_PRESS, config?.yenPress, this::onProviderConfigUpdate)
         private val viz = GenericProviderConfigState(VIZ, config?.viz, this::onProviderConfigUpdate)
         private val webtoons = GenericProviderConfigState(WEBTOONS, config?.webtoons, this::onProviderConfigUpdate)
+        private val nhentai =
+            KomfAverProviderConfigState(KomfAverProviders.NHENTAI, averConfig.nhentai, this::onAverProviderConfigUpdate)
+        private val ehentai =
+            EHentaiConfigState(KomfAverProviders.EHENTAI, averConfig.ehentai, this::onAverProviderConfigUpdate)
 
         var enabledProviders by mutableStateOf<List<ProviderConfigState>>(
-            config?.let { config ->
-                listOfNotNull(
-                    if (config.aniList.enabled) aniList else null,
-                    if (config.bangumi.enabled) bangumi else null,
-                    if (config.bookWalker.enabled) bookWalker else null,
-                    if (config.comicVine.enabled) comicVine else null,
-                    if (config.hentag.enabled) hentag else null,
-                    if (config.kodansha.enabled) kodansha else null,
-                    if (config.mal.enabled) mal else null,
-                    if (config.mangaUpdates.enabled) mangaUpdates else null,
-                    if (config.mangaDex.enabled) mangaDex else null,
-                    if (config.mangaBaka.enabled) mangaBaka else null,
-                    if (config.nautiljon.enabled) nautiljon else null,
-                    if (config.yenPress.enabled) yenPress else null,
-                    if (config.viz.enabled) viz else null,
-                    if (config.webtoons.enabled) webtoons else null,
-                ).sortedBy { it.priority }
-            } ?: emptyList()
+            listOfNotNull(
+                if (config?.aniList?.enabled == true) aniList else null,
+                if (config?.bangumi?.enabled == true) bangumi else null,
+                if (config?.bookWalker?.enabled == true) bookWalker else null,
+                if (config?.comicVine?.enabled == true) comicVine else null,
+                if (config?.hentag?.enabled == true) hentag else null,
+                if (config?.kodansha?.enabled == true) kodansha else null,
+                if (config?.mal?.enabled == true) mal else null,
+                if (config?.mangaUpdates?.enabled == true) mangaUpdates else null,
+                if (config?.mangaDex?.enabled == true) mangaDex else null,
+                if (config?.mangaBaka?.enabled == true) mangaBaka else null,
+                if (config?.nautiljon?.enabled == true) nautiljon else null,
+                if (config?.yenPress?.enabled == true) yenPress else null,
+                if (config?.viz?.enabled == true) viz else null,
+                if (config?.webtoons?.enabled == true) webtoons else null,
+                if (averConfig.nhentai.enabled) nhentai else null,
+                if (averConfig.ehentai.providerConfig.enabled) ehentai else null,
+            ).sortedBy { it.priority }
         )
             private set
+
+        fun providerByKey(providerKey: String): ProviderConfigState? {
+            return allProviderStates.firstOrNull { it.provider.providerKey == providerKey }
+        }
 
         fun onProviderReorder(fromIndex: Int, toIndex: Int) {
             val mutable = enabledProviders.toMutableList()
@@ -201,23 +264,8 @@ class KomfProvidersSettingsViewModel(
         }
 
         fun onProviderAdd(provider: KomfProviders) {
-            val configState = when (provider) {
-                ANILIST -> aniList
-                BANGUMI -> bangumi
-                BOOK_WALKER -> bookWalker
-                COMIC_VINE -> comicVine
-                HENTAG -> hentag
-                KODANSHA -> kodansha
-                MAL -> mal
-                MANGA_UPDATES -> mangaUpdates
-                MANGADEX -> mangaDex
-                NAUTILJON -> nautiljon
-                YEN_PRESS -> yenPress
-                VIZ -> viz
-                MANGA_BAKA -> mangaBaka
-                WEBTOONS -> webtoons
-                is UnknownKomfProvider -> error("Can't add config for unknown provider ${provider.name}")
-            }
+            val configState = providerByKey(provider.providerKey)
+                ?: error("Can't add config for unknown provider ${provider.providerKey}")
 
             enabledProviders = enabledProviders.plus(configState)
             configState.onPriorityChange(enabledProviders.size)
@@ -284,6 +332,30 @@ class KomfProvidersSettingsViewModel(
             }
             onMetadataUpdate(providersUpdate)
         }
+
+        private fun onAverProviderConfigUpdate(config: JsonObject, provider: KomfProviders) {
+            onAverProviderUpdate(libraryId, provider, config)
+        }
+
+        private val allProviderStates: List<ProviderConfigState>
+            get() = listOf(
+                aniList,
+                bangumi,
+                bookWalker,
+                comicVine,
+                hentag,
+                kodansha,
+                mal,
+                mangaUpdates,
+                mangaDex,
+                mangaBaka,
+                nautiljon,
+                yenPress,
+                viz,
+                webtoons,
+                nhentai,
+                ehentai,
+            )
 
     }
 

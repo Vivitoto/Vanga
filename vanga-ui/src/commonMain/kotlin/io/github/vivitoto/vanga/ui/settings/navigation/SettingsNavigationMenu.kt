@@ -71,6 +71,7 @@ import io.github.vivitoto.vanga.ui.settings.komf.general.KomfSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.jobs.KomfJobsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.notifications.KomfNotificationSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.processing.KomfProcessingSettingsScreen
+import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProviderDetailSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProvidersSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.offline.OfflineSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.server.ServerSettingsScreen
@@ -98,6 +99,7 @@ fun SettingsNavigationMenu(
     val advancedScreenSelected = currentScreen is KomfSettingsScreen ||
             currentScreen is KomfProcessingSettingsScreen ||
             currentScreen is KomfProvidersSettingsScreen ||
+            currentScreen is KomfProviderDetailSettingsScreen ||
             currentScreen is KomfNotificationSettingsScreen ||
             currentScreen is KomfJobsScreen
     var showAdvancedSettings by remember(advancedScreenSelected) { mutableStateOf(advancedScreenSelected) }
@@ -254,7 +256,8 @@ fun SettingsNavigationMenu(
                                     description = "配置漫画元数据来源",
                                     icon = Icons.Default.LocalOffer,
                                     onClick = { onNavigation(KomfProvidersSettingsScreen()) },
-                                    isSelected = currentScreen is KomfProvidersSettingsScreen,
+                                    isSelected = currentScreen is KomfProvidersSettingsScreen ||
+                                            currentScreen is KomfProviderDetailSettingsScreen,
                                     color = contentColor,
                                 )
                                 NavigationButton(

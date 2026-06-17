@@ -67,6 +67,7 @@ import io.github.vivitoto.vanga.ui.settings.komf.general.KomfSettingsViewModel
 import io.github.vivitoto.vanga.ui.settings.komf.jobs.KomfJobsViewModel
 import io.github.vivitoto.vanga.ui.settings.komf.notifications.KomfNotificationSettingsViewModel
 import io.github.vivitoto.vanga.ui.settings.komf.processing.KomfProcessingSettingsViewModel
+import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfAverCompatibilityClient
 import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProvidersSettingsViewModel
 import io.github.vivitoto.vanga.ui.settings.navigation.SettingsNavigationViewModel
 import io.github.vivitoto.vanga.ui.settings.offline.OfflineSettingsViewModel
@@ -610,6 +611,10 @@ class ViewModelFactory(
     fun getKomfProvidersViewModel(): KomfProvidersSettingsViewModel {
         return KomfProvidersSettingsViewModel(
             komfConfigClient = dependencies.komfClientFactory.configClient(),
+            komfAverCompatibilityClient = KomfAverCompatibilityClient(
+                ktor = dependencies.webDavHttpClient,
+                komfSettingsRepository = appRepositories.komfSettingsRepository
+            ),
             appNotifications = dependencies.appNotifications,
             komfSharedState = komfSharedState
         )

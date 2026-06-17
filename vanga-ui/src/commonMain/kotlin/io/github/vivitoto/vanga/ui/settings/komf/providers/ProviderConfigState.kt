@@ -3,13 +3,14 @@ package io.github.vivitoto.vanga.ui.settings.komf.providers
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import snd.komf.api.KomfAuthorRole
-import snd.komf.api.KomfAuthorRole.COLORIST
-import snd.komf.api.KomfAuthorRole.COVER
-import snd.komf.api.KomfAuthorRole.INKER
-import snd.komf.api.KomfAuthorRole.LETTERER
-import snd.komf.api.KomfAuthorRole.PENCILLER
-import snd.komf.api.KomfAuthorRole.WRITER
 import snd.komf.api.KomfCoreProviders.ANILIST
 import snd.komf.api.KomfCoreProviders.HENTAG
 import snd.komf.api.KomfCoreProviders.MAL
@@ -35,7 +36,7 @@ import snd.komf.api.config.ProviderConfigUpdateRequest
 import snd.komf.api.config.SeriesMetadataConfigUpdateRequest
 
 sealed class ProviderConfigState(
-    config: ProviderConf?,
+    config: ProviderConfigSnapshot?,
     val provider: KomfProviders,
 ) {
     var priority by mutableStateOf(config?.priority ?: 1)
@@ -46,12 +47,9 @@ sealed class ProviderConfigState(
         private set
     var mediaType by mutableStateOf(config?.mediaType)
         private set
-    var authorRoles by mutableStateOf(config?.authorRoles?.toList() ?: listOf(WRITER))
+    var authorRoles by mutableStateOf(config?.authorRoles ?: ProviderConfigSnapshot().authorRoles)
         private set
-    var artistRoles by mutableStateOf(
-        config?.artistRoles?.toList()
-            ?: listOf(PENCILLER, INKER, COLORIST, LETTERER, COVER)
-    )
+    var artistRoles by mutableStateOf(config?.artistRoles ?: ProviderConfigSnapshot().artistRoles)
         private set
 
     var seriesAgeRating by mutableStateOf(config?.seriesMetadata?.ageRating ?: true)
@@ -81,12 +79,12 @@ sealed class ProviderConfigState(
     var seriesBookCount by mutableStateOf(config?.seriesMetadata?.totalBookCount ?: true)
         private set
 
-    val isBookMetadataAvailable = when (provider) {
-        ANILIST, MAL, MANGA_UPDATES, HENTAG, MANGA_BAKA -> false
+    val isBookMetadataAvailable = when (provider.providerKey) {
+        ANILIST.name, MAL.name, MANGA_UPDATES.name, HENTAG.name, MANGA_BAKA.name -> false
         else -> true
     }
-    val canHaveMultiplePublishers = when (provider) {
-        MANGA_UPDATES, NAUTILJON, MANGA_BAKA -> true
+    val canHaveMultiplePublishers = when (provider.providerKey) {
+        MANGA_UPDATES.name, NAUTILJON.name, MANGA_BAKA.name -> true
         else -> false
     }
 
@@ -121,112 +119,116 @@ sealed class ProviderConfigState(
 
     fun onSeriesAgeRatingChange(ageRating: Boolean) {
         this.seriesAgeRating = ageRating
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(ageRating = Some(ageRating)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(ageRating = Some(ageRating)), "ageRating", ageRating)
     }
 
     fun onSeriesAuthorsChange(value: Boolean) {
         this.seriesAuthors = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(authors = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(authors = Some(value)), "authors", value)
     }
 
     fun onSeriesCoverChange(value: Boolean) {
         this.seriesCover = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(thumbnail = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(thumbnail = Some(value)), "thumbnail", value)
     }
 
     fun onSeriesGenresChange(value: Boolean) {
         this.seriesGenres = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(genres = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(genres = Some(value)), "genres", value)
     }
 
     fun onSeriesLinksChange(value: Boolean) {
         this.seriesLinks = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(links = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(links = Some(value)), "links", value)
     }
 
     fun onSeriesPublisherChange(value: Boolean) {
         this.seriesPublisher = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(publisher = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(publisher = Some(value)), "publisher", value)
     }
 
     fun onSeriesOriginalPublisherChange(value: Boolean) {
         this.seriesOriginalPublisher = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(useOriginalPublisher = Some(value)))
+        onSeriesMetadataSave(
+            SeriesMetadataConfigUpdateRequest(useOriginalPublisher = Some(value)),
+            "useOriginalPublisher",
+            value
+        )
     }
 
     fun onSeriesReleaseDateChange(value: Boolean) {
         this.seriesReleaseDate = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(releaseDate = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(releaseDate = Some(value)), "releaseDate", value)
     }
 
     fun onSeriesStatusChange(value: Boolean) {
         this.seriesStatus = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(status = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(status = Some(value)), "status", value)
     }
 
     fun onSeriesSummaryChange(value: Boolean) {
         this.seriesSummary = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(summary = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(summary = Some(value)), "summary", value)
     }
 
     fun onSeriesTagsChange(value: Boolean) {
         this.seriesTags = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(tags = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(tags = Some(value)), "tags", value)
     }
 
     fun onSeriesTitleChange(value: Boolean) {
         this.seriesTitle = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(title = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(title = Some(value)), "title", value)
     }
 
     fun onSeriesBookCountChange(value: Boolean) {
         this.seriesBookCount = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(totalBookCount = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(totalBookCount = Some(value)), "totalBookCount", value)
     }
 
     fun onBookEnabledChange(value: Boolean) {
         this.bookEnabled = value
-        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(books = Some(value)))
+        onSeriesMetadataSave(SeriesMetadataConfigUpdateRequest(books = Some(value)), "books", value)
     }
 
     fun onBookAuthorsChange(value: Boolean) {
         this.bookAuthors = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(authors = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(authors = Some(value)), "authors", value)
     }
 
     fun onBookCoverChange(value: Boolean) {
         this.bookCover = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(thumbnail = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(thumbnail = Some(value)), "thumbnail", value)
     }
 
     fun onBookIsbnChange(value: Boolean) {
         this.bookIsbn = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(isbn = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(isbn = Some(value)), "isbn", value)
     }
 
     fun onBookLinksChange(value: Boolean) {
         this.bookLinks = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(links = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(links = Some(value)), "links", value)
     }
 
     fun onBookNumberChange(value: Boolean) {
         this.bookNumber = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(number = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(number = Some(value)), "number", value)
     }
 
     fun onBookReleaseDateChange(value: Boolean) {
         this.bookReleaseDate = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(releaseDate = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(releaseDate = Some(value)), "releaseDate", value)
     }
 
     fun onBookSummaryChange(value: Boolean) {
         this.bookSummary = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(summary = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(summary = Some(value)), "summary", value)
     }
 
     fun onBookTagsChange(value: Boolean) {
         this.bookTags = value
-        onBookMetadataSave(BookMetadataConfigUpdateRequest(tags = Some(value)))
+        onBookMetadataSave(BookMetadataConfigUpdateRequest(tags = Some(value)), "tags", value)
     }
 
     fun onMediaTypeChange(mediaType: KomfMediaType?) {
@@ -246,13 +248,13 @@ sealed class ProviderConfigState(
 
     fun onArtistSelect(role: KomfAuthorRole) {
         artistRoles = artistRoles.addOrRemove(role)
-        onArtistRolesSave(authorRoles)
+        onArtistRolesSave(artistRoles)
     }
 
     protected abstract fun onPrioritySave(priority: Int)
     protected abstract fun onEnabledSave(enabled: Boolean)
-    protected abstract fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest)
-    protected abstract fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest)
+    protected abstract fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest, key: String, value: Boolean)
+    protected abstract fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest, key: String, value: Boolean)
     protected abstract fun onMediaTypeSave(mediaType: KomfMediaType?)
     protected abstract fun onNameMatchingModeSave(nameMatchingMode: KomfNameMatchingMode?)
     protected abstract fun onAuthorRolesSave(roles: List<KomfAuthorRole>)
@@ -273,7 +275,7 @@ class GenericProviderConfigState(
     provider: KomfProviders,
     config: ProviderConf?,
     private val onMetadataUpdate: (ProviderConfigUpdateRequest, KomfProviders) -> Unit,
-) : ProviderConfigState(config, provider) {
+) : ProviderConfigState(config.toProviderConfigSnapshot(), provider) {
 
     override fun onPrioritySave(priority: Int) {
         onMetadataUpdate(ProviderConfigUpdateRequest(priority = Some(priority)))
@@ -283,11 +285,11 @@ class GenericProviderConfigState(
         onMetadataUpdate(ProviderConfigUpdateRequest(enabled = Some(enabled)))
     }
 
-    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest) {
+    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest, key: String, value: Boolean) {
         onMetadataUpdate(ProviderConfigUpdateRequest(seriesMetadata = Some(metadata)))
     }
 
-    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest) {
+    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest, key: String, value: Boolean) {
         onMetadataUpdate(ProviderConfigUpdateRequest(bookMetadata = Some(metadata)))
     }
 
@@ -320,11 +322,106 @@ class GenericProviderConfigState(
 
 }
 
+open class KomfAverProviderConfigState(
+    provider: KomfProviders,
+    config: ProviderConfigSnapshot?,
+    private val onMetadataUpdate: (JsonObject, KomfProviders) -> Unit,
+) : ProviderConfigState(config, provider) {
+
+    override fun onPrioritySave(priority: Int) {
+        patch("priority", JsonPrimitive(priority))
+    }
+
+    override fun onEnabledSave(enabled: Boolean) {
+        patch("enabled", JsonPrimitive(enabled))
+    }
+
+    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest, key: String, value: Boolean) {
+        patch(
+            "seriesMetadata",
+            buildJsonObject { put(key, value) }
+        )
+    }
+
+    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest, key: String, value: Boolean) {
+        patch(
+            "bookMetadata",
+            buildJsonObject { put(key, value) }
+        )
+    }
+
+    override fun onMediaTypeSave(mediaType: KomfMediaType?) {
+        patch("mediaType", mediaType?.let { JsonPrimitive(it.name) } ?: JsonNull)
+    }
+
+    override fun onNameMatchingModeSave(nameMatchingMode: KomfNameMatchingMode?) {
+        patch("nameMatchingMode", nameMatchingMode?.let { JsonPrimitive(it.name) } ?: JsonNull)
+    }
+
+    override fun onAuthorRolesSave(roles: List<KomfAuthorRole>) {
+        patch("authorRoles", JsonArray(roles.map { JsonPrimitive(it.name) }))
+    }
+
+    override fun onArtistRolesSave(roles: List<KomfAuthorRole>) {
+        patch("artistRoles", JsonArray(roles.map { JsonPrimitive(it.name) }))
+    }
+
+    protected fun patch(key: String, value: JsonElement) {
+        onMetadataUpdate(buildJsonObject { put(key, value) }, provider)
+    }
+}
+
+class EHentaiConfigState(
+    provider: KomfProviders,
+    config: EHentaiConfigSnapshot?,
+    private val onMetadataUpdate: (JsonObject, KomfProviders) -> Unit,
+) : KomfAverProviderConfigState(provider, config?.providerConfig, onMetadataUpdate) {
+
+    var useExhentai by mutableStateOf(config?.useExhentai ?: false)
+        private set
+    var cookieHeader by mutableStateOf(config?.cookieHeader)
+        private set
+    var cookies by mutableStateOf(config?.cookies ?: emptyMap())
+        private set
+    var userAgent by mutableStateOf(config?.userAgent)
+        private set
+
+    fun onUseExhentaiChange(value: Boolean) {
+        useExhentai = value
+        patch("useExhentai", JsonPrimitive(value))
+    }
+
+    fun onCookieHeaderChange(value: String) {
+        if (value == SECRET_PLACEHOLDER) return
+        cookieHeader = value.ifBlank { null }
+        patch("cookieHeader", jsonOptionalString(cookieHeader))
+    }
+
+    fun onUserAgentChange(value: String) {
+        userAgent = value.ifBlank { null }
+        patch("userAgent", jsonOptionalString(userAgent))
+    }
+
+    fun onCookieValueChange(name: String, value: String) {
+        if (value == SECRET_PLACEHOLDER) return
+        cookies = cookies.toMutableMap()
+            .apply {
+                if (value.isBlank()) remove(name)
+                else put(name, value)
+            }
+            .toMap()
+        patch(
+            "cookies",
+            JsonObject(cookies.mapValues { (_, cookieValue) -> JsonPrimitive(cookieValue) })
+        )
+    }
+}
+
 class AniListConfigState(
     provider: KomfProviders,
     config: AniListConfigDto?,
     private val onMetadataUpdate: (AniListConfigUpdateRequest) -> Unit,
-) : ProviderConfigState(config, provider) {
+) : ProviderConfigState(config.toProviderConfigSnapshot(), provider) {
 
     var tagScoreThreshold by mutableStateOf(config?.tagsScoreThreshold ?: 60)
         private set
@@ -349,11 +446,11 @@ class AniListConfigState(
         onMetadataUpdate(AniListConfigUpdateRequest(enabled = Some(enabled)))
     }
 
-    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest) {
+    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest, key: String, value: Boolean) {
         onMetadataUpdate(AniListConfigUpdateRequest(seriesMetadata = Some(metadata)))
     }
 
-    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest) {
+    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest, key: String, value: Boolean) {
     }
 
     override fun onMediaTypeSave(mediaType: KomfMediaType?) {
@@ -384,7 +481,7 @@ class MangaDexConfigState(
     provider: KomfProviders,
     config: MangaDexConfigDto?,
     private val onMetadataUpdate: (MangaDexConfigUpdateRequest) -> Unit,
-) : ProviderConfigState(config, provider) {
+) : ProviderConfigState(config.toProviderConfigSnapshot(), provider) {
 
     var coverLanguages by mutableStateOf(config?.coverLanguages ?: listOf("en", "ja"))
     var links by mutableStateOf(config?.links ?: emptyList())
@@ -407,11 +504,11 @@ class MangaDexConfigState(
         onMetadataUpdate(MangaDexConfigUpdateRequest(enabled = Some(enabled)))
     }
 
-    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest) {
+    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest, key: String, value: Boolean) {
         onMetadataUpdate(MangaDexConfigUpdateRequest(seriesMetadata = Some(metadata)))
     }
 
-    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest) {
+    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest, key: String, value: Boolean) {
         onMetadataUpdate(MangaDexConfigUpdateRequest(bookMetadata = Some(metadata)))
     }
 
@@ -444,7 +541,7 @@ class MangaBakaConfigState(
     provider: KomfProviders,
     config: MangaBakaConfigDto?,
     private val onMetadataUpdate: (MangaBakaConfigUpdateRequest) -> Unit,
-) : ProviderConfigState(config, provider) {
+) : ProviderConfigState(config.toProviderConfigSnapshot(), provider) {
 
     var mode by mutableStateOf(config?.mode ?: MangaBakaMode.API)
         private set
@@ -460,10 +557,10 @@ class MangaBakaConfigState(
     override fun onEnabledSave(enabled: Boolean) =
         onMetadataUpdate(MangaBakaConfigUpdateRequest(enabled = Some(enabled)))
 
-    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest) =
+    override fun onSeriesMetadataSave(metadata: SeriesMetadataConfigUpdateRequest, key: String, value: Boolean) =
         onMetadataUpdate(MangaBakaConfigUpdateRequest(seriesMetadata = Some(metadata)))
 
-    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest) = Unit
+    override fun onBookMetadataSave(metadata: BookMetadataConfigUpdateRequest, key: String, value: Boolean) = Unit
 
     override fun onMediaTypeSave(mediaType: KomfMediaType?) =
         onMetadataUpdate(

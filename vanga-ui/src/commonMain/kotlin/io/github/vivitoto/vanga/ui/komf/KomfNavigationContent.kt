@@ -17,6 +17,7 @@ import io.github.vivitoto.vanga.ui.settings.komf.general.KomfSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.jobs.KomfJobsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.notifications.KomfNotificationSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.processing.KomfProcessingSettingsScreen
+import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProviderDetailSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProvidersSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.navigation.NavigationButton
 import snd.komf.api.MediaServer.KAVITA
@@ -62,7 +63,8 @@ fun KomfNavigationContent(
         NavigationButton(
             label = "数据源",
             onClick = { onNavigation(KomfProvidersSettingsScreen()) },
-            isSelected = currentScreen is KomfProvidersSettingsScreen,
+            isSelected = currentScreen is KomfProvidersSettingsScreen ||
+                    currentScreen is KomfProviderDetailSettingsScreen,
             color = contentColor,
         )
         NavigationButton(

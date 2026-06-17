@@ -85,6 +85,8 @@ data class KomfProviderSettingsStrings(
     val providerMangaUpdates: String,
     val providerMangaDex: String,
     val providerNautiljon: String,
+    val providerNHentai: String,
+    val providerEHentai: String,
     val providerYenPress: String,
     val providerViz: String,
     val providerWebtoons: String,
@@ -92,23 +94,38 @@ data class KomfProviderSettingsStrings(
     ) {
 
     fun forProvider(provider: KomfProviders) =
-        when (provider) {
-            KomfCoreProviders.ANILIST -> providerAniList
-            KomfCoreProviders.BANGUMI -> providerBangumi
-            KomfCoreProviders.BOOK_WALKER -> providerBookWalker
-            KomfCoreProviders.COMIC_VINE -> providerComicVine
-            KomfCoreProviders.HENTAG -> providerHentag
-            KomfCoreProviders.KODANSHA -> providerKodansha
-            KomfCoreProviders.MAL -> providerMal
-            KomfCoreProviders.MANGA_UPDATES -> providerMangaUpdates
-            KomfCoreProviders.MANGADEX -> providerMangaDex
-            KomfCoreProviders.NAUTILJON -> providerNautiljon
-            KomfCoreProviders.YEN_PRESS -> providerYenPress
-            KomfCoreProviders.VIZ -> providerViz
-            KomfCoreProviders.MANGA_BAKA -> providerMangaBaka
-            KomfCoreProviders.WEBTOONS -> providerWebtoons
-            is UnknownKomfProvider -> provider.name
+        when (val key = provider.providerKey()) {
+            KomfCoreProviders.ANILIST.name -> providerAniList
+            KomfCoreProviders.BANGUMI.name -> providerBangumi
+            KomfCoreProviders.BOOK_WALKER.name -> providerBookWalker
+            KomfCoreProviders.COMIC_VINE.name -> providerComicVine
+            KomfCoreProviders.HENTAG.name -> providerHentag
+            KomfCoreProviders.KODANSHA.name -> providerKodansha
+            KomfCoreProviders.MAL.name -> providerMal
+            KomfCoreProviders.MANGA_UPDATES.name -> providerMangaUpdates
+            KomfCoreProviders.MANGADEX.name -> providerMangaDex
+            KomfCoreProviders.NAUTILJON.name -> providerNautiljon
+            KomfCoreProviders.YEN_PRESS.name -> providerYenPress
+            KomfCoreProviders.VIZ.name -> providerViz
+            KomfCoreProviders.MANGA_BAKA.name -> providerMangaBaka
+            KomfCoreProviders.WEBTOONS.name -> providerWebtoons
+            "NHENTAI" -> providerNHentai
+            "EHENTAI" -> providerEHentai
+            else -> key
         }
+
+    fun forProviderKey(providerKey: String) =
+        when (providerKey) {
+            "NHENTAI" -> providerNHentai
+            "EHENTAI" -> providerEHentai
+            else -> forProvider(UnknownKomfProvider(providerKey))
+        }
+
+    private fun KomfProviders.providerKey(): String = when (this) {
+        is UnknownKomfProvider -> name
+        is Enum<*> -> name
+        else -> toString()
+    }
 }
 
 

@@ -7,6 +7,7 @@ expect class VangaWebview : AutoCloseable {
     fun start()
     fun navigate(uri: String)
     fun registerRequestInterceptor(handler: RequestInterceptor)
+    override fun close()
 
 }
 

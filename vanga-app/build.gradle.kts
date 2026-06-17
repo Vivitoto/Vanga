@@ -111,7 +111,7 @@ android {
         applicationId = "io.github.vivitoto.vanga"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 11
+        versionCode = 12
         versionName = libs.versions.app.version.get()
 
         val enableSelfUpdates = when (androidVariant) {

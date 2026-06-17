@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,6 +40,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -48,7 +50,6 @@ import sh.calvin.reorderable.ReorderableColumn
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateFormat
 import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.VangaShape
-import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.common.components.ChipFieldWithSuggestions
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.DropdownMultiChoiceMenu
@@ -56,10 +57,6 @@ import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.UpdateProgressContent
 import io.github.vivitoto.vanga.ui.common.components.scrollbar
 import io.github.vivitoto.vanga.ui.dialogs.AppDialog
-import io.github.vivitoto.vanga.ui.dialogs.tabs.DialogTab
-import io.github.vivitoto.vanga.ui.dialogs.tabs.TabDialog
-import io.github.vivitoto.vanga.ui.dialogs.tabs.TabItem
-import io.github.vivitoto.vanga.ui.platform.WindowSizeClass
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.platform.cursorForMove
 import io.github.vivitoto.vanga.ui.settings.SettingsRow
@@ -104,6 +101,7 @@ fun KomfProvidersSettingsContent(
     mangaBakaDbMetadata: MangaBakaDatabaseDto?,
     onMangaBakaUpdate: () -> Flow<MangaBakaDownloadProgress>
 ) {
+    val navigator = LocalNavigator.currentOrThrow
 
     LibraryTabs(
         defaultProcessingState = defaultProcessingState,
@@ -113,7 +111,18 @@ fun KomfProvidersSettingsContent(
         libraries = libraries
     ) { state ->
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            ProvidersConfigContent(state, state::onProviderReorder)
+            ProvidersConfigContent(
+                state = state,
+                onReorder = state::onProviderReorder,
+                onProviderOpen = {
+                    navigator.push(
+                        KomfProviderDetailSettingsScreen(
+                            providerKey = it.provider.providerKey,
+                            libraryId = state.libraryId?.value
+                        )
+                    )
+                }
+            )
 
             if (state == defaultProcessingState) {
                 CommonSettingsContent(
@@ -137,6 +146,7 @@ fun KomfProvidersSettingsContent(
 private fun ProvidersConfigContent(
     state: ProvidersConfigState,
     onReorder: (fromIndex: Int, toIndex: Int) -> Unit,
+    onProviderOpen: (ProviderConfigState) -> Unit,
 ) {
     SettingsSectionCard(
         title = "启用的数据源",
@@ -178,7 +188,11 @@ private fun ProvidersConfigContent(
 
                         }
 
-                        ProviderCard(item, state::onProviderRemove)
+                        ProviderCard(
+                            state = item,
+                            onProviderOpen = onProviderOpen,
+                            onProviderRemove = state::onProviderRemove,
+                        )
 
                     }
                 }
@@ -187,7 +201,7 @@ private fun ProvidersConfigContent(
 
         AddNewProviderButton(
             onNewProviderAdd = state::onProviderAdd,
-            enabledProviders = remember(state.enabledProviders) { state.enabledProviders.map { it.provider } },
+            enabledProviders = remember(state.enabledProviders) { state.enabledProviders.map { it.provider.providerKey } },
         )
     }
 }
@@ -197,7 +211,7 @@ private fun ProvidersConfigContent(
 @Composable
 private fun AddNewProviderButton(
     onNewProviderAdd: (KomfProviders) -> Unit,
-    enabledProviders: List<KomfProviders>,
+    enabledProviders: List<String>,
 ) {
     val strings = LocalStrings.current.komf.providerSettings
     var addProviderExpanded by remember { mutableStateOf(false) }
@@ -223,7 +237,10 @@ private fun AddNewProviderButton(
                 .widthIn(min = 200.dp)
                 .scrollbar(scrollState, Orientation.Vertical)
         ) {
-            KomfCoreProviders.entries.filter { it !in enabledProviders }.forEach {
+            (KomfCoreProviders.entries.map { it as KomfProviders } + KomfAverProviders.entries)
+                .distinctBy { it.providerKey }
+                .filter { it.providerKey !in enabledProviders }
+                .forEach {
                 DropdownMenuItem(
                     text = { Text(strings.forProvider(it)) },
                     onClick = {
@@ -393,11 +410,16 @@ private fun MangaBakaDbDownloadContent(
 @Composable
 private fun ProviderCard(
     state: ProviderConfigState,
+    onProviderOpen: (ProviderConfigState) -> Unit,
     onProviderRemove: (ProviderConfigState) -> Unit
 ) {
     val strings = LocalStrings.current.komf.providerSettings
-    var showEditDialog by remember { mutableStateOf(false) }
     Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onProviderOpen(state) }
+            .cursorForHand()
+            .padding(end = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -408,12 +430,7 @@ private fun ProviderCard(
             overflow = TextOverflow.Ellipsis,
         )
 
-        IconButton(
-            onClick = { showEditDialog = true },
-            modifier = Modifier.cursorForHand()
-        ) {
-            Icon(Icons.Default.Edit, null)
-        }
+        Icon(Icons.Default.ChevronRight, null)
         IconButton(
             onClick = { onProviderRemove(state) },
             modifier = Modifier.cursorForHand()
@@ -421,326 +438,341 @@ private fun ProviderCard(
             Icon(Icons.Default.Delete, null)
         }
     }
+}
 
-    val tabs = remember(state) {
-        listOfNotNull(
-            SeriesMetadataTab(state),
-            if (state.isBookMetadataAvailable) BookMetadataTab(state) else null,
-            ProviderSettingsTab(state)
+@Composable
+fun ProviderDetailSettingsContent(
+    state: ProviderConfigState,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SeriesMetadataSettings(state)
+        if (state.isBookMetadataAvailable) BookMetadataSettings(state)
+        ProviderSettings(state)
+    }
+}
+
+@Composable
+private fun SeriesMetadataSettings(state: ProviderConfigState) {
+    SettingsSectionCard(
+        title = "作品元数据",
+    ) {
+        SettingsSwitchRow(
+            title = "年龄分级",
+            checked = state.seriesAgeRating,
+            onCheckedChange = state::onSeriesAgeRatingChange,
+        )
+
+        SettingsSwitchRow(
+            title = "作者",
+            checked = state.seriesAuthors,
+            onCheckedChange = state::onSeriesAuthorsChange,
+        )
+
+        SettingsSwitchRow(
+            title = "单本数量",
+            checked = state.seriesBookCount,
+            onCheckedChange = state::onSeriesBookCountChange,
+        )
+        SettingsSwitchRow(
+            title = "封面",
+            checked = state.seriesCover,
+            onCheckedChange = state::onSeriesCoverChange,
+        )
+
+        SettingsSwitchRow(
+            title = "类型",
+            checked = state.seriesGenres,
+            onCheckedChange = state::onSeriesGenresChange,
+        )
+
+        SettingsSwitchRow(
+            title = "链接",
+            checked = state.seriesLinks,
+            onCheckedChange = state::onSeriesLinksChange,
+        )
+
+        SettingsSwitchRow(
+            title = "出版社",
+            checked = state.seriesPublisher,
+            onCheckedChange = state::onSeriesPublisherChange,
+        )
+
+        if (state.canHaveMultiplePublishers) {
+            SettingsSwitchRow(
+                title = "使用原始出版社",
+                supportingText = "优先使用原始出版社名称，而不是本地化名称。",
+                checked = state.seriesOriginalPublisher,
+                onCheckedChange = state::onSeriesOriginalPublisherChange,
+            )
+        }
+
+        SettingsSwitchRow(
+            title = "发布日期",
+            checked = state.seriesReleaseDate,
+            onCheckedChange = state::onSeriesReleaseDateChange,
+        )
+
+        SettingsSwitchRow(
+            title = "状态",
+            checked = state.seriesStatus,
+            onCheckedChange = state::onSeriesStatusChange,
+        )
+
+        SettingsSwitchRow(
+            title = "简介",
+            checked = state.seriesSummary,
+            onCheckedChange = state::onSeriesSummaryChange,
+        )
+
+        SettingsSwitchRow(
+            title = "标签",
+            checked = state.seriesTags,
+            onCheckedChange = state::onSeriesTagsChange,
+        )
+
+        SettingsSwitchRow(
+            title = "标题",
+            checked = state.seriesTitle,
+            onCheckedChange = state::onSeriesTitleChange,
         )
     }
-    var currentTab by remember { mutableStateOf(tabs.first()) }
-    if (showEditDialog) {
+}
 
-        TabDialog(
-            modifier = when (LocalWindowWidth.current) {
-                WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier
-                else -> Modifier.widthIn(max = 700.dp)
-            },
-            title = "编辑 ${strings.forProvider(state.provider)}",
-            currentTab = currentTab,
-            tabs = tabs,
-            onTabChange = { currentTab = it },
-            showCancelButton = false,
-            onConfirm = { showEditDialog = false },
-            confirmationText = "关闭",
-            onDismissRequest = { showEditDialog = false },
+@Composable
+private fun BookMetadataSettings(state: ProviderConfigState) {
+    SettingsSectionCard(
+        title = "单本元数据",
+    ) {
+        SettingsSwitchRow(
+            title = "启用",
+            checked = state.bookEnabled,
+            onCheckedChange = state::onBookEnabledChange,
+        )
+
+        SettingsSwitchRow(
+            title = "作者",
+            enabled = state.bookEnabled,
+            checked = state.bookAuthors,
+            onCheckedChange = state::onBookAuthorsChange,
+        )
+
+        SettingsSwitchRow(
+            title = "封面",
+            enabled = state.bookEnabled,
+            checked = state.bookCover,
+            onCheckedChange = state::onBookCoverChange,
+        )
+
+        SettingsSwitchRow(
+            title = "ISBN",
+            enabled = state.bookEnabled,
+            checked = state.bookIsbn,
+            onCheckedChange = state::onBookIsbnChange,
+        )
+
+        SettingsSwitchRow(
+            title = "链接",
+            enabled = state.bookEnabled,
+            checked = state.bookLinks,
+            onCheckedChange = state::onBookLinksChange,
+        )
+
+        SettingsSwitchRow(
+            title = "编号",
+            enabled = state.bookEnabled,
+            checked = state.bookNumber,
+            onCheckedChange = state::onBookNumberChange,
+        )
+
+        SettingsSwitchRow(
+            title = "发布日期",
+            enabled = state.bookEnabled,
+            checked = state.bookReleaseDate,
+            onCheckedChange = state::onBookReleaseDateChange,
+        )
+
+        SettingsSwitchRow(
+            title = "简介",
+            enabled = state.bookEnabled,
+            checked = state.bookSummary,
+            onCheckedChange = state::onBookSummaryChange,
+        )
+
+        SettingsSwitchRow(
+            title = "标签",
+            enabled = state.bookEnabled,
+            checked = state.bookTags,
+            onCheckedChange = state::onBookTagsChange,
         )
     }
 }
 
-private class SeriesMetadataTab(private val state: ProviderConfigState) : DialogTab {
-    override fun options() = TabItem(title = "作品元数据")
-
-    @Composable
-    override fun Content() {
+@Composable
+private fun ProviderSettings(state: ProviderConfigState) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SettingsSectionCard(
-            title = "作品元数据",
+            title = "匹配设置",
         ) {
-            SettingsSwitchRow(
-                title = "年龄分级",
-                checked = state.seriesAgeRating,
-                onCheckedChange = state::onSeriesAgeRatingChange,
-            )
-
-            SettingsSwitchRow(
-                title = "作者",
-                checked = state.seriesAuthors,
-                onCheckedChange = state::onSeriesAuthorsChange,
-            )
-
-            SettingsSwitchRow(
-                title = "单本数量",
-                checked = state.seriesBookCount,
-                onCheckedChange = state::onSeriesBookCountChange,
-            )
-            SettingsSwitchRow(
-                title = "封面",
-                checked = state.seriesCover,
-                onCheckedChange = state::onSeriesCoverChange,
-            )
-
-            SettingsSwitchRow(
-                title = "类型",
-                checked = state.seriesGenres,
-                onCheckedChange = state::onSeriesGenresChange,
-            )
-
-            SettingsSwitchRow(
-                title = "链接",
-                checked = state.seriesLinks,
-                onCheckedChange = state::onSeriesLinksChange,
-            )
-
-            SettingsSwitchRow(
-                title = "出版社",
-                checked = state.seriesPublisher,
-                onCheckedChange = state::onSeriesPublisherChange,
-            )
-
-            if (state.canHaveMultiplePublishers) {
-                SettingsSwitchRow(
-                    title = "使用原始出版社",
-                    supportingText = "优先使用原始出版社名称，而不是本地化名称。",
-                    checked = state.seriesOriginalPublisher,
-                    onCheckedChange = state::onSeriesOriginalPublisherChange,
-                )
-            }
-
-            SettingsSwitchRow(
-                title = "发布日期",
-                checked = state.seriesReleaseDate,
-                onCheckedChange = state::onSeriesReleaseDateChange,
-            )
-
-            SettingsSwitchRow(
-                title = "状态",
-                checked = state.seriesStatus,
-                onCheckedChange = state::onSeriesStatusChange,
-            )
-
-            SettingsSwitchRow(
-                title = "简介",
-                checked = state.seriesSummary,
-                onCheckedChange = state::onSeriesSummaryChange,
-            )
-
-            SettingsSwitchRow(
-                title = "标签",
-                checked = state.seriesTags,
-                onCheckedChange = state::onSeriesTagsChange,
-            )
-
-            SettingsSwitchRow(
-                title = "标题",
-                checked = state.seriesTitle,
-                onCheckedChange = state::onSeriesTitleChange,
-            )
-        }
-    }
-}
-
-private class BookMetadataTab(private val state: ProviderConfigState) : DialogTab {
-    override fun options() = TabItem(title = "单本元数据")
-
-    @Composable
-    override fun Content() {
-        SettingsSectionCard(
-            title = "单本元数据",
-        ) {
-            SettingsSwitchRow(
-                title = "启用",
-                checked = state.bookEnabled,
-                onCheckedChange = state::onBookEnabledChange,
-            )
-
-            SettingsSwitchRow(
-                title = "作者",
-                enabled = state.bookEnabled,
-                checked = state.bookAuthors,
-                onCheckedChange = state::onBookAuthorsChange,
-            )
-
-            SettingsSwitchRow(
-                title = "封面",
-                enabled = state.bookEnabled,
-                checked = state.bookCover,
-                onCheckedChange = state::onBookCoverChange,
-            )
-
-            SettingsSwitchRow(
-                title = "ISBN",
-                enabled = state.bookEnabled,
-                checked = state.bookIsbn,
-                onCheckedChange = state::onBookIsbnChange,
-            )
-
-            SettingsSwitchRow(
-                title = "链接",
-                enabled = state.bookEnabled,
-                checked = state.bookLinks,
-                onCheckedChange = state::onBookLinksChange,
-            )
-
-            SettingsSwitchRow(
-                title = "编号",
-                enabled = state.bookEnabled,
-                checked = state.bookNumber,
-                onCheckedChange = state::onBookNumberChange,
-            )
-
-            SettingsSwitchRow(
-                title = "发布日期",
-                enabled = state.bookEnabled,
-                checked = state.bookReleaseDate,
-                onCheckedChange = state::onBookReleaseDateChange,
-            )
-
-            SettingsSwitchRow(
-                title = "简介",
-                enabled = state.bookEnabled,
-                checked = state.bookSummary,
-                onCheckedChange = state::onBookSummaryChange,
-            )
-
-            SettingsSwitchRow(
-                title = "标签",
-                enabled = state.bookEnabled,
-                checked = state.bookTags,
-                onCheckedChange = state::onBookTagsChange,
-            )
-        }
-    }
-}
-private class ProviderSettingsTab(private val state: ProviderConfigState) : DialogTab {
-    override fun options() = TabItem(title = "数据源设置")
-
-    @Composable
-    override fun Content() {
-
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            SettingsSectionCard(
-                title = "匹配设置",
-            ) {
-                DropdownChoiceMenu(
-                    selectedOption = remember(state.mediaType) {
-                        LabeledEntry(
-                            state.mediaType,
-                            state.mediaType?.name ?: "未设置"
-                        )
-                    },
-                    options = remember {
-                        listOf(LabeledEntry<KomfMediaType?>(null, "未设置")) +
-                                KomfMediaType.entries.map { LabeledEntry(it, it.name) }
-                    },
-                    onOptionChange = { state.onMediaTypeChange(it.value) },
-                    label = { Text("媒体类型") },
-                    inputFieldModifier = Modifier.fillMaxWidth()
-                )
-
-                DropdownChoiceMenu(
-                    selectedOption = remember(state.nameMatchingMode) {
-                        LabeledEntry(
-                            state.nameMatchingMode,
-                            state.nameMatchingMode?.name ?: "未设置"
-                        )
-                    },
-                    options = remember {
-                        listOf(LabeledEntry<KomfNameMatchingMode?>(null, "未设置")) +
-                                KomfNameMatchingMode.entries.map { LabeledEntry(it, it.name) }
-                    },
-                    onOptionChange = { state.onNameMatchingModeChange(it.value) },
-                    label = { Text("名称匹配模式") },
-                    inputFieldModifier = Modifier.fillMaxWidth()
-                )
-
-                DropdownMultiChoiceMenu(
-                    selectedOptions = remember(state.authorRoles) { state.authorRoles.map { LabeledEntry(it, it.name) } },
-                    options = remember { KomfAuthorRole.entries.map { LabeledEntry(it, it.name) } },
-                    onOptionSelect = { state.onAuthorSelect(it.value) },
-                    label = { Text("作者角色") },
-                    placeholder = "未设置",
-                    inputFieldModifier = Modifier.fillMaxWidth()
-                )
-                DropdownMultiChoiceMenu(
-                    selectedOptions = remember(state.artistRoles) { state.artistRoles.map { LabeledEntry(it, it.name) } },
-                    options = remember { KomfAuthorRole.entries.map { LabeledEntry(it, it.name) } },
-                    onOptionSelect = { state.onArtistSelect(it.value) },
-                    label = { Text("画师角色") },
-                    placeholder = "未设置",
-                    inputFieldModifier = Modifier.fillMaxWidth()
-                )
-            }
-            when (state) {
-                is GenericProviderConfigState -> {}
-                is AniListConfigState -> AniListProviderSettings(state)
-                is MangaDexConfigState -> MangaDexProviderSettings(state)
-                is MangaBakaConfigState -> MangaBakaProviderSettings(state)
-            }
-
-        }
-    }
-
-    @Composable
-    private fun AniListProviderSettings(state: AniListConfigState) {
-        SettingsSectionCard(
-            title = "AniList 设置",
-        ) {
-            SavableTextField(
-                currentValue = remember(state.tagScoreThreshold) { state.tagScoreThreshold.toString() },
-                onValueSave = { state.onTagScoreThresholdChange(it.toInt()) },
-                valueChangePolicy = { it.toIntOrNull() != null },
-                label = { Text("标签分数阈值") }
-            )
-
-            SavableTextField(
-                currentValue = remember(state.tagSizeLimit) { state.tagSizeLimit.toString() },
-                onValueSave = { state.onTagSizeLimitChange(it.toInt()) },
-                valueChangePolicy = { it.toIntOrNull() != null },
-                label = { Text("标签数量上限") }
-            )
-        }
-    }
-
-    @Composable
-    private fun MangaDexProviderSettings(state: MangaDexConfigState) {
-        SettingsSectionCard(
-            title = "MangaDex 设置",
-        ) {
-            ChipFieldWithSuggestions(
-                label = { Text("别名语言（ISO 639）") },
-                values = state.coverLanguages,
-                onValuesChange = state::onCoverLanguagesChange,
-                suggestions = komfLanguageTagsSuggestions
-            )
-            DropdownMultiChoiceMenu(
-                selectedOptions = state.links.map { LabeledEntry(it, it.name) },
-                options = MangaDexLink.entries.map { LabeledEntry(it, it.name) },
-                onOptionSelect = { state.onLinkSelect(it.value) },
-                label = { Text("包含链接") },
-                placeholder = "全部",
-                inputFieldModifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
-
-    @Composable
-    private fun MangaBakaProviderSettings(state: MangaBakaConfigState) {
-        SettingsSectionCard("MangaBaka 设置") {
             DropdownChoiceMenu(
-                selectedOption = remember(state.mode) {
+                selectedOption = remember(state.mediaType) {
                     LabeledEntry(
-                        state.mode,
-                        state.mode.name
+                        state.mediaType,
+                        state.mediaType?.name ?: "未设置"
                     )
                 },
                 options = remember {
-                    MangaBakaMode.entries.map { LabeledEntry(it, it.name) }
+                    listOf(LabeledEntry<KomfMediaType?>(null, "未设置")) +
+                            KomfMediaType.entries.map { LabeledEntry(it, it.name) }
                 },
-                onOptionChange = { state.onModeChange(it.value) },
-                label = { Text("数据源类型") },
+                onOptionChange = { state.onMediaTypeChange(it.value) },
+                label = { Text("媒体类型") },
+                inputFieldModifier = Modifier.fillMaxWidth()
+            )
+
+            DropdownChoiceMenu(
+                selectedOption = remember(state.nameMatchingMode) {
+                    LabeledEntry(
+                        state.nameMatchingMode,
+                        state.nameMatchingMode?.name ?: "未设置"
+                    )
+                },
+                options = remember {
+                    listOf(LabeledEntry<KomfNameMatchingMode?>(null, "未设置")) +
+                            KomfNameMatchingMode.entries.map { LabeledEntry(it, it.name) }
+                },
+                onOptionChange = { state.onNameMatchingModeChange(it.value) },
+                label = { Text("名称匹配模式") },
+                inputFieldModifier = Modifier.fillMaxWidth()
+            )
+
+            DropdownMultiChoiceMenu(
+                selectedOptions = remember(state.authorRoles) { state.authorRoles.map { LabeledEntry(it, it.name) } },
+                options = remember { KomfAuthorRole.entries.map { LabeledEntry(it, it.name) } },
+                onOptionSelect = { state.onAuthorSelect(it.value) },
+                label = { Text("作者角色") },
+                placeholder = "未设置",
+                inputFieldModifier = Modifier.fillMaxWidth()
+            )
+            DropdownMultiChoiceMenu(
+                selectedOptions = remember(state.artistRoles) { state.artistRoles.map { LabeledEntry(it, it.name) } },
+                options = remember { KomfAuthorRole.entries.map { LabeledEntry(it, it.name) } },
+                onOptionSelect = { state.onArtistSelect(it.value) },
+                label = { Text("画师角色") },
+                placeholder = "未设置",
                 inputFieldModifier = Modifier.fillMaxWidth()
             )
         }
+        when (state) {
+            is GenericProviderConfigState -> {}
+            is EHentaiConfigState -> EHentaiProviderSettings(state)
+            is KomfAverProviderConfigState -> {}
+            is AniListConfigState -> AniListProviderSettings(state)
+            is MangaDexConfigState -> MangaDexProviderSettings(state)
+            is MangaBakaConfigState -> MangaBakaProviderSettings(state)
+        }
     }
+}
+
+@Composable
+private fun AniListProviderSettings(state: AniListConfigState) {
+    SettingsSectionCard(
+        title = "AniList 设置",
+    ) {
+        SavableTextField(
+            currentValue = remember(state.tagScoreThreshold) { state.tagScoreThreshold.toString() },
+            onValueSave = { state.onTagScoreThresholdChange(it.toInt()) },
+            valueChangePolicy = { it.toIntOrNull() != null },
+            label = { Text("标签分数阈值") }
+        )
+
+        SavableTextField(
+            currentValue = remember(state.tagSizeLimit) { state.tagSizeLimit.toString() },
+            onValueSave = { state.onTagSizeLimitChange(it.toInt()) },
+            valueChangePolicy = { it.toIntOrNull() != null },
+            label = { Text("标签数量上限") }
+        )
+    }
+}
+
+@Composable
+private fun MangaDexProviderSettings(state: MangaDexConfigState) {
+    SettingsSectionCard(
+        title = "MangaDex 设置",
+    ) {
+        ChipFieldWithSuggestions(
+            label = { Text("别名语言（ISO 639）") },
+            values = state.coverLanguages,
+            onValuesChange = state::onCoverLanguagesChange,
+            suggestions = komfLanguageTagsSuggestions
+        )
+        DropdownMultiChoiceMenu(
+            selectedOptions = state.links.map { LabeledEntry(it, it.name) },
+            options = MangaDexLink.entries.map { LabeledEntry(it, it.name) },
+            onOptionSelect = { state.onLinkSelect(it.value) },
+            label = { Text("包含链接") },
+            placeholder = "全部",
+            inputFieldModifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun MangaBakaProviderSettings(state: MangaBakaConfigState) {
+    SettingsSectionCard("MangaBaka 设置") {
+        DropdownChoiceMenu(
+            selectedOption = remember(state.mode) {
+                LabeledEntry(
+                    state.mode,
+                    state.mode.name
+                )
+            },
+            options = remember {
+                MangaBakaMode.entries.map { LabeledEntry(it, it.name) }
+            },
+            onOptionChange = { state.onModeChange(it.value) },
+            label = { Text("数据源类型") },
+            inputFieldModifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun EHentaiProviderSettings(state: EHentaiConfigState) {
+    SettingsSectionCard("EHentai / ExHentai 设置") {
+        SettingsSwitchRow(
+            title = "使用 ExHentai",
+            checked = state.useExhentai,
+            onCheckedChange = state::onUseExhentaiChange,
+        )
+        SavableTextField(
+            currentValue = if (state.cookieHeader != null) SECRET_PLACEHOLDER else "",
+            onValueSave = state::onCookieHeaderChange,
+            useEditButton = true,
+            isPassword = true,
+            label = { Text("Cookie Header") }
+        )
+        EHentaiCookieTextField(state, "ipb_member_id")
+        EHentaiCookieTextField(state, "ipb_pass_hash")
+        EHentaiCookieTextField(state, "igneous")
+        SavableTextField(
+            currentValue = state.userAgent ?: "",
+            onValueSave = state::onUserAgentChange,
+            useEditButton = true,
+            label = { Text("User-Agent") }
+        )
+    }
+}
+
+@Composable
+private fun EHentaiCookieTextField(
+    state: EHentaiConfigState,
+    cookieName: String,
+) {
+    SavableTextField(
+        currentValue = if (state.cookies[cookieName] != null) SECRET_PLACEHOLDER else "",
+        onValueSave = { state.onCookieValueChange(cookieName, it) },
+        useEditButton = true,
+        isPassword = true,
+        label = { Text(cookieName) }
+    )
 }
