@@ -4,13 +4,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
@@ -119,6 +121,7 @@ class KomfIdentifyDialogViewModel(
 
         fun launchEventCollection(jobId: KomfMetadataJobId) {
             coroutineScope.launch {
+                var handledFailure = false
                 appNotifications.runCatchingToNotifications {
 
                     state.value = LoadState.Loading
@@ -184,17 +187,25 @@ class KomfIdentifyDialogViewModel(
                             UnknownEvent -> {}
                         }
                     }
+                        .catch { cause ->
+                            if (cause is CancellationException) throw cause
+
+                            handledFailure = true
+                            state.value = LoadState.Error(cause)
+                            appNotifications.addErrorNotification(cause)
+                            onDismiss()
+                        }
                         .onCompletion { cause ->
-                            if (cause != null) {
-                                appNotifications.addErrorNotification(cause)
-                                onDismiss()
-                            } else {
+                            if (cause == null && !handledFailure) {
                                 postProcessing = false
                                 state.value = LoadState.Success(Unit)
                             }
                         }
-                        .launchIn(coroutineScope)
-                }.onFailure { onDismiss() }
+                        .collect()
+                }.onFailure { cause ->
+                    state.value = LoadState.Error(cause)
+                    onDismiss()
+                }
             }
         }
 
