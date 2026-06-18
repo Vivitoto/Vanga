@@ -1,6 +1,5 @@
 package io.github.vivitoto.vanga.ui.settings.navigation
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,7 +25,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Person
@@ -34,7 +32,6 @@ import androidx.compose.material.icons.filled.PriorityHigh
 import androidx.compose.material.icons.filled.RecentActors
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SupervisorAccount
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -67,17 +64,11 @@ import io.github.vivitoto.vanga.ui.settings.authactivity.AuthenticationActivityS
 import io.github.vivitoto.vanga.ui.settings.epub.EpubReaderSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.favoritesync.FavoriteSyncSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.imagereader.ImageReaderSettingsScreen
-import io.github.vivitoto.vanga.ui.settings.komf.general.KomfSettingsScreen
-import io.github.vivitoto.vanga.ui.settings.komf.jobs.KomfJobsScreen
-import io.github.vivitoto.vanga.ui.settings.komf.notifications.KomfNotificationSettingsScreen
-import io.github.vivitoto.vanga.ui.settings.komf.processing.KomfProcessingSettingsScreen
-import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProviderDetailSettingsScreen
-import io.github.vivitoto.vanga.ui.settings.komf.providers.KomfProvidersSettingsScreen
+import io.github.vivitoto.vanga.ui.settings.komf.KomfAdvancedSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.offline.OfflineSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.server.ServerSettingsScreen
 import io.github.vivitoto.vanga.ui.settings.updates.AppUpdatesScreen
 import io.github.vivitoto.vanga.ui.settings.users.UsersScreen
-import snd.komf.api.MediaServer.KOMGA
 import snd.komga.client.user.KomgaUser
 import io.github.vivitoto.vanga.webview.webviewIsAvailable
 
@@ -96,13 +87,7 @@ fun SettingsNavigationMenu(
     contentPadding: PaddingValues = PaddingValues(0.dp),
 ) {
     val isAdmin = remember(user) { user?.roleAdmin() ?: true }
-    val advancedScreenSelected = currentScreen is KomfSettingsScreen ||
-            currentScreen is KomfProcessingSettingsScreen ||
-            currentScreen is KomfProvidersSettingsScreen ||
-            currentScreen is KomfProviderDetailSettingsScreen ||
-            currentScreen is KomfNotificationSettingsScreen ||
-            currentScreen is KomfJobsScreen
-    var showAdvancedSettings by remember(advancedScreenSelected) { mutableStateOf(advancedScreenSelected) }
+    val advancedScreenSelected = currentScreen is KomfAdvancedSettingsScreen
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -224,60 +209,13 @@ fun SettingsNavigationMenu(
 
             if (isAdmin) {
                 NavigationButton(
-                    label = if (showAdvancedSettings) "收起高级设置" else "高级设置",
+                    label = "高级设置",
                     description = "Komf 元数据、自动化任务和通知",
                     icon = Icons.Default.Extension,
-                    onClick = { showAdvancedSettings = !showAdvancedSettings },
+                    onClick = { onNavigation(KomfAdvancedSettingsScreen()) },
                     isSelected = advancedScreenSelected,
-                    expanded = showAdvancedSettings,
                     color = contentColor,
                 )
-                AnimatedVisibility(showAdvancedSettings) {
-                    Column(Modifier.padding(start = 18.dp)) {
-                        NavigationButton(
-                            label = "Komf 连接",
-                            icon = Icons.Default.Extension,
-                            onClick = { onNavigation(KomfSettingsScreen()) },
-                            isSelected = currentScreen is KomfSettingsScreen,
-                            color = contentColor,
-                        )
-                        AnimatedVisibility(komfEnabled) {
-                            Column {
-                                NavigationButton(
-                                    label = "处理规则",
-                                    description = "自动匹配和写入元数据的规则",
-                                    icon = Icons.Default.Tune,
-                                    onClick = { onNavigation(KomfProcessingSettingsScreen(KOMGA)) },
-                                    isSelected = currentScreen is KomfProcessingSettingsScreen,
-                                    color = contentColor,
-                                )
-                                NavigationButton(
-                                    label = "数据源",
-                                    description = "配置漫画元数据来源",
-                                    icon = Icons.Default.LocalOffer,
-                                    onClick = { onNavigation(KomfProvidersSettingsScreen()) },
-                                    isSelected = currentScreen is KomfProvidersSettingsScreen ||
-                                            currentScreen is KomfProviderDetailSettingsScreen,
-                                    color = contentColor,
-                                )
-                                NavigationButton(
-                                    label = "通知",
-                                    icon = Icons.Default.Info,
-                                    onClick = { onNavigation(KomfNotificationSettingsScreen()) },
-                                    isSelected = currentScreen is KomfNotificationSettingsScreen,
-                                    color = contentColor,
-                                )
-                                NavigationButton(
-                                    label = "任务记录",
-                                    icon = Icons.Default.Cached,
-                                    onClick = { onNavigation(KomfJobsScreen()) },
-                                    isSelected = currentScreen is KomfJobsScreen,
-                                    color = contentColor,
-                                )
-                            }
-                        }
-                    }
-                }
                 Spacer(Modifier.height(6.dp))
             }
         }

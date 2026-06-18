@@ -386,6 +386,9 @@ class EHentaiConfigState(
     var userAgent by mutableStateOf(config?.userAgent)
         private set
 
+    val hasCookieAuth: Boolean
+        get() = cookieHeader != null || cookies.isNotEmpty()
+
     fun onUseExhentaiChange(value: Boolean) {
         useExhentai = value
         patch("useExhentai", JsonPrimitive(value))
@@ -394,26 +397,14 @@ class EHentaiConfigState(
     fun onCookieHeaderChange(value: String) {
         if (value == SECRET_PLACEHOLDER) return
         cookieHeader = value.ifBlank { null }
+        cookies = emptyMap()
         patch("cookieHeader", jsonOptionalString(cookieHeader))
+        patch("cookies", JsonNull)
     }
 
     fun onUserAgentChange(value: String) {
         userAgent = value.ifBlank { null }
         patch("userAgent", jsonOptionalString(userAgent))
-    }
-
-    fun onCookieValueChange(name: String, value: String) {
-        if (value == SECRET_PLACEHOLDER) return
-        cookies = cookies.toMutableMap()
-            .apply {
-                if (value.isBlank()) remove(name)
-                else put(name, value)
-            }
-            .toMap()
-        patch(
-            "cookies",
-            JsonObject(cookies.mapValues { (_, cookieValue) -> JsonPrimitive(cookieValue) })
-        )
     }
 }
 

@@ -745,15 +745,12 @@ private fun EHentaiProviderSettings(state: EHentaiConfigState) {
             onCheckedChange = state::onUseExhentaiChange,
         )
         SavableTextField(
-            currentValue = if (state.cookieHeader != null) SECRET_PLACEHOLDER else "",
+            currentValue = if (state.hasCookieAuth) SECRET_PLACEHOLDER else "",
             onValueSave = state::onCookieHeaderChange,
             useEditButton = true,
             isPassword = true,
-            label = { Text("Cookie Header") }
+            label = { Text("Cookie") }
         )
-        EHentaiCookieTextField(state, "ipb_member_id")
-        EHentaiCookieTextField(state, "ipb_pass_hash")
-        EHentaiCookieTextField(state, "igneous")
         SavableTextField(
             currentValue = state.userAgent ?: "",
             onValueSave = state::onUserAgentChange,
@@ -761,18 +758,4 @@ private fun EHentaiProviderSettings(state: EHentaiConfigState) {
             label = { Text("User-Agent") }
         )
     }
-}
-
-@Composable
-private fun EHentaiCookieTextField(
-    state: EHentaiConfigState,
-    cookieName: String,
-) {
-    SavableTextField(
-        currentValue = if (state.cookies[cookieName] != null) SECRET_PLACEHOLDER else "",
-        onValueSave = { state.onCookieValueChange(cookieName, it) },
-        useEditButton = true,
-        isPassword = true,
-        label = { Text(cookieName) }
-    )
 }
