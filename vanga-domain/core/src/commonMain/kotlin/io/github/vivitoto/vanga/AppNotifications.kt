@@ -65,18 +65,20 @@ class AppNotifications {
         when (exception) {
             is CancellationException -> {}
             is ResponseException -> toErrorNotification(exception)
-            else -> add(AppNotification.Error(exception.message ?: exception.cause?.message ?: "Unknown error"))
+            else -> add(AppNotification.Error((exception.message ?: exception.cause?.message ?: "Unknown error").toUserFacingErrorMessage()))
         }
     }
 
     private suspend fun toErrorNotification(exception: ResponseException) {
         val contentType = exception.response.contentType()
-        contentType?.toString()
         val errorMessage =
             if (contentType != null && contentType.contentType == "application" && contentType.contentSubtype == "json") {
                 parseJsonErrorMessage(exception)
             } else {
-                errorMessageFromStatusCode(exception.response.status)
+                exception.response.bodyAsText()
+                    .toUserFacingErrorMessage()
+                    .takeIf { it.isNotBlank() }
+                    ?: errorMessageFromStatusCode(exception.response.status)
             }
 
         add(AppNotification.Error(errorMessage))
@@ -84,11 +86,29 @@ class AppNotifications {
 }
 
 private suspend fun parseJsonErrorMessage(exception: ResponseException): String {
-    return exception.toErrorResponse()?.message
+    return (exception.toErrorResponse()?.message
         ?: exception.toKomfErrorResponse()?.message
         ?: exception.toViolationResponse()
             ?.violations?.firstOrNull()?.let { "${it.fieldName}: ${it.message}" }
-        ?: exception.response.bodyAsText()
+        ?: exception.response.bodyAsText()).toUserFacingErrorMessage()
+}
+
+private fun String.toUserFacingErrorMessage(): String {
+    val normalized = lowercase()
+    if (
+        normalized.contains("attention required! | cloudflare") ||
+        normalized.contains("cf-error") ||
+        normalized.contains("cf-wrapper") ||
+        normalized.contains("/cdn-cgi/")
+    ) {
+        return "目标数据源被 Cloudflare 拦截。请更换可访问该站点的代理出口，或使用可通过 Cloudflare 的 komf-aver 访问方式。"
+    }
+
+    if (normalized.contains("<!doctype html") || normalized.contains("<html")) {
+        return "服务器返回了 HTML 错误页面，请检查目标服务、代理或登录状态。"
+    }
+
+    return this
 }
 
 private fun errorMessageFromStatusCode(statusCode: HttpStatusCode): String {
@@ -106,4 +126,3 @@ sealed class AppNotification(val id: Long = Clock.System.now().toEpochMillisecon
     class Normal(val message: String) : AppNotification()
     class Error(val message: String) : AppNotification()
 }
-
