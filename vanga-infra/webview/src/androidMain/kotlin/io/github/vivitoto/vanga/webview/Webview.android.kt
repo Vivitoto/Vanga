@@ -123,7 +123,7 @@ actual class VangaWebview(private val webview: WebView) : WebViewClient(), AutoC
         }
     }
 
-    override fun close() {}
+    actual override fun close() {}
 
     suspend fun bind(name: String, callback: WebviewCallback) {
         withContext(Dispatchers.Main) {
