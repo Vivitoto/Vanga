@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,44 @@ import kotlin.math.roundToInt
 
 // FIXME starting from compose 1.8.0 Android doesn't properly display animatedContentSize inside dialog
 expect val dialogAnimateContentSize: Modifier
+
+private const val APP_DIALOG_COMPACT_WIDTH_FRACTION = .92f
+
+internal fun calculateAppDialogWidth(
+    availableWidth: Int,
+    compactBreakpointWidth: Int,
+    compactMinTotalMargin: Int,
+    compactWidthFraction: Float = APP_DIALOG_COMPACT_WIDTH_FRACTION,
+): Int {
+    if (availableWidth <= 0) return 0
+    if (availableWidth >= compactBreakpointWidth) return availableWidth
+
+    val fractionalWidth = (availableWidth * compactWidthFraction).roundToInt()
+    val marginWidth = availableWidth - compactMinTotalMargin
+    return minOf(fractionalWidth, marginWidth)
+        .coerceAtLeast(0)
+        .coerceAtMost(availableWidth)
+}
+
+private fun Modifier.appDialogResponsiveWidth(): Modifier = layout { measurable, constraints ->
+    val width = if (constraints.maxWidth == Constraints.Infinity) {
+        constraints.maxWidth
+    } else {
+        calculateAppDialogWidth(
+            availableWidth = constraints.maxWidth,
+            compactBreakpointWidth = 600.dp.roundToPx(),
+            compactMinTotalMargin = 24.dp.roundToPx(),
+        )
+    }.coerceIn(
+        minimumValue = constraints.minWidth,
+        maximumValue = constraints.maxWidth,
+    )
+
+    val placeable = measurable.measure(constraints.copy(maxWidth = width))
+    layout(width = placeable.width, height = placeable.height) {
+        placeable.placeRelative(0, 0)
+    }
+}
 
 @Composable
 fun AppDialog(
@@ -70,8 +109,7 @@ fun BasicAppDialog(
         onDismissRequest = onDismissRequest,
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-
-            )
+        )
     ) {
         val focusManager = LocalFocusManager.current
         Surface(
@@ -79,6 +117,7 @@ fun BasicAppDialog(
             shape = VangaShape,
             color = color,
             modifier = modifier
+                .appDialogResponsiveWidth()
                 .pointerInput(Unit) { detectTapGestures(onTap = { focusManager.clearFocus() }) }
                 .then(dialogAnimateContentSize),
             content = content
