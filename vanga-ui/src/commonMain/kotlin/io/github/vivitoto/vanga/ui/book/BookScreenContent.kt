@@ -5,7 +5,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -225,20 +228,26 @@ private fun BookHero(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Surface(
-            modifier = Modifier
-                .heightIn(min = 180.dp, max = 380.dp)
-                .widthIn(min = coverMinWidth, max = 320.dp)
-                .animateContentSize(),
-            shape = coverShape,
-            tonalElevation = 1.dp,
-            shadowElevation = 2.dp,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
-        ) {
-            BookThumbnail(
-                book.id,
-                modifier = Modifier.fillMaxSize(),
-            )
+        BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            val coverMaxWidth = maxWidth.coerceAtMost(320.dp)
+            Surface(
+                modifier = Modifier
+                    .heightIn(min = 180.dp, max = 380.dp)
+                    .widthIn(
+                        min = coverMinWidth.coerceAtMost(coverMaxWidth),
+                        max = coverMaxWidth,
+                    )
+                    .animateContentSize(),
+                shape = coverShape,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
+            ) {
+                BookThumbnail(
+                    book.id,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
         }
         Text(
             text = book.metadata.title,
@@ -267,6 +276,7 @@ private fun DetailSection(content: @Composable () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun BookActionRow(
     book: VangaBook,
@@ -275,9 +285,9 @@ private fun BookActionRow(
     onDownload: () -> Unit,
     onDownloadDelete: () -> Unit
 ) {
-    Row(
+    FlowRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (!book.deleted && !library.unavailable) {
             if (readIsSupported(book)) {

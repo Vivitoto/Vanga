@@ -34,6 +34,7 @@ import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.itemlist.ItemCardsSlider
+import io.github.vivitoto.vanga.ui.common.layout.ResponsiveCardWidth
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import snd.komga.client.readlist.KomgaReadList
 
@@ -64,23 +65,24 @@ fun BookReadListsContent(
         }
 
         AnimatedVisibility(show) {
-            Column(
-                modifier = Modifier.padding(bottom = 30.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-                readLists.forEach { (readList, books) ->
-                    ItemCardsSlider(
-                        onClick = { onReadListClick(readList) },
-                        label = { ReadListLabel(readList) },
-                    ) {
-                        items(books) { book ->
-                            BookImageCard(
-                                book = book,
-                                onBookClick = { onBookClick(book, readList) },
-                                modifier = Modifier.width(cardWidth)
-                            )
+            ResponsiveCardWidth(cardWidth = cardWidth) { itemWidth ->
+                Column(
+                    modifier = Modifier.padding(bottom = 30.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    readLists.forEach { (readList, books) ->
+                        ItemCardsSlider(
+                            onClick = { onReadListClick(readList) },
+                            label = { ReadListLabel(readList) },
+                        ) {
+                            items(books) { book ->
+                                BookImageCard(
+                                    book = book,
+                                    onBookClick = { onBookClick(book, readList) },
+                                    modifier = Modifier.width(itemWidth)
+                                )
+                            }
                         }
-
                     }
                 }
             }

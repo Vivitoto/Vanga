@@ -474,7 +474,7 @@ fun TagFiltersDropdownMenu(
                 onDismissRequest = { isExpanded = false },
                 scrollState = scrollState,
                 modifier = Modifier
-                    .widthIn(min = 400.dp, max = 800.dp)
+                    .widthIn(max = 800.dp)
                     .fillMaxWidth()
                     .scrollbar(scrollState, Orientation.Vertical)
             ) {

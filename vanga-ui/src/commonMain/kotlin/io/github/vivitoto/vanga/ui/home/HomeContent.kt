@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -46,8 +47,10 @@ import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.LocalPlatform
 import io.github.vivitoto.vanga.ui.MobileTopContentPadding
+import io.github.vivitoto.vanga.ui.rememberMeasuredBottomOverlayPadding
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
+import io.github.vivitoto.vanga.ui.common.itemlist.adaptiveCardGridMinSize
 import io.github.vivitoto.vanga.ui.common.menus.bulk.BottomPopupBulkActionsPanel
 import io.github.vivitoto.vanga.ui.common.menus.bulk.BulkActionsContainer
 import io.github.vivitoto.vanga.ui.common.menus.bulk.MixedBulkActionsContent
@@ -105,6 +108,13 @@ fun HomeContent(
                 coroutineScope.launch { gridState.animateScrollToItem(0) }
             },
         )
+        val width = LocalWindowWidth.current
+        val bottomOverlayVisible =
+            (width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedItems.isNotEmpty()
+        val bottomOverlayPadding = rememberMeasuredBottomOverlayPadding(
+            visible = bottomOverlayVisible,
+            basePadding = 50.dp,
+        )
         DisplayContent(
             filters = filters,
             activeFilterNumber = activeFilterNumber,
@@ -116,11 +126,14 @@ fun HomeContent(
             selectionMode = selectionMode,
             selectedItems = selectedItems,
             onSelectedItemSelect = onSelectedItemSelect,
+            contentPadding = PaddingValues(bottom = bottomOverlayPadding.bottomPadding),
         )
 
-        val width = LocalWindowWidth.current
-        if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedItems.isNotEmpty()) {
-            BottomPopupBulkActionsPanel(onCancel = { onSelectionModeChange(false) }) {
+        if (bottomOverlayVisible) {
+            BottomPopupBulkActionsPanel(
+                onCancel = { onSelectionModeChange(false) },
+                onSizeChanged = bottomOverlayPadding.onOverlaySizeChanged,
+            ) {
                 MixedBulkActionsContent(selectedItems, true)
             }
         }
@@ -277,36 +290,39 @@ private fun DisplayContent(
     selectionMode: Boolean,
     selectedItems: List<SelectedItem>,
     onSelectedItemSelect: (SelectedItem) -> Unit,
+    contentPadding: PaddingValues,
 ) {
-    LazyVerticalGrid(
-        modifier = Modifier.padding(horizontal = 20.dp),
-        state = gridState,
-        columns = GridCells.Adaptive(cardWidth),
-        horizontalArrangement = Arrangement.spacedBy(15.dp),
-        verticalArrangement = Arrangement.spacedBy(15.dp),
-        contentPadding = PaddingValues(bottom = 50.dp)
-    ) {
-        for (data in filters) {
-            if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
-                when (data) {
-                    is BookFilterData -> BookFilterEntry(
-                        label = data.filter.label,
-                        books = data.books,
-                        onBookClick = onBookClick,
-                        selectionMode = selectionMode,
-                        selectedItems = selectedItems,
-                        onSelectedItemSelect = onSelectedItemSelect,
-                    )
+    BoxWithConstraints(Modifier.padding(horizontal = 20.dp)) {
+        val gridMinWidth = adaptiveCardGridMinSize(cardWidth, maxWidth, horizontalPadding = 0.dp)
+        LazyVerticalGrid(
+            state = gridState,
+            columns = GridCells.Adaptive(gridMinWidth),
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            verticalArrangement = Arrangement.spacedBy(15.dp),
+            contentPadding = contentPadding
+        ) {
+            for (data in filters) {
+                if (activeFilterNumber == 0 || data.filter.order == activeFilterNumber) {
+                    when (data) {
+                        is BookFilterData -> BookFilterEntry(
+                            label = data.filter.label,
+                            books = data.books,
+                            onBookClick = onBookClick,
+                            selectionMode = selectionMode,
+                            selectedItems = selectedItems,
+                            onSelectedItemSelect = onSelectedItemSelect,
+                        )
 
-                    is SeriesFilterData -> SeriesFilterEntries(
-                        label = data.filter.label,
-                        series = data.series,
-                        onSeriesClick = onSeriesClick,
-                        selectionMode = selectionMode,
-                        selectedItems = selectedItems,
-                        onSelectedItemSelect = onSelectedItemSelect,
-                    )
+                        is SeriesFilterData -> SeriesFilterEntries(
+                            label = data.filter.label,
+                            series = data.series,
+                            onSeriesClick = onSeriesClick,
+                            selectionMode = selectionMode,
+                            selectedItems = selectedItems,
+                            onSelectedItemSelect = onSelectedItemSelect,
+                        )
 
+                    }
                 }
             }
         }

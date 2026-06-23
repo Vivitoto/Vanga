@@ -77,9 +77,7 @@ fun BookMatchConditionContent(
     onConditionRemove: () -> Unit
 ) {
     SettingsCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(min = 280.dp),
+        modifier = Modifier.fillMaxWidth(),
         containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
     ) {
         FlowRow(

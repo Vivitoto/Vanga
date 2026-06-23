@@ -5,8 +5,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FullscreenExit
@@ -94,8 +95,14 @@ fun AppBar(
         DownloadsPopupIcon(notificationsState, Modifier.align(Alignment.Start))
 
         val searchBarModifier = when (LocalWindowWidth.current) {
-            FULL -> Modifier.align(Alignment.CenterHorizontally).width(600.dp)
-            else -> Modifier.align(Alignment.Start).width(240.dp)
+            FULL -> Modifier
+                .align(Alignment.CenterHorizontally)
+                .widthIn(max = 600.dp)
+                .fillMaxWidth()
+            else -> Modifier
+                .align(Alignment.Start)
+                .widthIn(max = 240.dp)
+                .fillMaxWidth()
         }
 
         SearchBar(

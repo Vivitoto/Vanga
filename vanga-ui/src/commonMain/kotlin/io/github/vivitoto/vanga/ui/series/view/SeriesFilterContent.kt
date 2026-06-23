@@ -153,7 +153,7 @@ fun SeriesFilterContent(
                 text = searchTerm,
                 placeholder = strings.search,
                 onTextChange = { searchTerm = it },
-                modifier = Modifier.weight(1f).height(40.dp).widthIn(min = 340.dp),
+                modifier = Modifier.weight(1f).height(40.dp).widthIn(min = 240.dp),
             )
 
             Row(

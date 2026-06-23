@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.Slider
@@ -21,6 +20,7 @@ import io.github.vivitoto.vanga.ui.LocalStrings
 import io.github.vivitoto.vanga.ui.common.components.AppSliderDefaults
 import io.github.vivitoto.vanga.ui.common.components.DropdownChoiceMenu
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
+import io.github.vivitoto.vanga.ui.common.layout.ResponsiveCardWidth
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import io.github.vivitoto.vanga.ui.settings.SettingsRow
 import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
@@ -114,12 +114,15 @@ fun AppearanceSettingsContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                Card(
-                    Modifier
-                        .width(cardWidth)
-                        .aspectRatio(0.703f)
-                ) {
+                ResponsiveCardWidth(cardWidth = cardWidth, horizontalPadding = 0.dp) { previewWidth ->
+                    Card(
+                        Modifier
+                            .widthIn(max = previewWidth)
+                            .fillMaxWidth()
+                            .aspectRatio(0.703f)
+                    ) {
 
+                    }
                 }
             }
         }

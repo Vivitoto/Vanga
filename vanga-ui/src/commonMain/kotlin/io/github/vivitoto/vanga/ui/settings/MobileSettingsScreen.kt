@@ -17,10 +17,8 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import io.github.vivitoto.vanga.ui.LocalViewModelFactory
-import io.github.vivitoto.vanga.ui.MobileTopContentPadding
+import io.github.vivitoto.vanga.ui.rememberMobileLayoutMetrics
 import io.github.vivitoto.vanga.ui.settings.navigation.SettingsNavigationMenu
-
-private val MobileSettingsBottomPadding = 24.dp
 
 class MobileSettingsScreen : Screen {
     @Composable
@@ -28,6 +26,7 @@ class MobileSettingsScreen : Screen {
         val currentNavigator = LocalNavigator.currentOrThrow
         val viewModelFactory = LocalViewModelFactory.current
         val vm = rememberScreenModel { viewModelFactory.getSettingsNavigationViewModel(currentNavigator) }
+        val metrics = rememberMobileLayoutMetrics()
         LaunchedEffect(Unit) { vm.initialize() }
 
         Surface(
@@ -38,7 +37,7 @@ class MobileSettingsScreen : Screen {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 10.dp)
-                    .padding(top = MobileTopContentPadding),
+                    .padding(top = metrics.topContentPadding),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 SettingsNavigationMenu(
@@ -52,7 +51,7 @@ class MobileSettingsScreen : Screen {
                     user = vm.user.collectAsState().value,
                     contentColor = MaterialTheme.colorScheme.surface,
                     modifier = Modifier.weight(1f, false),
-                    contentPadding = PaddingValues(bottom = MobileSettingsBottomPadding),
+                    contentPadding = PaddingValues(bottom = metrics.bottomContentPadding),
                 )
             }
         }

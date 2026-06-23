@@ -6,7 +6,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +59,7 @@ import io.github.vivitoto.vanga.ui.common.components.DescriptionChips
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry.Companion.stringEntry
 import io.github.vivitoto.vanga.ui.common.images.SeriesThumbnail
+import io.github.vivitoto.vanga.ui.common.itemlist.adaptiveCardGridMinSize
 import io.github.vivitoto.vanga.ui.common.menus.SeriesActionsMenu
 import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
 import io.github.vivitoto.vanga.ui.common.menus.bulk.BooksBulkActionsContent
@@ -72,6 +75,7 @@ import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.EXPANDED
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.FULL
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.rememberMeasuredBottomOverlayPadding
 import io.github.vivitoto.vanga.ui.series.SeriesBooksState
 import io.github.vivitoto.vanga.ui.series.SeriesBooksState.BooksData
 import io.github.vivitoto.vanga.ui.series.SeriesViewModel.SeriesTab
@@ -100,13 +104,16 @@ fun SeriesContent(
     onDownload: () -> Unit,
 ) {
     val windowWidth = LocalWindowWidth.current
-    val contentPadding = when (windowWidth) {
-        COMPACT, MEDIUM -> Modifier.padding(10.dp)
-        EXPANDED -> Modifier.padding(start = 20.dp, end = 20.dp)
-        FULL -> Modifier.padding(start = 30.dp, end = 30.dp)
+    val screenHorizontalPadding = when (windowWidth) {
+        COMPACT, MEDIUM -> 10.dp
+        EXPANDED -> 20.dp
+        FULL -> 30.dp
+    }
+    val screenPadding = when (windowWidth) {
+        COMPACT, MEDIUM -> PaddingValues(10.dp)
+        EXPANDED, FULL -> PaddingValues(horizontal = screenHorizontalPadding)
     }
     val gridMinWidth = booksState.cardWidth.collectAsState().value
-    val width = LocalWindowWidth.current
     val booksLoadState = booksState.state.collectAsState().value
     val bookMenuActions = remember { booksState.bookMenuActions() }
 
@@ -114,6 +121,14 @@ fun SeriesContent(
         if (booksLoadState is LoadState.Success<BooksData>) booksLoadState.value
         else BooksData()
     }
+    val bottomOverlayVisible =
+        currentTab == SeriesTab.BOOKS &&
+                (windowWidth == COMPACT || windowWidth == MEDIUM) &&
+                booksData.selectedBooks.isNotEmpty()
+    val bottomOverlayPadding = rememberMeasuredBottomOverlayPadding(
+        visible = bottomOverlayVisible,
+        basePadding = 0.dp,
+    )
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (booksData.selectionMode) {
@@ -132,17 +147,23 @@ fun SeriesContent(
 
         val scrollState = rememberLazyGridState()
 
-        Box {
+        BoxWithConstraints {
+            val adaptiveMinWidth = adaptiveCardGridMinSize(
+                minSize = gridMinWidth,
+                maxWidth = maxWidth,
+                horizontalPadding = screenHorizontalPadding,
+            )
             LazyVerticalGrid(
                 state = scrollState,
-                columns = GridCells.Adaptive(gridMinWidth),
+                columns = GridCells.Adaptive(adaptiveMinWidth),
                 horizontalArrangement = Arrangement.spacedBy(15.dp),
                 verticalArrangement = if (currentTab == SeriesTab.BOOKS && booksData.layout == BooksLayout.GRID) {
                     Arrangement.spacedBy(15.dp)
                 } else {
                     Arrangement.Top
                 },
-                modifier = contentPadding,
+                contentPadding = PaddingValues(bottom = bottomOverlayPadding.bottomPadding),
+                modifier = Modifier.padding(screenPadding),
             ) {
 
                 if (series != null && library != null) {
@@ -211,10 +232,11 @@ fun SeriesContent(
         }
     }
 
-    if (currentTab == SeriesTab.BOOKS &&
-        (width == COMPACT || width == MEDIUM) && booksData.selectedBooks.isNotEmpty()
-    ) {
-        BottomPopupBulkActionsPanel(onCancel = { booksState.setSelectionMode(false) }) {
+    if (bottomOverlayVisible) {
+        BottomPopupBulkActionsPanel(
+            onCancel = { booksState.setSelectionMode(false) },
+            onSizeChanged = bottomOverlayPadding.onOverlaySizeChanged,
+        ) {
             BooksBulkActionsContent(
                 books = booksData.selectedBooks,
                 actions = booksState.bookBulkMenuActions(),
@@ -309,21 +331,27 @@ fun Series(
             COMPACT, MEDIUM -> 0.dp
             else -> 300.dp
         }
-        Surface(
-            modifier = Modifier
-                .animateContentSize()
-                .heightIn(min = 190.dp, max = 400.dp)
-                .widthIn(min = thumbnailMinWidth, max = 320.dp),
-            shape = coverShape,
-            tonalElevation = 1.dp,
-            shadowElevation = 2.dp,
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
-        ) {
-            SeriesThumbnail(
-                seriesId = series.id,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Fit,
-            )
+        BoxWithConstraints(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            val thumbnailMaxWidth = maxWidth.coerceAtMost(320.dp)
+            Surface(
+                modifier = Modifier
+                    .animateContentSize()
+                    .heightIn(min = 190.dp, max = 400.dp)
+                    .widthIn(
+                        min = thumbnailMinWidth.coerceAtMost(thumbnailMaxWidth),
+                        max = thumbnailMaxWidth,
+                    ),
+                shape = coverShape,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = .20f)),
+            ) {
+                SeriesThumbnail(
+                    seriesId = series.id,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit,
+                )
+            }
         }
 
         Text(

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -373,44 +374,46 @@ fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
     var showFilters by remember { mutableStateOf(false) }
     val currentFilter = filterState.state.collectAsState().value
     Row(verticalAlignment = Alignment.CenterVertically) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            verticalArrangement = Arrangement.Center,
-        ) {
-            val widthModifier = Modifier.width(200.dp)
+        BoxWithConstraints(Modifier.weight(1f, fill = false)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val widthModifier = Modifier.width(maxWidth.coerceAtMost(200.dp))
 
-            SortOrder(
-                sortOrder = currentFilter.sortOrder,
-                filterState = filterState,
-                modifier = widthModifier,
-                withLabel = false
-            )
-            ReadStatusFilter(
-                readStatus = currentFilter.readStatus,
-                filterState = filterState,
-                modifier = widthModifier,
-                withLabel = false
-            )
-
-            AnimatedVisibility(showFilters && filterState.authorsOptions.isNotEmpty()) {
-                AuthorsFilter(
-                    authors = currentFilter.authors,
+                SortOrder(
+                    sortOrder = currentFilter.sortOrder,
                     filterState = filterState,
                     modifier = widthModifier,
                     withLabel = false
                 )
-            }
-
-            AnimatedVisibility(showFilters && filterState.tagOptions.isNotEmpty()) {
-                TagsFilter(
-                    includeTags = currentFilter.includeTags,
-                    excludeTags = currentFilter.excludeTags,
-                    inclusionMode = currentFilter.inclusionMode,
-                    exclusionMode = currentFilter.exclusionMode,
+                ReadStatusFilter(
+                    readStatus = currentFilter.readStatus,
                     filterState = filterState,
                     modifier = widthModifier,
                     withLabel = false
                 )
+
+                AnimatedVisibility(showFilters && filterState.authorsOptions.isNotEmpty()) {
+                    AuthorsFilter(
+                        authors = currentFilter.authors,
+                        filterState = filterState,
+                        modifier = widthModifier,
+                        withLabel = false
+                    )
+                }
+
+                AnimatedVisibility(showFilters && filterState.tagOptions.isNotEmpty()) {
+                    TagsFilter(
+                        includeTags = currentFilter.includeTags,
+                        excludeTags = currentFilter.excludeTags,
+                        inclusionMode = currentFilter.inclusionMode,
+                        exclusionMode = currentFilter.exclusionMode,
+                        filterState = filterState,
+                        modifier = widthModifier,
+                        withLabel = false
+                    )
+                }
             }
         }
 

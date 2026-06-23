@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -59,8 +60,12 @@ fun TabDialog(
 
     val sizeModifier = when (LocalWindowWidth.current) {
         COMPACT -> Modifier.fillMaxSize()
-        MEDIUM, EXPANDED -> Modifier.width(840.dp)
-        else -> Modifier.width(1000.dp)
+        MEDIUM, EXPANDED -> Modifier
+            .widthIn(max = 840.dp)
+            .fillMaxWidth(.96f)
+        else -> Modifier
+            .widthIn(max = 1000.dp)
+            .fillMaxWidth(.92f)
     }
     BasicAppDialog(modifier.then(sizeModifier), onDismissRequest) {
         when (LocalWindowWidth.current) {

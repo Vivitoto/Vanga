@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -65,6 +66,7 @@ fun SeriesLazyCardGrid(
     gridState: LazyGridState = rememberLazyGridState(),
 
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(bottom = CardGridBottomPadding),
 
     beforeContent: (@Composable () -> Unit)? = null,
 ) {
@@ -79,13 +81,14 @@ fun SeriesLazyCardGrid(
     }
 
 
-    Box(modifier) {
+    BoxWithConstraints(modifier) {
+        val gridMinSize = adaptiveCardGridMinSize(minSize, maxWidth)
         LazyVerticalGrid(
             state = gridState,
-            columns = GridCells.Adaptive(minSize),
+            columns = GridCells.Adaptive(gridMinSize),
             horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
             verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
-            contentPadding = PaddingValues(bottom = CardGridBottomPadding),
+            contentPadding = contentPadding,
             modifier = Modifier.padding(horizontal = CardGridHorizontalPadding)
         ) {
             if (beforeContent != null) {

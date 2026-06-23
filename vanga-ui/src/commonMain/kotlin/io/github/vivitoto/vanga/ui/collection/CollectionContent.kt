@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.ui.collection
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.common.components.PageSizeSelectionDropdown
+import io.github.vivitoto.vanga.ui.common.itemlist.CardGridBottomPadding
 import io.github.vivitoto.vanga.ui.common.itemlist.SeriesLazyCardGrid
 import io.github.vivitoto.vanga.ui.common.menus.CollectionActionsMenu
 import io.github.vivitoto.vanga.ui.common.menus.SeriesMenuActions
@@ -37,6 +39,7 @@ import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.COMPACT
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.EXPANDED
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.FULL
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
+import io.github.vivitoto.vanga.ui.rememberMeasuredBottomOverlayPadding
 import snd.komga.client.collection.KomgaCollection
 import snd.komga.client.series.KomgaSeries
 
@@ -86,6 +89,13 @@ fun CollectionContent(
 
             )
 
+        val width = LocalWindowWidth.current
+        val bottomOverlayVisible = (width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()
+        val bottomOverlayPadding = rememberMeasuredBottomOverlayPadding(
+            visible = bottomOverlayVisible,
+            basePadding = CardGridBottomPadding,
+        )
+
         SeriesLazyCardGrid(
             series = series,
             onSeriesClick = if (editMode) onSeriesSelect else onSeriesClick,
@@ -104,12 +114,15 @@ fun CollectionContent(
             onPageChange = onPageChange,
 
             minSize = cardMinSize,
+            contentPadding = PaddingValues(bottom = bottomOverlayPadding.bottomPadding),
             modifier = Modifier.weight(1f)
         )
 
-        val width = LocalWindowWidth.current
-        if ((width == COMPACT || width == MEDIUM) && selectedSeries.isNotEmpty()) {
-            BottomPopupBulkActionsPanel(onCancel = { onEditModeChange(false) }) {
+        if (bottomOverlayVisible) {
+            BottomPopupBulkActionsPanel(
+                onCancel = { onEditModeChange(false) },
+                onSizeChanged = bottomOverlayPadding.onOverlaySizeChanged,
+            ) {
                 CollectionBulkActionsContent(collection, selectedSeries, true)
             }
         }

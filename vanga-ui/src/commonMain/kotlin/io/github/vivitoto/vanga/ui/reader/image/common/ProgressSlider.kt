@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -158,70 +159,80 @@ private fun Slider(
         valueRange = remember(pageSpreads.size) { 0f..(pageSpreads.size - 1).toFloat() },
     )
 
-    Layout(content = {
-        if ( showPreview) {
-            Row {
-                for (pageMetadata in currentSpread) {
-                    BookPageThumbnail(
-                        page = pageMetadata,
-                        modifier = Modifier.height(300.dp).widthIn(min = 210.dp)
+    BoxWithConstraints {
+        val previewPageCount = currentSpread.size.coerceAtLeast(1)
+        val previewPageWidth = (maxWidth / previewPageCount.toFloat()).coerceAtMost(210.dp)
+        val previewHeight = (previewPageWidth * (300f / 210f)).coerceAtMost(300.dp)
+
+        Layout(content = {
+            if (showPreview) {
+                Row {
+                    for (pageMetadata in currentSpread) {
+                        BookPageThumbnail(
+                            page = pageMetadata,
+                            modifier = Modifier
+                                .height(previewHeight)
+                                .width(previewPageWidth)
+                        )
+                    }
+                }
+            } else Spacer(Modifier)
+
+            Text(
+                label,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = VangaShape
+                    )
+                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.surface))
+                    .padding(4.dp)
+                    .defaultMinSize(minWidth = 40.dp)
+            )
+
+            Slider(
+                state = sliderState,
+                modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant),
+                colors = AppSliderDefaults.colors(),
+                track = { state ->
+                    SliderDefaults.Track(
+                        sliderState = state,
+                        colors = AppSliderDefaults.colors(),
                     )
                 }
-            }
-        } else Spacer(Modifier)
+            )
 
-        Text(
-            label,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = VangaShape
+        }) { measurables, constraints ->
+            val previewPlaceable = measurables[0].measure(constraints)
+            val labelPlaceable = measurables[1].measure(constraints)
+            val sliderPlaceable = measurables[2].measure(constraints)
+
+            val previewMaxOffset = (constraints.maxWidth - previewPlaceable.width).coerceAtLeast(0)
+            val previewOffsetX = (constraints.maxWidth * sliderState.coercedValueAsFraction - previewPlaceable.width / 2)
+                .roundToInt()
+                .coerceIn(0, previewMaxOffset)
+
+            val labelMaxOffset = (constraints.maxWidth - labelPlaceable.width).coerceAtLeast(0)
+            val labelOffsetX = (constraints.maxWidth * sliderState.coercedValueAsFraction - labelPlaceable.width / 2)
+                .roundToInt()
+                .coerceIn(0, labelMaxOffset)
+
+            layout(constraints.maxWidth, previewPlaceable.height + sliderPlaceable.height + labelPlaceable.height) {
+                previewPlaceable.placeRelative(
+                    x = previewOffsetX,
+                    y = 0
                 )
-                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.surface))
-                .padding(4.dp)
-                .defaultMinSize(minWidth = 40.dp)
-        )
-
-        Slider(
-            state = sliderState,
-            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant),
-            colors = AppSliderDefaults.colors(),
-            track = { state ->
-                SliderDefaults.Track(
-                    sliderState = state,
-                    colors = AppSliderDefaults.colors(),
+                labelPlaceable.placeRelative(
+                    x = labelOffsetX,
+                    y = previewPlaceable.height
+                )
+                sliderPlaceable.placeRelative(
+                    x = 0,
+                    y = previewPlaceable.height + labelPlaceable.height
                 )
             }
-        )
-
-    }) { measurables, constraints ->
-        val previewPlaceable = measurables[0].measure(constraints)
-        val labelPlaceable = measurables[1].measure(constraints)
-        val sliderPlaceable = measurables[2].measure(constraints)
-
-        val previewOffsetX = (constraints.maxWidth * sliderState.coercedValueAsFraction - previewPlaceable.width / 2)
-            .roundToInt()
-            .coerceIn(0, constraints.maxWidth - previewPlaceable.width)
-
-        val labelOffsetX = (constraints.maxWidth * sliderState.coercedValueAsFraction - labelPlaceable.width / 2)
-            .roundToInt()
-            .coerceIn(0, constraints.maxWidth - labelPlaceable.width)
-
-        layout(constraints.maxWidth, previewPlaceable.height + sliderPlaceable.height + labelPlaceable.height) {
-            previewPlaceable.placeRelative(
-                x = previewOffsetX,
-                y = 0
-            )
-            labelPlaceable.placeRelative(
-                x = labelOffsetX,
-                y = previewPlaceable.height
-            )
-            sliderPlaceable.placeRelative(
-                x = 0,
-                y = previewPlaceable.height + labelPlaceable.height
-            )
         }
     }
 }

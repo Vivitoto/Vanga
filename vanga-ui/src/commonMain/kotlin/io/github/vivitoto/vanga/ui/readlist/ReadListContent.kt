@@ -3,6 +3,7 @@ package io.github.vivitoto.vanga.ui.readlist
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
+import io.github.vivitoto.vanga.ui.common.itemlist.CardGridBottomPadding
 import io.github.vivitoto.vanga.ui.common.components.PageSizeSelectionDropdown
 import io.github.vivitoto.vanga.ui.common.itemlist.BookLazyCardGrid
 import io.github.vivitoto.vanga.ui.common.menus.BookMenuActions
@@ -37,6 +39,7 @@ import io.github.vivitoto.vanga.ui.common.menus.bulk.BottomPopupBulkActionsPanel
 import io.github.vivitoto.vanga.ui.common.menus.bulk.BulkActionsContainer
 import io.github.vivitoto.vanga.ui.common.menus.bulk.ReadListBulkActionsContent
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass
+import io.github.vivitoto.vanga.ui.rememberMeasuredBottomOverlayPadding
 import snd.komga.client.readlist.KomgaReadList
 
 @Composable
@@ -99,6 +102,13 @@ fun ReadListContent(
             Spacer(Modifier.height(5.dp))
             HorizontalDivider()
         }
+        val width = LocalWindowWidth.current
+        val bottomOverlayVisible =
+            (width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedBooks.isNotEmpty()
+        val bottomOverlayPadding = rememberMeasuredBottomOverlayPadding(
+            visible = bottomOverlayVisible,
+            basePadding = CardGridBottomPadding,
+        )
         BookLazyCardGrid(
             books = books,
             onBookClick = if (editMode) onBookSelect else onBookClick,
@@ -118,11 +128,15 @@ fun ReadListContent(
             onPageChange = onPageChange,
 
             minSize = cardMinSize,
+            contentPadding = PaddingValues(bottom = bottomOverlayPadding.bottomPadding),
+            modifier = Modifier.weight(1f),
         )
 
-        val width = LocalWindowWidth.current
-        if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedBooks.isNotEmpty()) {
-            BottomPopupBulkActionsPanel(onCancel = { onEditModeChange(false) }) {
+        if (bottomOverlayVisible) {
+            BottomPopupBulkActionsPanel(
+                onCancel = { onEditModeChange(false) },
+                onSizeChanged = bottomOverlayPadding.onOverlaySizeChanged,
+            ) {
                 ReadListBulkActionsContent(readList, selectedBooks, true)
             }
         }

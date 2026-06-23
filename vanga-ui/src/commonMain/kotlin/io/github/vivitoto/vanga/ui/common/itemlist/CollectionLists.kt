@@ -1,7 +1,7 @@
 package io.github.vivitoto.vanga.ui.common.itemlist
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,15 +34,18 @@ fun CollectionLazyCardGrid(
     onPageChange: (Int) -> Unit,
     minSize: Dp = 200.dp,
     scrollState: LazyGridState = rememberLazyGridState(),
+    contentPadding: PaddingValues = PaddingValues(bottom = CardGridBottomPadding),
+    modifier: Modifier = Modifier,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    Box {
+    BoxWithConstraints(modifier) {
+        val gridMinSize = adaptiveCardGridMinSize(minSize, maxWidth)
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize),
+            columns = GridCells.Adaptive(gridMinSize),
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
             verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
-            contentPadding = PaddingValues(bottom = CardGridBottomPadding),
+            contentPadding = contentPadding,
             modifier = Modifier.padding(horizontal = CardGridHorizontalPadding)
         ) {
             items(collections) {

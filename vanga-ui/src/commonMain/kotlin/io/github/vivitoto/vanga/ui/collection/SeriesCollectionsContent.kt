@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
 import io.github.vivitoto.vanga.ui.common.itemlist.ItemCardsSlider
+import io.github.vivitoto.vanga.ui.common.layout.ResponsiveCardWidth
 import snd.komga.client.collection.KomgaCollection
 import snd.komga.client.series.KomgaSeries
 
@@ -30,23 +31,24 @@ fun SeriesCollectionsContent(
 ) {
     if (collections.isEmpty()) return
 
-    Column(
-        modifier = Modifier.padding(top = 10.dp, bottom = 30.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        collections.forEach { (collection, series) ->
-            ItemCardsSlider(
-                onClick = { onCollectionClick(collection) },
-                label = { CollectionLabel(collection) }
-            ) {
-                items(series) { series ->
-                    SeriesImageCard(
-                        series = series,
-                        onSeriesClick = { onSeriesClick(series) },
-                        modifier = Modifier.width(cardWidth)
-                    )
+    ResponsiveCardWidth(cardWidth = cardWidth) { itemWidth ->
+        Column(
+            modifier = Modifier.padding(top = 10.dp, bottom = 30.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            collections.forEach { (collection, series) ->
+                ItemCardsSlider(
+                    onClick = { onCollectionClick(collection) },
+                    label = { CollectionLabel(collection) }
+                ) {
+                    items(series) { series ->
+                        SeriesImageCard(
+                            series = series,
+                            onSeriesClick = { onSeriesClick(series) },
+                            modifier = Modifier.width(itemWidth)
+                        )
+                    }
                 }
-
             }
         }
     }

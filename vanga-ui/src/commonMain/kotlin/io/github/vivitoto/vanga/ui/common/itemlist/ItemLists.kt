@@ -3,7 +3,7 @@ package io.github.vivitoto.vanga.ui.common.itemlist
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,9 +38,10 @@ fun PlaceHolderLazyCardGrid(
     minSize: Dp = 200.dp,
     scrollState: LazyGridState = rememberLazyGridState(),
 ) {
-    Box {
+    BoxWithConstraints {
+        val gridMinSize = adaptiveCardGridMinSize(minSize, maxWidth)
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize),
+            columns = GridCells.Adaptive(gridMinSize),
             state = scrollState,
             horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
             verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
@@ -92,4 +93,3 @@ fun ItemCardsSlider(
         }
     }
 }
-

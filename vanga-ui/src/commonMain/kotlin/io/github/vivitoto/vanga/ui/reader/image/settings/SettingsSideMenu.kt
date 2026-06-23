@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -116,7 +117,8 @@ fun SettingsSideMenuOverlay(
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .width(380.dp)
+                .widthIn(max = 380.dp)
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .imePadding()
                 .fillMaxHeight()

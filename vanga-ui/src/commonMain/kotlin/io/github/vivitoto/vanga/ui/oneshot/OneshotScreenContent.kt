@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -113,23 +114,29 @@ fun OneshotScreenContent(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.Start
             ) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
-                    BookThumbnail(
-                        book.id,
-                        modifier = Modifier
-                            .heightIn(min = 100.dp, max = 400.dp)
-                            .widthIn(min = coverMinWidth, max = 500.dp)
-                            .animateContentSize()
-                    )
-                    OneshotMainInfo(
-                        series = series,
-                        book = book,
-                        library = library,
-                        onLibraryClick = onLibraryClick,
-                        onBookReadClick = onBookReadClick,
-                        onDownload = onBookDownload,
-                        onDownloadDelete = onBookDownloadDelete,
-                    )
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val coverMaxWidth = maxWidth.coerceAtMost(500.dp)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(15.dp)) {
+                        BookThumbnail(
+                            book.id,
+                            modifier = Modifier
+                                .heightIn(min = 100.dp, max = 400.dp)
+                                .widthIn(
+                                    min = coverMinWidth.coerceAtMost(coverMaxWidth),
+                                    max = coverMaxWidth,
+                                )
+                                .animateContentSize()
+                        )
+                        OneshotMainInfo(
+                            series = series,
+                            book = book,
+                            library = library,
+                            onLibraryClick = onLibraryClick,
+                            onBookReadClick = onBookReadClick,
+                            onDownload = onBookDownload,
+                            onDownloadDelete = onBookDownloadDelete,
+                        )
+                    }
                 }
                 BookInfoColumn(
                     publisher = series.metadata.publisher,
@@ -219,6 +226,7 @@ private fun ToolbarOneshotActions(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun FlowRowScope.OneshotMainInfo(
     series: KomgaSeries,
@@ -255,9 +263,9 @@ private fun FlowRowScope.OneshotMainInfo(
             book = book,
             onSeriesButtonClick = null,
         ) {
-            Row(
+            FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 if (readIsSupported(book) && !isDeleted) {
                     BookReadButton(

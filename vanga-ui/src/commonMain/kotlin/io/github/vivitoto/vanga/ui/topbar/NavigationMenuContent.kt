@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -81,7 +82,12 @@ fun NavBarContent(
     onSettingsClick: () -> Unit,
     taskQueueStatus: TaskQueueStatus?,
 ) {
-    Surface(Modifier.width(230.dp), color = MaterialTheme.colorScheme.surfaceDim) {
+    Surface(
+        Modifier
+            .widthIn(max = 230.dp)
+            .fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceDim,
+    ) {
         NavMenu(
             currentScreen = currentScreen,
             libraries = libraries,
@@ -109,7 +115,12 @@ fun LibrariesNavBarContent(
     onLibrariesClick: () -> Unit,
     onLibraryClick: (KomgaLibraryId) -> Unit,
 ) {
-    Surface(Modifier.width(230.dp), color = MaterialTheme.colorScheme.surfaceDim) {
+    Surface(
+        Modifier
+            .widthIn(max = 230.dp)
+            .fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceDim,
+    ) {
         val scrollState: ScrollState = rememberScrollState()
         Column(
             modifier = modifier

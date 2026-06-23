@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -41,7 +42,9 @@ class KomfMainScreen : Screen {
                                 currentScreen = navigator.lastItem,
                                 onNavigation = { navigator.replaceAll(it) },
                                 contentColor = MaterialTheme.colorScheme.surfaceVariant,
-                                modifier = Modifier.width(settingsDesktopNavMenuWidth)
+                                modifier = Modifier
+                                    .widthIn(max = settingsDesktopNavMenuWidth)
+                                    .fillMaxWidth()
                             )
                         }
                     },

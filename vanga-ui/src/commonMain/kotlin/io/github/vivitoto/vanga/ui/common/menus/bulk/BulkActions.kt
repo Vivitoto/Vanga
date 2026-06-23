@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
+import io.github.vivitoto.vanga.ui.rememberMobileLayoutMetrics
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 import kotlin.math.roundToInt
 
@@ -99,10 +101,12 @@ fun BulkActionsContainer(
 @Composable
 fun BottomPopupBulkActionsPanel(
     onCancel: (() -> Unit)? = null,
+    onSizeChanged: (IntSize) -> Unit = {},
     content: @Composable RowScope.() -> Unit
 ) {
+    val metrics = rememberMobileLayoutMetrics()
     Popup(
-        popupPositionProvider = rememberBottomCenterPopupPositionProvider(bottomPadding = 88.dp),
+        popupPositionProvider = rememberBottomCenterPopupPositionProvider(bottomPadding = metrics.bottomBulkActionsOffset),
         onDismissRequest = { onCancel?.invoke() },
         properties = PopupProperties(focusable = onCancel != null),
     ) {
@@ -119,6 +123,7 @@ fun BottomPopupBulkActionsPanel(
                 tonalElevation = 6.dp,
                 shadowElevation = 6.dp,
                 modifier = Modifier
+                    .onSizeChanged(onSizeChanged)
                     .widthIn(max = 720.dp)
                     .fillMaxWidth()
             ) {

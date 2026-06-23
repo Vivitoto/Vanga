@@ -3,11 +3,12 @@ package io.github.vivitoto.vanga.ui.search
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
+import io.github.vivitoto.vanga.ui.rememberMeasuredBottomOverlayPadding
 import io.github.vivitoto.vanga.ui.common.cards.BookDetailedListCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesDetailedListCard
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
@@ -68,9 +70,18 @@ fun SearchContent(
         val widthModifier = when (LocalWindowWidth.current) {
             WindowSizeClass.COMPACT, WindowSizeClass.MEDIUM -> Modifier.fillMaxWidth()
             WindowSizeClass.EXPANDED -> Modifier.fillMaxWidth(.8f)
-            WindowSizeClass.FULL -> Modifier.width(1200.dp)
+            WindowSizeClass.FULL -> Modifier
+                .widthIn(max = 1200.dp)
+                .fillMaxWidth()
         }
         val scrollState = rememberLazyListState()
+        val width = LocalWindowWidth.current
+        val bottomOverlayVisible =
+            (width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedItems.isNotEmpty()
+        val bottomOverlayPadding = rememberMeasuredBottomOverlayPadding(
+            visible = bottomOverlayVisible,
+            basePadding = 0.dp,
+        )
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
@@ -96,6 +107,7 @@ fun SearchContent(
                 state = scrollState,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(bottom = bottomOverlayPadding.bottomPadding),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 when (searchType) {
@@ -153,9 +165,11 @@ fun SearchContent(
             }
         }
 
-        val width = LocalWindowWidth.current
-        if ((width == WindowSizeClass.COMPACT || width == WindowSizeClass.MEDIUM) && selectedItems.isNotEmpty()) {
-            BottomPopupBulkActionsPanel(onCancel = { onSelectionModeChange(false) }) {
+        if (bottomOverlayVisible) {
+            BottomPopupBulkActionsPanel(
+                onCancel = { onSelectionModeChange(false) },
+                onSizeChanged = bottomOverlayPadding.onOverlaySizeChanged,
+            ) {
                 MixedBulkActionsContent(selectedItems, true)
             }
         }
