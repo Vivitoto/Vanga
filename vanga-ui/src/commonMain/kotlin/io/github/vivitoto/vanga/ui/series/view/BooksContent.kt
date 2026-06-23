@@ -375,11 +375,12 @@ fun ExpandableBookFiltersRow(filterState: BooksFilterState) {
     val currentFilter = filterState.state.collectAsState().value
     Row(verticalAlignment = Alignment.CenterVertically) {
         BoxWithConstraints(Modifier.weight(1f, fill = false)) {
+            val filterWidth = maxWidth.coerceAtMost(200.dp)
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
-                val widthModifier = Modifier.width(maxWidth.coerceAtMost(200.dp))
+                val widthModifier = Modifier.width(filterWidth)
 
                 SortOrder(
                     sortOrder = currentFilter.sortOrder,
