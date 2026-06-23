@@ -48,12 +48,17 @@ fun readIsSupported(book: VangaBook) = book.media.mediaProfile != EPUB || webvie
 @Composable
 fun BookReadButton(
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
     onRead: () -> Unit,
     onIncognitoRead: () -> Unit,
     onDropdownOpenChange: (Boolean) -> Unit = {}
 ) {
     val containerColor = MaterialTheme.colorScheme.primary
     val contentColor = MaterialTheme.colorScheme.onPrimary
+    val buttonHeight = if (compact) 40.dp else 48.dp
+    val readHorizontalPadding = if (compact) 8.dp else 12.dp
+    val dropdownMinWidth = if (compact) 40.dp else 48.dp
+
     Surface(
         shape = VangaButtonShape,
         modifier = modifier.semantics { role = Role.Button }.pointerHoverIcon(PointerIcon.Hand),
@@ -61,17 +66,22 @@ fun BookReadButton(
         contentColor = contentColor,
     ) {
         Row(
-            Modifier.height(48.dp),
+            Modifier.height(buttonHeight),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             ReadButton(
-                modifier = Modifier.defaultMinSize(minHeight = 48.dp).padding(horizontal = 12.dp).fillMaxHeight(),
+                modifier = Modifier
+                    .defaultMinSize(minHeight = buttonHeight)
+                    .padding(horizontal = readHorizontalPadding)
+                    .fillMaxHeight(),
                 onRead = onRead,
             )
             VerticalDivider(color = contentColor.copy(alpha = 0.32f))
             IncognitoDropDown(
-                modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 48.dp).fillMaxHeight(),
+                modifier = Modifier
+                    .defaultMinSize(minWidth = dropdownMinWidth, minHeight = buttonHeight)
+                    .fillMaxHeight(),
                 onIncognitoRead = onIncognitoRead,
                 onDropdownOpenChange = onDropdownOpenChange
             )

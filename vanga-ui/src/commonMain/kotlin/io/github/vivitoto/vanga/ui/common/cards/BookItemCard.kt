@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.ui.common.cards
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -68,6 +69,11 @@ import io.github.vivitoto.vanga.ui.platform.PlatformType.MOBILE
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.COMPACT
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+
+private val GridOverlayControlSize = 40.dp
+private val GridOverlayControlGap = 8.dp
+private val GridOverlayControlHorizontalPadding = 5.dp
+private val GridOverlayControlBottomPadding = 10.dp
 
 @Composable
 fun BookImageCard(
@@ -330,12 +336,19 @@ private fun BookHoverOverlay(
                 }
 
                 Row(
-                    modifier = Modifier.padding(vertical = 5.dp).fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            start = GridOverlayControlHorizontalPadding,
+                            end = GridOverlayControlHorizontalPadding,
+                            bottom = GridOverlayControlBottomPadding
+                        ),
+                    horizontalArrangement = Arrangement.spacedBy(GridOverlayControlGap),
                     verticalAlignment = Alignment.Bottom,
                 ) {
                     if (onBookReadClick != null && !book.deleted && readIsSupported(book) && !libraryIsDeleted) {
                         BookReadButton(
-                            modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
+                            compact = true,
                             onRead = { onBookReadClick(true) },
                             onIncognitoRead = { onBookReadClick(false) },
                             onDropdownOpenChange = { isReadButtonExpanded = it }
@@ -348,7 +361,9 @@ private fun BookHoverOverlay(
                             book = book,
                             bookMenuActions = bookMenuActions,
                             isActionsMenuExpanded = isActionsMenuExpanded,
-                            onActionsMenuExpand = { isActionsMenuExpanded = it }
+                            onActionsMenuExpand = { isActionsMenuExpanded = it },
+                            modifier = Modifier.size(GridOverlayControlSize),
+                            compact = true,
                         )
                 }
             }
@@ -544,14 +559,29 @@ private fun BookMenuActionsDropdown(
     book: VangaBook,
     bookMenuActions: BookMenuActions,
     isActionsMenuExpanded: Boolean,
-    onActionsMenuExpand: (Boolean) -> Unit
+    onActionsMenuExpand: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     Box {
-        IconButton(
-            onClick = { onActionsMenuExpand(true) },
-            colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Icon(Icons.Default.MoreVert, null)
+        if (compact) {
+            Box(
+                modifier = modifier
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .clickable { onActionsMenuExpand(true) },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(Icons.Default.MoreVert, null, tint = MaterialTheme.colorScheme.onSurface)
+            }
+        } else {
+            IconButton(
+                onClick = { onActionsMenuExpand(true) },
+                modifier = modifier,
+                colors = IconButtonDefaults.iconButtonColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
+                Icon(Icons.Default.MoreVert, null)
+            }
         }
 
         BookActionsMenu(
