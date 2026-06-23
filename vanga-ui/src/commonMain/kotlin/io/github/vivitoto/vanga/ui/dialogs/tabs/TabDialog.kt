@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -28,10 +26,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
@@ -43,6 +44,45 @@ import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.COMPACT
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.EXPANDED
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import kotlin.math.roundToInt
+
+internal fun calculateTabDialogWidth(
+    availableWidth: Int,
+    maxWidth: Int,
+    fraction: Float,
+): Int = (availableWidth * fraction)
+    .roundToInt()
+    .coerceAtMost(maxWidth)
+    .coerceAtLeast(0)
+
+private fun Modifier.fillWindowWidthUpTo(
+    maxWidth: Dp,
+    fraction: Float,
+): Modifier = layout { measurable, constraints ->
+    val maxWidthPx = maxWidth.roundToPx()
+    val width = if (constraints.maxWidth == Constraints.Infinity) {
+        maxWidthPx
+    } else {
+        calculateTabDialogWidth(
+            availableWidth = constraints.maxWidth,
+            maxWidth = maxWidthPx,
+            fraction = fraction,
+        )
+    }.coerceIn(
+        minimumValue = constraints.minWidth,
+        maximumValue = constraints.maxWidth,
+    )
+    val placeable = measurable.measure(
+        constraints.copy(
+            minWidth = width,
+            maxWidth = width,
+        )
+    )
+
+    layout(width = width, height = placeable.height) {
+        placeable.placeRelative(0, 0)
+    }
+}
 
 @Composable
 fun TabDialog(
@@ -61,11 +101,9 @@ fun TabDialog(
     val sizeModifier = when (LocalWindowWidth.current) {
         COMPACT -> Modifier.fillMaxSize()
         MEDIUM, EXPANDED -> Modifier
-            .widthIn(max = 840.dp)
-            .fillMaxWidth(.96f)
+            .fillWindowWidthUpTo(maxWidth = 840.dp, fraction = .96f)
         else -> Modifier
-            .widthIn(max = 1000.dp)
-            .fillMaxWidth(.92f)
+            .fillWindowWidthUpTo(maxWidth = 1000.dp, fraction = .92f)
     }
     BasicAppDialog(modifier.then(sizeModifier), onDismissRequest) {
         when (LocalWindowWidth.current) {

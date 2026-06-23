@@ -7,6 +7,53 @@ import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
+internal data class SettingsScreenLayoutMetrics(
+    val useSingleColumn: Boolean,
+    val navWidth: Int,
+    val contentWidth: Int,
+    val horizontalPadding: Int,
+)
+
+internal fun calculateSettingsScreenLayoutMetrics(
+    availableWidth: Int,
+    preferredNavWidth: Int,
+    preferredContentWidth: Int,
+    minNavWidth: Int,
+    minContentWidth: Int,
+): SettingsScreenLayoutMetrics {
+    if (availableWidth < minNavWidth + minContentWidth) {
+        return SettingsScreenLayoutMetrics(
+            useSingleColumn = true,
+            navWidth = 0,
+            contentWidth = availableWidth.coerceAtLeast(0),
+            horizontalPadding = 0,
+        )
+    }
+
+    val maxNavWidth = (availableWidth - minContentWidth).coerceAtLeast(minNavWidth)
+    val navWidth = if (availableWidth < preferredNavWidth + preferredContentWidth) {
+        (availableWidth * .35f).roundToInt()
+            .coerceAtLeast(minNavWidth)
+            .coerceAtMost(preferredNavWidth)
+            .coerceAtMost(maxNavWidth)
+    } else {
+        preferredNavWidth
+    }
+    val contentWidth = (availableWidth - navWidth)
+        .coerceAtLeast(minContentWidth)
+        .coerceAtMost(preferredContentWidth)
+    val horizontalPadding = ((availableWidth - (navWidth + contentWidth)).toFloat() / 2)
+        .roundToInt()
+        .coerceAtLeast(0)
+
+    return SettingsScreenLayoutMetrics(
+        useSingleColumn = false,
+        navWidth = navWidth,
+        contentWidth = contentWidth,
+        horizontalPadding = horizontalPadding,
+    )
+}
+
 @Composable
 fun SettingsScreenLayout(
     navMenu: @Composable () -> Unit,
@@ -21,9 +68,15 @@ fun SettingsScreenLayout(
     val minNavWidth = 180.dp.roundToPx()
     val minContentWidth = 360.dp.roundToPx()
     val availableWidth = constraints.maxWidth
-    val useSingleColumn = availableWidth < minNavWidth + minContentWidth
+    val layoutMetrics = calculateSettingsScreenLayoutMetrics(
+        availableWidth = availableWidth,
+        preferredNavWidth = preferredNavWidth,
+        preferredContentWidth = preferredContentWidth,
+        minNavWidth = minNavWidth,
+        minContentWidth = minContentWidth,
+    )
 
-    if (useSingleColumn) {
+    if (layoutMetrics.useSingleColumn) {
         val navMaxHeight = (constraints.maxHeight / 3)
             .coerceAtMost(280.dp.roundToPx())
             .coerceAtLeast(0)
@@ -57,16 +110,9 @@ fun SettingsScreenLayout(
         }
     }
 
-    val navWidth = if (availableWidth < preferredNavWidth + preferredContentWidth) {
-        ((availableWidth * .35f).roundToInt())
-            .coerceAtLeast(minNavWidth.coerceAtMost(availableWidth))
-            .coerceAtMost(preferredNavWidth.coerceAtMost(availableWidth))
-    } else {
-        preferredNavWidth
-    }
-    val contentWidth = (availableWidth - navWidth).coerceAtLeast(0).coerceAtMost(preferredContentWidth)
-    val padding =
-        ((constraints.maxWidth - (navWidth + contentWidth)).toFloat() / 2).roundToInt().coerceAtLeast(0)
+    val navWidth = layoutMetrics.navWidth
+    val contentWidth = layoutMetrics.contentWidth
+    val padding = layoutMetrics.horizontalPadding
 
     val contentPlaceable = contentMeasurable.first()
         .measure(
