@@ -72,9 +72,10 @@ fun BookReadButton(
         ) {
             ReadButton(
                 modifier = Modifier
-                    .defaultMinSize(minHeight = buttonHeight)
+                    .defaultMinSize(minWidth = if (compact) dropdownMinWidth else 0.dp, minHeight = buttonHeight)
                     .padding(horizontal = readHorizontalPadding)
                     .fillMaxHeight(),
+                showLabel = !compact,
                 onRead = onRead,
             )
             VerticalDivider(color = contentColor.copy(alpha = 0.32f))
@@ -92,19 +93,22 @@ fun BookReadButton(
 @Composable
 private fun ReadButton(
     modifier: Modifier,
+    showLabel: Boolean,
     onRead: () -> Unit,
 ) {
     Row(
         modifier = Modifier.clickable { onRead() }.then(modifier),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Spacer(Modifier.width(5.dp))
         Icon(
             imageVector = Icons.AutoMirrored.Rounded.MenuBook,
             contentDescription = null,
         )
-        Spacer(Modifier.width(10.dp))
-        Text("阅读")
+        if (showLabel) {
+            Spacer(Modifier.width(10.dp))
+            Text("阅读")
+        }
     }
 }
 

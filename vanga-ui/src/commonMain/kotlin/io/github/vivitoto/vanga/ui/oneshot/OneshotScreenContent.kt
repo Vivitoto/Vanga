@@ -3,6 +3,7 @@ package io.github.vivitoto.vanga.ui.oneshot
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,8 +12,10 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -21,11 +24,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
 import io.github.vivitoto.vanga.ui.book.BookInfoColumn
@@ -278,11 +282,19 @@ private fun FlowRowScope.OneshotMainInfo(
                 }
 
                 if (book.downloaded) {
-                    ElevatedButton(
-                        onClick = onDownloadDelete,
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
+                    Surface(
+                        shape = VangaButtonShape,
+                        color = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.error,
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.errorContainer),
+                        modifier = Modifier.height(48.dp).clickable { onDownloadDelete() },
                     ) {
-                        Text("删除已下载文件")
+                        Row(
+                            Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text("删除已下载文件")
+                        }
                     }
                 }
             }

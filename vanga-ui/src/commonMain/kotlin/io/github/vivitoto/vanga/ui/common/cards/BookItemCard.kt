@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.filter
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
@@ -71,9 +72,6 @@ import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 
 private val GridOverlayControlSize = 40.dp
-private val GridOverlayControlGap = 8.dp
-private val GridOverlayControlHorizontalPadding = 5.dp
-private val GridOverlayControlBottomPadding = 10.dp
 
 @Composable
 fun BookImageCard(
@@ -113,6 +111,7 @@ fun BookImageCard(
                     showSeriesTitle = showSeriesTitle,
                     titleMaxLines = titleMaxLines,
                     topStartContent = topStartContent,
+                    titleBottomPadding = GridOverlayControlSize,
                 ) {
                     BookThumbnail(
                         book.id,
@@ -158,6 +157,7 @@ private fun BookImageOverlay(
     showSeriesTitle: Boolean = false,
     titleMaxLines: Int = 3,
     topStartContent: (@Composable () -> Unit)? = null,
+    titleBottomPadding: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
     Box(
@@ -196,7 +196,7 @@ private fun BookImageOverlay(
             }
 
             Spacer(modifier = Modifier.weight(1f))
-            Column(Modifier.fillMaxWidth().padding(10.dp)) {
+            Column(Modifier.fillMaxWidth().padding(start = 10.dp, end = 10.dp, top = 10.dp, bottom = 10.dp + titleBottomPadding)) {
                 if (showSeriesTitle && !book.oneshot) {
                     CardOutlinedText(
                         text = book.seriesTitle,
@@ -325,46 +325,49 @@ private fun BookHoverOverlay(
     ) {
         content()
         if (showControls.value) {
-            val backgroundColor =
-                if (isSelected)
-                    Modifier.background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
-                else Modifier
-            Column(backgroundColor.fillMaxSize()) {
-                if (selectionControlVisible.value) {
-                    onSelect?.let { SelectionRadioButton(isSelected, it) }
-                    Spacer(Modifier.weight(1f))
-                }
-
-                Row(
-                    modifier = Modifier
+            if (isSelected) {
+                Box(
+                    Modifier
                         .fillMaxSize()
-                        .padding(
-                            start = GridOverlayControlHorizontalPadding,
-                            end = GridOverlayControlHorizontalPadding,
-                            bottom = GridOverlayControlBottomPadding
-                        ),
-                    horizontalArrangement = Arrangement.spacedBy(GridOverlayControlGap),
-                    verticalAlignment = Alignment.Bottom,
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = .38f))
+                )
+            }
+            if (selectionControlVisible.value) {
+                Box(
+                    Modifier.fillMaxSize().padding(4.dp),
+                    contentAlignment = Alignment.TopStart
                 ) {
-                    if (onBookReadClick != null && !book.deleted && readIsSupported(book) && !libraryIsDeleted) {
-                        BookReadButton(
-                            compact = true,
-                            onRead = { onBookReadClick(true) },
-                            onIncognitoRead = { onBookReadClick(false) },
-                            onDropdownOpenChange = { isReadButtonExpanded = it }
-                        )
-                    }
-
-                    Spacer(Modifier.weight(1f))
-                    if (bookMenuActions != null)
-                        BookMenuActionsDropdown(
-                            book = book,
-                            bookMenuActions = bookMenuActions,
-                            isActionsMenuExpanded = isActionsMenuExpanded,
-                            onActionsMenuExpand = { isActionsMenuExpanded = it },
-                            modifier = Modifier.size(GridOverlayControlSize),
-                            compact = true,
-                        )
+                    onSelect?.let { SelectionRadioButton(isSelected, it) }
+                }
+            }
+            // Top-right: more menu
+            if (bookMenuActions != null) {
+                Box(
+                    Modifier.fillMaxSize().padding(4.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    BookMenuActionsDropdown(
+                        book = book,
+                        bookMenuActions = bookMenuActions,
+                        isActionsMenuExpanded = isActionsMenuExpanded,
+                        onActionsMenuExpand = { isActionsMenuExpanded = it },
+                        modifier = Modifier.size(GridOverlayControlSize),
+                        compact = true,
+                    )
+                }
+            }
+            // Bottom-right: read button
+            if (onBookReadClick != null && !book.deleted && readIsSupported(book) && !libraryIsDeleted) {
+                Box(
+                    Modifier.fillMaxSize().padding(4.dp),
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    BookReadButton(
+                        compact = true,
+                        onRead = { onBookReadClick(true) },
+                        onIncognitoRead = { onBookReadClick(false) },
+                        onDropdownOpenChange = { isReadButtonExpanded = it }
+                    )
                 }
             }
         }

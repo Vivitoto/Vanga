@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateTimeFormat
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.common.TagList
 import io.github.vivitoto.vanga.ui.common.components.DescriptionChips
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
@@ -187,15 +189,15 @@ fun BookInfoColumn(
 @Composable
 private fun BookPositionBadge(book: VangaBook) {
     Surface(
-        shape = MaterialTheme.shapes.extraLarge,
+        shape = VangaButtonShape,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
         tonalElevation = 1.dp,
     ) {
         Column(
             modifier = Modifier
-                .heightIn(min = 40.dp)
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .height(48.dp)
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {

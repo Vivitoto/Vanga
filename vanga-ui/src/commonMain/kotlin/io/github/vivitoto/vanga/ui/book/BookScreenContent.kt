@@ -3,6 +3,7 @@ package io.github.vivitoto.vanga.ui.book
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -11,8 +12,10 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,7 +28,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +55,7 @@ import io.github.vivitoto.vanga.ui.LocalBookDownloadEvents
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
+import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.VangaShape
 import io.github.vivitoto.vanga.ui.common.BookReadButton
 import io.github.vivitoto.vanga.ui.common.cards.coverShape
@@ -301,11 +304,19 @@ private fun BookActionRow(
             }
         }
         if (book.downloaded) {
-            ElevatedButton(
-                onClick = onDownloadDelete,
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.errorContainer)
+            Surface(
+                shape = VangaButtonShape,
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.error,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.errorContainer),
+                modifier = Modifier.height(48.dp).clickable { onDownloadDelete() },
             ) {
-                Text("删除已下载")
+                Row(
+                    Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("删除已下载")
+                }
             }
         }
     }
@@ -324,41 +335,46 @@ fun DownloadButton(
         downloadEvents?.filter { it.bookId == book.id }?.collect { downloadEvent = it }
     }
 
-    ElevatedButton(
-        enabled = downloadEvent == null,
-        onClick = { showDownloadConfirmation = true },
-        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand),
-        elevation = null
+    val downloadEnabled = downloadEvent == null
+    val surfaceModifier = Modifier.height(48.dp).pointerHoverIcon(PointerIcon.Hand)
+    Surface(
+        shape = VangaButtonShape,
+        color = if (downloadEnabled) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = if (downloadEnabled) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = if (downloadEnabled) surfaceModifier.clickable { showDownloadConfirmation = true } else surfaceModifier,
     ) {
-        when (val event = downloadEvent) {
-            is DownloadEvent.BookDownloadProgress -> {
-                Box(
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(
-                        progress = { event.completed / event.total.toFloat() },
-                        color = MaterialTheme.colorScheme.tertiary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .45f),
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.size(24.dp),
-                    )
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.size(20.dp),
-                    )
+        Row(
+            Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            when (val event = downloadEvent) {
+                is DownloadEvent.BookDownloadProgress -> {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            progress = { event.completed / event.total.toFloat() },
+                            color = MaterialTheme.colorScheme.tertiary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .45f),
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(24.dp),
+                        )
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+
+                else -> {
+                    Icon(Icons.Default.Download, null)
                 }
             }
-
-            else -> {
-                Icon(Icons.Default.Download, null)
-            }
+            Spacer(Modifier.width(8.dp))
+            Text("下载")
         }
-        Spacer(Modifier.width(8.dp))
-        Text("下载")
-
-
     }
 
     if (showDownloadConfirmation) {
