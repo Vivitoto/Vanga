@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -49,6 +50,7 @@ fun readIsSupported(book: VangaBook) = book.media.mediaProfile != EPUB || webvie
 fun BookReadButton(
     modifier: Modifier = Modifier,
     compact: Boolean = false,
+    fillContentWidth: Boolean = false,
     onRead: () -> Unit,
     onIncognitoRead: () -> Unit,
     onDropdownOpenChange: (Boolean) -> Unit = {}
@@ -66,7 +68,9 @@ fun BookReadButton(
         contentColor = contentColor,
     ) {
         Row(
-            Modifier.height(buttonHeight),
+            Modifier
+                .height(buttonHeight)
+                .then(if (fillContentWidth) Modifier.fillMaxWidth() else Modifier),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {

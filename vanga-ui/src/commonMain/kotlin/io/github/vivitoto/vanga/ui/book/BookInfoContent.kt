@@ -1,18 +1,20 @@
 package io.github.vivitoto.vanga.ui.book
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.LibraryBooks
 import androidx.compose.material.icons.filled.Link
@@ -39,6 +41,8 @@ import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateTimeFormat
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.common.TagList
+import io.github.vivitoto.vanga.ui.common.components.CompactMetadataEntry
+import io.github.vivitoto.vanga.ui.common.components.CompactMetadataFlow
 import io.github.vivitoto.vanga.ui.common.components.DescriptionChips
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry.Companion.stringEntry
@@ -66,7 +70,6 @@ private val authorsOrder = listOf(
     translatorRole
 )
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BookInfoColumn(
     publisher: String?,
@@ -79,8 +82,12 @@ fun BookInfoColumn(
     isbn: String,
     fileUrl: String,
     onFilterClick: (SeriesScreenFilter) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
         if (!publisher.isNullOrBlank()) {
             DescriptionChips(
                 label = "出版社",
@@ -131,64 +138,29 @@ fun BookInfoColumn(
         }
 
         Spacer(Modifier.size(0.dp))
-        Row {
-            Text(
-                "大小",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.width(120.dp)
-            )
-            SelectionContainer(Modifier.weight(1f)) {
-                Text(sizeInMiB, style = MaterialTheme.typography.labelLarge)
-            }
-        }
-
-        Row {
-            Text(
-                "格式",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.width(120.dp)
-            )
-            if (mediaType != null) {
-                SelectionContainer(Modifier.weight(1f)) {
-                    Text(mediaType, style = MaterialTheme.typography.labelLarge)
-                }
-            }
-        }
-
-        isbn.ifBlank { null }?.let { isbn ->
-            Row {
-                Text(
-                    "ISBN",
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.width(120.dp)
-                )
-                SelectionContainer(Modifier.weight(1f)) {
-                    Text(isbn, style = MaterialTheme.typography.labelLarge)
-                }
-            }
-        }
-
-        Row {
-            Text(
-                "文件",
-                style = MaterialTheme.typography.labelLarge,
-                modifier = Modifier.width(120.dp)
-            )
-            SelectionContainer(Modifier.weight(1f)) {
-                Text(
-                    fileUrl,
-                    style = MaterialTheme.typography.labelLarge,
+        CompactMetadataFlow(
+            entries = listOfNotNull(
+                CompactMetadataEntry("大小", sizeInMiB),
+                mediaType?.let { CompactMetadataEntry("格式", it) },
+                isbn.ifBlank { null }?.let { CompactMetadataEntry("ISBN", it) },
+                CompactMetadataEntry(
+                    label = "文件",
+                    value = fileUrl,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
+                    wide = true,
+                ),
+            )
+        )
     }
 }
 
 @Composable
-private fun BookPositionBadge(book: VangaBook) {
+private fun BookPositionBadge(
+    book: VangaBook,
+    modifier: Modifier = Modifier,
+) {
     Surface(
+        modifier = modifier.height(48.dp),
         shape = VangaButtonShape,
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -196,7 +168,7 @@ private fun BookPositionBadge(book: VangaBook) {
     ) {
         Column(
             modifier = Modifier
-                .height(48.dp)
+                .fillMaxSize()
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -219,11 +191,24 @@ private fun BookPositionBadge(book: VangaBook) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
+fun FlowRowScope.BookInfoActionSlot(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    Box(
+        modifier = modifier.weight(1f).widthIn(min = 132.dp).height(48.dp),
+        contentAlignment = Alignment.Center,
+        content = content,
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 fun BookInfoRow(
     modifier: Modifier = Modifier,
     book: VangaBook,
     onSeriesButtonClick: (() -> Unit)? = null,
-    actions: (@Composable () -> Unit)? = null,
+    actions: (@Composable FlowRowScope.() -> Unit)? = null,
 ) {
 
     Column(
@@ -250,17 +235,28 @@ fun BookInfoRow(
         }
 
         FlowRow(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            BookPositionBadge(book)
-            if (actions != null) {
+            if (actions == null) {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    BookPositionBadge(book)
+                }
+            } else {
+                BookInfoActionSlot {
+                    BookPositionBadge(book, Modifier.fillMaxWidth())
+                }
                 actions()
             }
         }
 
         if (book.deleted || book.remoteFileUnavailable || book.isLocalFileOutdated) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 if (book.deleted) {
                     SuggestionChip(
                         onClick = {},
@@ -298,68 +294,37 @@ fun BookInfoRow(
         val releaseDate = book.metadata.releaseDate
         val readProgress = book.readProgress
         if (releaseDate != null || readProgress != null) {
-            SelectionContainer {
-                Column {
-                    releaseDate?.let {
-                        Row {
-                            Text(
-                                text = "发布日期：",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.width(120.dp)
-                            )
-
-                            Text(
-                                it.toString(),
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
+            val pagesCount = book.media.pagesCount
+            val readProgressText = remember(pagesCount, readProgress) {
+                if (readProgress == null || readProgress.completed) {
+                    null
+                } else {
+                    buildString {
+                        val pagesLeft = (pagesCount - readProgress.page).coerceAtLeast(0)
+                        val percentage = if (pagesCount > 0) {
+                            (readProgress.page.toFloat() / pagesCount * 100).roundToInt()
+                        } else {
+                            0
                         }
-                    }
-
-                    val pagesCount = book.media.pagesCount
-                    if (readProgress != null) {
-                        if (!readProgress.completed) {
-                            val readProgressText = remember(pagesCount, readProgress) {
-                                buildString {
-                                    val pagesLeft = pagesCount - readProgress.page
-                                    val percentage =
-                                        (readProgress.page.toFloat() / pagesCount * 100)
-                                            .roundToInt()
-                                    append(percentage)
-                                    append("%, ")
-                                    append(pagesLeft)
-                                    append(" 页未读")
-                                }
-                            }
-
-                            Row {
-                                Text(
-                                    "阅读进度：",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.width(120.dp)
-                                )
-                                Text(readProgressText, style = MaterialTheme.typography.bodyMedium)
-                            }
-                        }
-
-                        Row {
-                            val readDate = remember(readProgress) {
-                                readProgress.readDate
-                                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                                    .format(localDateTimeFormat)
-                            }
-                            Text(
-                                "上次阅读：",
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.width(120.dp)
-                            )
-                            Text(
-                                readDate,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
+                        append(percentage)
+                        append("%, ")
+                        append(pagesLeft)
+                        append(" 页未读")
                     }
                 }
             }
+            val readDate = remember(readProgress) {
+                readProgress?.readDate
+                    ?.toLocalDateTime(TimeZone.currentSystemDefault())
+                    ?.format(localDateTimeFormat)
+            }
+            CompactMetadataFlow(
+                entries = listOfNotNull(
+                    releaseDate?.let { CompactMetadataEntry("发布日期", it.toString()) },
+                    readProgressText?.let { CompactMetadataEntry("阅读进度", it) },
+                    readDate?.let { CompactMetadataEntry("上次阅读", it) },
+                )
+            )
         }
     }
 }

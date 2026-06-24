@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material3.ElevatedButton
@@ -23,12 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kotlinx.datetime.LocalDate
 import io.github.vivitoto.vanga.ui.LocalStrings
+import io.github.vivitoto.vanga.ui.common.components.CompactMetadataChip
+import io.github.vivitoto.vanga.ui.common.components.CompactMetadataEntry
+import io.github.vivitoto.vanga.ui.common.components.CompactMetadataFlow
 import io.github.vivitoto.vanga.ui.common.components.ExpandableText
 import io.github.vivitoto.vanga.ui.library.SeriesScreenFilter
 import snd.komga.client.common.KomgaReadingDirection
@@ -62,10 +61,14 @@ fun SeriesDescriptionRow(
         horizontalAlignment = Alignment.Start
     ) {
 
-        if (releaseDate != null)
-            Text("发布年份：${releaseDate.year}", fontSize = 10.sp)
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            if (releaseDate != null) {
+                CompactMetadataChip("发布年份", releaseDate.year.toString())
+            }
 
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             ElevatedButton(
                 onClick = { onLibraryClick(library) },
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
@@ -138,24 +141,16 @@ fun SeriesDescriptionRow(
         }
 
         if (alternateTitles.isNotEmpty()) {
-            SelectionContainer {
-                Column {
-                    Text("别名", fontWeight = FontWeight.Bold)
-                    alternateTitles.forEach {
-                        Row {
-                            Text(
-                                it.label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.widthIn(min = 100.dp, max = 200.dp)
-                            )
-                            Text(
-                                it.title,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
-                }
-            }
+            CompactMetadataFlow(
+                entries = alternateTitles.map {
+                    CompactMetadataEntry(
+                        label = it.label.ifBlank { "别名" },
+                        value = it.title,
+                        maxLines = 2,
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

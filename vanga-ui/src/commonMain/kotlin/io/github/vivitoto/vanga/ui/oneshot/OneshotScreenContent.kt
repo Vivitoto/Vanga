@@ -1,9 +1,7 @@
 package io.github.vivitoto.vanga.ui.oneshot
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,10 +10,8 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
@@ -28,7 +24,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -42,11 +37,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
-import io.github.vivitoto.vanga.ui.VangaButtonShape
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalWindowWidth
+import io.github.vivitoto.vanga.ui.book.BookInfoActionSlot
 import io.github.vivitoto.vanga.ui.book.BookInfoColumn
 import io.github.vivitoto.vanga.ui.book.BookInfoRow
+import io.github.vivitoto.vanga.ui.book.DeleteDownloadedButton
 import io.github.vivitoto.vanga.ui.book.DownloadButton
 import io.github.vivitoto.vanga.ui.collection.SeriesCollectionsContent
 import io.github.vivitoto.vanga.ui.common.BookReadButton
@@ -68,6 +64,8 @@ import snd.komga.client.collection.KomgaCollection
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 import snd.komga.client.series.KomgaSeries
+
+private val DetailContentMaxWidth = 720.dp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -142,18 +140,24 @@ fun OneshotScreenContent(
                         )
                     }
                 }
-                BookInfoColumn(
-                    publisher = series.metadata.publisher,
-                    genres = series.metadata.genres,
-                    authors = book.metadata.authors,
-                    tags = book.metadata.tags,
-                    links = book.metadata.links,
-                    sizeInMiB = book.size,
-                    mediaType = book.media.mediaType,
-                    isbn = book.metadata.isbn,
-                    fileUrl = book.url,
-                    onFilterClick = onFilterClick
-                )
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    BookInfoColumn(
+                        publisher = series.metadata.publisher,
+                        genres = series.metadata.genres,
+                        authors = book.metadata.authors,
+                        tags = book.metadata.tags,
+                        links = book.metadata.links,
+                        sizeInMiB = book.size,
+                        mediaType = book.media.mediaType,
+                        isbn = book.metadata.isbn,
+                        fileUrl = book.url,
+                        onFilterClick = onFilterClick,
+                        modifier = Modifier.widthIn(max = DetailContentMaxWidth).fillMaxWidth(),
+                    )
+                }
                 BookReadListsContent(
                     readLists = readLists,
                     onReadListClick = onReadListClick,
@@ -263,43 +267,42 @@ private fun FlowRowScope.OneshotMainInfo(
             onFilterClick = {},
             modifier = Modifier.widthIn(min = minWidth.coerceAtMost(200.dp)),
         )
-        BookInfoRow(
-            book = book,
-            onSeriesButtonClick = null,
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center,
         ) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+            BookInfoRow(
+                book = book,
+                onSeriesButtonClick = null,
+                modifier = Modifier.widthIn(max = DetailContentMaxWidth).fillMaxWidth(),
             ) {
                 if (readIsSupported(book) && !isDeleted) {
-                    BookReadButton(
-                        onRead = { onBookReadClick(true) },
-                        onIncognitoRead = { onBookReadClick(false) }
-                    )
+                    BookInfoActionSlot {
+                        BookReadButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            fillContentWidth = true,
+                            onRead = { onBookReadClick(true) },
+                            onIncognitoRead = { onBookReadClick(false) }
+                        )
+                    }
                     if (!book.downloaded || book.isLocalFileOutdated) {
-                        DownloadButton(book, onDownload)
+                        BookInfoActionSlot {
+                            DownloadButton(book, onDownload, Modifier.fillMaxWidth())
+                        }
                     }
                 }
 
                 if (book.downloaded) {
-                    Surface(
-                        shape = VangaButtonShape,
-                        color = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.error,
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.errorContainer),
-                        modifier = Modifier.height(48.dp).clickable { onDownloadDelete() },
-                    ) {
-                        Row(
-                            Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text("删除已下载文件")
-                        }
+                    BookInfoActionSlot {
+                        DeleteDownloadedButton(
+                            text = "删除已下载文件",
+                            onClick = onDownloadDelete,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
                     }
                 }
             }
         }
-
         if (book.metadata.summary.isNotBlank()) {
             HorizontalDivider()
             ExpandableText(

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -78,6 +78,9 @@ import io.github.vivitoto.vanga.ui.readlist.BookReadListsContent
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 
+private val DetailSectionMaxWidth = 860.dp
+private val DetailContentMaxWidth = 720.dp
+
 @Composable
 fun BookScreenContent(
     library: KomgaLibrary?,
@@ -125,17 +128,23 @@ fun BookScreenContent(
                 BookHero(book = book, coverMinWidth = coverMinWidth)
 
                 DetailSection {
-                    BookInfoRow(
-                        book = book,
-                        onSeriesButtonClick = onParentSeriesPress,
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        BookActionRow(
+                        BookInfoRow(
                             book = book,
-                            library = library,
-                            onBookReadPress = onBookReadPress,
-                            onDownload = onBookDownload,
-                            onDownloadDelete = onBookDownloadDelete
-                        )
+                            onSeriesButtonClick = onParentSeriesPress,
+                            modifier = Modifier.widthIn(max = DetailContentMaxWidth).fillMaxWidth(),
+                        ) {
+                            BookActionRow(
+                                book = book,
+                                library = library,
+                                onBookReadPress = onBookReadPress,
+                                onDownload = onBookDownload,
+                                onDownloadDelete = onBookDownloadDelete
+                            )
+                        }
                     }
 
                     ExpandableText(
@@ -145,18 +154,24 @@ fun BookScreenContent(
                 }
 
                 DetailSection {
-                    BookInfoColumn(
-                        publisher = null,
-                        genres = null,
-                        authors = book.metadata.authors,
-                        tags = book.metadata.tags,
-                        links = book.metadata.links,
-                        sizeInMiB = book.size,
-                        mediaType = book.media.mediaType,
-                        isbn = book.metadata.isbn,
-                        fileUrl = book.url,
-                        onFilterClick = onFilterClick,
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        BookInfoColumn(
+                            publisher = null,
+                            genres = null,
+                            authors = book.metadata.authors,
+                            tags = book.metadata.tags,
+                            links = book.metadata.links,
+                            sizeInMiB = book.size,
+                            mediaType = book.media.mediaType,
+                            isbn = book.metadata.isbn,
+                            fileUrl = book.url,
+                            onFilterClick = onFilterClick,
+                            modifier = Modifier.widthIn(max = DetailContentMaxWidth).fillMaxWidth(),
+                        )
+                    }
                 }
                 BookReadListsContent(
                     readLists = readLists,
@@ -258,7 +273,7 @@ private fun BookHero(
             textAlign = TextAlign.Center,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.widthIn(max = 720.dp).padding(horizontal = 12.dp),
+            modifier = Modifier.widthIn(max = DetailContentMaxWidth).padding(horizontal = 12.dp),
         )
     }
 }
@@ -266,7 +281,7 @@ private fun BookHero(
 @Composable
 private fun DetailSection(content: @Composable () -> Unit) {
     Surface(
-        modifier = Modifier.widthIn(max = 860.dp).fillMaxWidth(),
+        modifier = Modifier.widthIn(max = DetailSectionMaxWidth).fillMaxWidth(),
         shape = VangaShape,
         tonalElevation = 1.dp,
     ) {
@@ -281,52 +296,69 @@ private fun DetailSection(content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun BookActionRow(
+private fun FlowRowScope.BookActionRow(
     book: VangaBook,
     library: KomgaLibrary,
     onBookReadPress: (markReadProgress: Boolean) -> Unit,
     onDownload: () -> Unit,
     onDownloadDelete: () -> Unit
 ) {
-    FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-    ) {
-        if (!book.deleted && !library.unavailable) {
-            if (readIsSupported(book)) {
+    if (!book.deleted && !library.unavailable) {
+        if (readIsSupported(book)) {
+            BookInfoActionSlot {
                 BookReadButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    fillContentWidth = true,
                     onRead = { onBookReadPress(true) },
                     onIncognitoRead = { onBookReadPress(false) },
                 )
             }
-            if (!book.downloaded || book.isLocalFileOutdated) {
-                DownloadButton(book, onDownload)
+        }
+        if (!book.downloaded || book.isLocalFileOutdated) {
+            BookInfoActionSlot {
+                DownloadButton(book, onDownload, Modifier.fillMaxWidth())
             }
         }
-        if (book.downloaded) {
-            Surface(
-                shape = VangaButtonShape,
-                color = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.error,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.errorContainer),
-                modifier = Modifier.height(48.dp).clickable { onDownloadDelete() },
-            ) {
-                Row(
-                    Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text("删除已下载")
-                }
-            }
+    }
+    if (book.downloaded) {
+        BookInfoActionSlot {
+            DeleteDownloadedButton(
+                text = "删除已下载",
+                onClick = onDownloadDelete,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }
 
+@Composable
+fun DeleteDownloadedButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Surface(
+        shape = VangaButtonShape,
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.error,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.errorContainer),
+        modifier = modifier.height(48.dp).clickable { onClick() },
+    ) {
+        Row(
+            Modifier.padding(horizontal = 12.dp).fillMaxHeight().fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
 
 @Composable
 fun DownloadButton(
     book: VangaBook,
     onDownload: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showDownloadConfirmation by remember { mutableStateOf(false) }
     val downloadEvents = LocalBookDownloadEvents.current
@@ -336,7 +368,7 @@ fun DownloadButton(
     }
 
     val downloadEnabled = downloadEvent == null
-    val surfaceModifier = Modifier.height(48.dp).pointerHoverIcon(PointerIcon.Hand)
+    val surfaceModifier = modifier.height(48.dp).pointerHoverIcon(PointerIcon.Hand)
     Surface(
         shape = VangaButtonShape,
         color = if (downloadEnabled) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.surfaceVariant,
@@ -344,7 +376,8 @@ fun DownloadButton(
         modifier = if (downloadEnabled) surfaceModifier.clickable { showDownloadConfirmation = true } else surfaceModifier,
     ) {
         Row(
-            Modifier.padding(horizontal = 12.dp).fillMaxHeight(),
+            Modifier.padding(horizontal = 12.dp).fillMaxHeight().fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             when (val event = downloadEvent) {

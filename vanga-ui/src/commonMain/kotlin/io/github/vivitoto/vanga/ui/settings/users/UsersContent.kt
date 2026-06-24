@@ -26,7 +26,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,13 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import io.github.vivitoto.vanga.DefaultDateTimeFormats.localDateTimeFormat
 import io.github.vivitoto.vanga.ui.VangaShape
+import io.github.vivitoto.vanga.ui.common.components.DescriptionChips
+import io.github.vivitoto.vanga.ui.common.components.LabeledEntry.Companion.stringEntry
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
 import io.github.vivitoto.vanga.ui.dialogs.user.PasswordChangeDialog
 import io.github.vivitoto.vanga.ui.dialogs.user.UserAddDialog
@@ -131,20 +131,12 @@ private fun UserCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun UserRoles(user: KomgaUser) {
-    Column {
-        Text("角色：", fontWeight = FontWeight.Bold)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-            user.roles.forEach { role ->
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text(role) }
-                )
-            }
-        }
-    }
+    DescriptionChips(
+        label = "角色",
+        chipValues = user.roles.map { stringEntry(it) },
+    )
 }
 
 @Composable
