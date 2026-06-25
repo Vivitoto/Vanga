@@ -46,9 +46,9 @@ fun AccountSettingsContent(user: KomgaUser) {
     ) {
         SettingsSectionCard(title = "账号信息") {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 // Avatar
                 Surface(

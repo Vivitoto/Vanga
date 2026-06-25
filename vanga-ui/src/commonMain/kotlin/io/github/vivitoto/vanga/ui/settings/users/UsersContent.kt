@@ -27,6 +27,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -165,7 +166,14 @@ private fun UserInfo(
         else
             Icon(Icons.Default.Person, null)
 
-        Spacer(Modifier.width(20.dp))
+        Spacer(Modifier.width(12.dp))
+
+        SuggestionChip(
+            onClick = {},
+            label = { Text("用户", style = MaterialTheme.typography.labelSmall) },
+        )
+
+        Spacer(Modifier.width(12.dp))
 
         Column(Modifier.weight(1f)) {
             Text(user.email)

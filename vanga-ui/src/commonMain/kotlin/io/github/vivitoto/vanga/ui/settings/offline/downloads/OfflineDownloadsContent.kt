@@ -63,7 +63,6 @@ fun OfflineDownloadsContent(
             }
             SettingsRow(
                 title = "存储位置",
-                stackTrailing = true,
                 trailing = {
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         Button(onClick = { showDirectoryPickerDialog = true }) { Text("更改") }

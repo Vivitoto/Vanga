@@ -1,7 +1,6 @@
 package io.github.vivitoto.vanga.ui.settings.appearance
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -10,6 +9,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -111,23 +112,21 @@ fun AppearanceSettingsContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 340.dp, max = 520.dp)
-                    .padding(top = 8.dp),
+                    .padding(top = 12.dp),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
             ) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    ResponsiveCardWidth(cardWidth = cardWidth, horizontalPadding = 0.dp) { previewWidth ->
-                        Card(
-                            Modifier
-                                .widthIn(max = previewWidth)
-                                .fillMaxWidth()
-                                .aspectRatio(0.703f)
-                        ) {
+                ResponsiveCardWidth(cardWidth = cardWidth, horizontalPadding = 0.dp) { previewWidth ->
+                    Card(
+                        Modifier
+                            .widthIn(max = previewWidth)
+                            .fillMaxWidth()
+                            .aspectRatio(0.703f),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .38f)
+                        ),
+                    ) {
 
-                        }
                     }
                 }
             }

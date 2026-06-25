@@ -111,7 +111,7 @@ fun BookImageCard(
                     showSeriesTitle = showSeriesTitle,
                     titleMaxLines = titleMaxLines,
                     topStartContent = topStartContent,
-                    titleBottomPadding = GridOverlayControlSize,
+                    titleBottomPadding = if (onBookReadClick != null) GridOverlayControlSize else 0.dp,
                 ) {
                     BookThumbnail(
                         book.id,
@@ -229,8 +229,7 @@ private fun BookImageOverlay(
                     color = MaterialTheme.colorScheme.tertiary,
                     trackColor = MaterialTheme.colorScheme.surface.copy(alpha = .72f),
                     modifier = Modifier.height(5.dp).fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface.copy(alpha = .72f))
-                        .padding(bottom = 4.dp),
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = .72f)),
                     drawStopIndicator = {}
                 )
             }
@@ -361,7 +360,7 @@ private fun BookHoverOverlay(
             // Bottom-right: read button
             if (onBookReadClick != null && !book.deleted && readIsSupported(book) && !libraryIsDeleted) {
                 Box(
-                    Modifier.fillMaxSize().padding(4.dp),
+                    Modifier.fillMaxSize().padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 10.dp),
                     contentAlignment = Alignment.BottomEnd
                 ) {
                     BookReadButton(

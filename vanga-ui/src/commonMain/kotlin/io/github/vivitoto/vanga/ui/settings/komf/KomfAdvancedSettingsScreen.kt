@@ -42,7 +42,6 @@ class KomfAdvancedSettingsScreen : Screen {
             ) {
                 SettingsSectionCard(
                     title = "Komf 连接",
-                    description = "服务器地址、账号和连接开关",
                 ) {
                     AdvancedSettingsRow(
                         title = "Komf 连接",
@@ -53,7 +52,6 @@ class KomfAdvancedSettingsScreen : Screen {
                 }
                 SettingsSectionCard(
                     title = "处理规则",
-                    description = "自动匹配和写入元数据的规则",
                 ) {
                     AdvancedSettingsRow(
                         title = "处理规则",
@@ -64,7 +62,6 @@ class KomfAdvancedSettingsScreen : Screen {
                 }
                 SettingsSectionCard(
                     title = "数据源",
-                    description = "配置漫画元数据来源和每个数据源的独立设置",
                 ) {
                     AdvancedSettingsRow(
                         title = "数据源",
@@ -75,7 +72,6 @@ class KomfAdvancedSettingsScreen : Screen {
                 }
                 SettingsSectionCard(
                     title = "通知",
-                    description = "元数据任务通知设置",
                 ) {
                     AdvancedSettingsRow(
                         title = "通知",
@@ -86,7 +82,6 @@ class KomfAdvancedSettingsScreen : Screen {
                 }
                 SettingsSectionCard(
                     title = "任务记录",
-                    description = "查看和管理 Komf 自动化任务",
                 ) {
                     AdvancedSettingsRow(
                         title = "任务记录",

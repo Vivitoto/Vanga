@@ -272,7 +272,6 @@ fun SettingsValueRow(
         title = title,
         supportingText = supportingText,
         modifier = modifier,
-        stackTrailing = true,
         trailing = {
             Text(
                 text = value,
