@@ -76,7 +76,7 @@ fun AccountSettingsContent(user: KomgaUser) {
 
                 // Roles — label above, chips centered
                 if (user.roles.isNotEmpty()) {
-                    RolesSection(user.roles)
+                    RolesSection(user.roles.toList())
                 }
 
                 // Change password button — centered
