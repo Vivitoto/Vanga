@@ -360,7 +360,7 @@ private fun BookHoverOverlay(
             // Bottom-right: read button
             if (onBookReadClick != null && !book.deleted && readIsSupported(book) && !libraryIsDeleted) {
                 Box(
-                    Modifier.fillMaxSize().padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 10.dp),
+                    Modifier.fillMaxSize().padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 7.dp),
                     contentAlignment = Alignment.BottomEnd
                 ) {
                     BookReadButton(
