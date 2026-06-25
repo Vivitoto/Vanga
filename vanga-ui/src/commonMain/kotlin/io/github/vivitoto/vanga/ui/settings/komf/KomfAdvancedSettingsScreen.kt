@@ -1,7 +1,9 @@
 package io.github.vivitoto.vanga.ui.settings.komf
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material.icons.filled.ChevronRight
@@ -12,6 +14,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -33,40 +36,65 @@ class KomfAdvancedSettingsScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         SettingsScreenContainer(title = "高级设置") {
-            SettingsSectionCard(
-                title = "Komf",
-                description = "配置元数据连接、处理规则、数据源、通知和任务。",
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                AdvancedSettingsRow(
+                SettingsSectionCard(
                     title = "Komf 连接",
-                    supportingText = "服务器地址、账号和连接开关",
-                    icon = { Icon(Icons.Default.Extension, null) },
-                    onClick = { navigator.push(KomfSettingsScreen()) },
-                )
-                AdvancedSettingsRow(
+                    description = "服务器地址、账号和连接开关",
+                ) {
+                    AdvancedSettingsRow(
+                        title = "Komf 连接",
+                        supportingText = "服务器地址、账号和连接开关",
+                        icon = { Icon(Icons.Default.Extension, null) },
+                        onClick = { navigator.push(KomfSettingsScreen()) },
+                    )
+                }
+                SettingsSectionCard(
                     title = "处理规则",
-                    supportingText = "自动匹配和写入元数据的规则",
-                    icon = { Icon(Icons.Default.Tune, null) },
-                    onClick = { navigator.push(KomfProcessingSettingsScreen(KOMGA)) },
-                )
-                AdvancedSettingsRow(
+                    description = "自动匹配和写入元数据的规则",
+                ) {
+                    AdvancedSettingsRow(
+                        title = "处理规则",
+                        supportingText = "自动匹配和写入元数据的规则",
+                        icon = { Icon(Icons.Default.Tune, null) },
+                        onClick = { navigator.push(KomfProcessingSettingsScreen(KOMGA)) },
+                    )
+                }
+                SettingsSectionCard(
                     title = "数据源",
-                    supportingText = "配置漫画元数据来源和每个数据源的独立设置",
-                    icon = { Icon(Icons.Default.LocalOffer, null) },
-                    onClick = { navigator.push(KomfProvidersSettingsScreen()) },
-                )
-                AdvancedSettingsRow(
+                    description = "配置漫画元数据来源和每个数据源的独立设置",
+                ) {
+                    AdvancedSettingsRow(
+                        title = "数据源",
+                        supportingText = "配置漫画元数据来源和每个数据源的独立设置",
+                        icon = { Icon(Icons.Default.LocalOffer, null) },
+                        onClick = { navigator.push(KomfProvidersSettingsScreen()) },
+                    )
+                }
+                SettingsSectionCard(
                     title = "通知",
-                    supportingText = "元数据任务通知设置",
-                    icon = { Icon(Icons.Default.Info, null) },
-                    onClick = { navigator.push(KomfNotificationSettingsScreen()) },
-                )
-                AdvancedSettingsRow(
+                    description = "元数据任务通知设置",
+                ) {
+                    AdvancedSettingsRow(
+                        title = "通知",
+                        supportingText = "元数据任务通知设置",
+                        icon = { Icon(Icons.Default.Info, null) },
+                        onClick = { navigator.push(KomfNotificationSettingsScreen()) },
+                    )
+                }
+                SettingsSectionCard(
                     title = "任务记录",
-                    supportingText = "查看和管理 Komf 自动化任务",
-                    icon = { Icon(Icons.Default.Cached, null) },
-                    onClick = { navigator.push(KomfJobsScreen()) },
-                )
+                    description = "查看和管理 Komf 自动化任务",
+                ) {
+                    AdvancedSettingsRow(
+                        title = "任务记录",
+                        supportingText = "查看和管理 Komf 自动化任务",
+                        icon = { Icon(Icons.Default.Cached, null) },
+                        onClick = { navigator.push(KomfJobsScreen()) },
+                    )
+                }
             }
         }
     }

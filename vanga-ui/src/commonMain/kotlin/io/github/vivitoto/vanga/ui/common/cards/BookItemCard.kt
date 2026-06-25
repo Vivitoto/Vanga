@@ -228,7 +228,9 @@ private fun BookImageOverlay(
                     progress = { getReadProgressPercentage(book) },
                     color = MaterialTheme.colorScheme.tertiary,
                     trackColor = MaterialTheme.colorScheme.surface.copy(alpha = .72f),
-                    modifier = Modifier.height(5.dp).fillMaxWidth().background(MaterialTheme.colorScheme.surface.copy(alpha = .72f)),
+                    modifier = Modifier.height(5.dp).fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = .72f))
+                        .padding(bottom = 4.dp),
                     drawStopIndicator = {}
                 )
             }

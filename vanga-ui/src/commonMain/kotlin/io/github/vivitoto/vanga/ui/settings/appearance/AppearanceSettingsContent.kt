@@ -1,6 +1,7 @@
 package io.github.vivitoto.vanga.ui.settings.appearance
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -114,14 +115,19 @@ fun AppearanceSettingsContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                ResponsiveCardWidth(cardWidth = cardWidth, horizontalPadding = 0.dp) { previewWidth ->
-                    Card(
-                        Modifier
-                            .widthIn(max = previewWidth)
-                            .fillMaxWidth()
-                            .aspectRatio(0.703f)
-                    ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    ResponsiveCardWidth(cardWidth = cardWidth, horizontalPadding = 0.dp) { previewWidth ->
+                        Card(
+                            Modifier
+                                .widthIn(max = previewWidth)
+                                .fillMaxWidth()
+                                .aspectRatio(0.703f)
+                        ) {
 
+                        }
                     }
                 }
             }

@@ -147,7 +147,6 @@ fun BookInfoColumn(
                     label = "文件",
                     value = fileUrl,
                     maxLines = 2,
-                    wide = true,
                 ),
             )
         )

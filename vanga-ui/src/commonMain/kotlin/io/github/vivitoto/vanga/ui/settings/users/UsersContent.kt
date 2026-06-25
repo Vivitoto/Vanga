@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LockReset
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.SupervisorAccount
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -74,12 +75,18 @@ fun UsersContent(
         }
         var showUserAddDialog by remember { mutableStateOf(false) }
 
-        FilledTonalButton(
-            onClick = { showUserAddDialog = true },
-            modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End,
         ) {
-            Text("新增用户")
+            FilledTonalButton(
+                onClick = { showUserAddDialog = true },
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
+                Icon(Icons.Default.PersonAdd, null)
+                Spacer(Modifier.width(8.dp))
+                Text("新增用户")
+            }
         }
 
         if (showUserAddDialog) {
@@ -192,7 +199,10 @@ private fun UserActions(
     var showEditDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.End),
+    ) {
         val contentPadding = PaddingValues(horizontal = 15.dp, vertical = 8.dp)
 
         if (!isSelf)

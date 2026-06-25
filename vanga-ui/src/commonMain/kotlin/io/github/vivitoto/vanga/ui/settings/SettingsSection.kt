@@ -37,7 +37,7 @@ val SettingsTitleGap = 4.dp
 val SettingsCardPadding = 10.dp
 val SettingsItemGap = 8.dp
 val SettingsDetailGap = 6.dp
-val SettingsRowHorizontalPadding = 2.dp
+val SettingsRowHorizontalPadding = 6.dp
 val SettingsRowVerticalPadding = 8.dp
 
 @Composable
@@ -272,6 +272,7 @@ fun SettingsValueRow(
         title = title,
         supportingText = supportingText,
         modifier = modifier,
+        stackTrailing = true,
         trailing = {
             Text(
                 text = value,
