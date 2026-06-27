@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.math.roundToInt
 import io.github.vivitoto.vanga.AppNotifications
 import io.github.vivitoto.vanga.komga.api.KomgaBookApi
 import io.github.vivitoto.vanga.komga.api.KomgaReferentialApi
@@ -193,6 +194,10 @@ class SeriesBooksState(
     fun onBookLayoutChange(layout: BooksLayout) {
         updateCurrentState { it.copy(layout = layout) }
         screenModelScope.launch { settingsRepository.putBookListLayout(layout) }
+    }
+
+    fun onBookGridDensityChange(cardWidth: Dp) {
+        screenModelScope.launch { settingsRepository.putCardWidth(cardWidth.value.roundToInt()) }
     }
 
     fun setSelectionMode(editMode: Boolean) {

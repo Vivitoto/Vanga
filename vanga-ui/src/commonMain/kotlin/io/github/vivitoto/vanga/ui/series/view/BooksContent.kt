@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -24,11 +25,15 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -45,7 +50,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
@@ -60,6 +67,7 @@ import io.github.vivitoto.vanga.ui.book.BooksFilterState
 import io.github.vivitoto.vanga.ui.book.BooksFilterState.BooksSort
 import io.github.vivitoto.vanga.ui.common.cards.BookDetailedListCard
 import io.github.vivitoto.vanga.ui.common.cards.BookImageCard
+import io.github.vivitoto.vanga.ui.common.cards.defaultCardWidth
 import io.github.vivitoto.vanga.ui.common.components.FilterDropdownChoice
 import io.github.vivitoto.vanga.ui.common.components.FilterDropdownMultiChoice
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
@@ -90,12 +98,14 @@ fun LazyGridScope.SeriesBooksContent(
     onBookClick: (VangaBook) -> Unit,
     onBookReadClick: (VangaBook, Boolean) -> Unit,
     onBooksLayoutChange: (BooksLayout) -> Unit,
+    onBooksGridDensityChange: (Dp) -> Unit,
     onBooksPageSizeChange: (Int) -> Unit,
     onPageChange: (Int) -> Unit,
     onBookSelect: (VangaBook) -> Unit,
     booksFilterState: BooksFilterState,
     bookContextMenuActions: BookMenuActions,
     scrollState: LazyGridState,
+    cardWidth: Dp,
 ) {
     if (booksLoadState is LoadState.Success<BooksData>) {
         val booksState = booksLoadState.value
@@ -103,7 +113,9 @@ fun LazyGridScope.SeriesBooksContent(
             BooksToolBar(
                 series = series,
                 booksLayout = booksState.layout,
+                cardWidth = cardWidth,
                 onBooksLayoutChange = onBooksLayoutChange,
+                onBooksGridDensityChange = onBooksGridDensityChange,
                 booksPageSize = booksState.pageSize,
                 onBooksPageSizeChange = onBooksPageSizeChange,
                 selectionMode = booksState.selectionMode,
@@ -218,7 +230,9 @@ private fun BooksToolBar(
     series: KomgaSeries?,
 
     booksLayout: BooksLayout,
+    cardWidth: Dp,
     onBooksLayoutChange: (BooksLayout) -> Unit,
+    onBooksGridDensityChange: (Dp) -> Unit,
     booksPageSize: Int,
     onBooksPageSizeChange: (Int) -> Unit,
     selectionMode: Boolean,
@@ -293,7 +307,7 @@ private fun BooksToolBar(
                 ) {
                     Icon(
                         Icons.AutoMirrored.Filled.ViewList,
-                        null,
+                        contentDescription = "列表视图",
                     )
                 }
 
@@ -309,9 +323,16 @@ private fun BooksToolBar(
                 ) {
                     Icon(
                         Icons.Default.GridView,
-                        null,
+                        contentDescription = "网格视图",
                     )
                 }
+
+                BooksLayoutDensityDropdown(
+                    booksLayout = booksLayout,
+                    cardWidth = cardWidth,
+                    onBooksLayoutChange = onBooksLayoutChange,
+                    onBooksGridDensityChange = onBooksGridDensityChange,
+                )
             }
         }
         if (showFilters) {
@@ -327,6 +348,65 @@ private fun BooksToolBar(
                 currentPage = currentBookPage,
                 onPageChange = onPageChange,
             )
+        }
+    }
+}
+
+private enum class BookGridDensity(
+    val label: String,
+    val cardWidthDp: Int,
+) {
+    COMPACT("紧凑网格", 170),
+    STANDARD("标准网格", defaultCardWidth),
+    COMFORTABLE("舒适网格", 300),
+}
+
+@Composable
+private fun BooksLayoutDensityDropdown(
+    booksLayout: BooksLayout,
+    cardWidth: Dp,
+    onBooksLayoutChange: (BooksLayout) -> Unit,
+    onBooksGridDensityChange: (Dp) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(
+            onClick = { expanded = true },
+            modifier = Modifier
+                .size(36.dp)
+                .cursorForHand(),
+        ) {
+            Icon(
+                Icons.Default.ArrowDropDown,
+                contentDescription = "选择书籍视图",
+                modifier = Modifier.size(20.dp),
+            )
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text("列表") },
+                onClick = {
+                    expanded = false
+                    onBooksLayoutChange(LIST)
+                },
+                leadingIcon = if (booksLayout == LIST) {
+                    { Icon(Icons.Default.Check, contentDescription = null) }
+                } else null,
+            )
+            BookGridDensity.entries.forEach { density ->
+                val selected = booksLayout == GRID && cardWidth.value.roundToInt() == density.cardWidthDp
+                DropdownMenuItem(
+                    text = { Text(density.label) },
+                    onClick = {
+                        expanded = false
+                        onBooksGridDensityChange(density.cardWidthDp.dp)
+                        onBooksLayoutChange(GRID)
+                    },
+                    leadingIcon = if (selected) {
+                        { Icon(Icons.Default.Check, contentDescription = null) }
+                    } else null,
+                )
+            }
         }
     }
 }
