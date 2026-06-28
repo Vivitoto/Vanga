@@ -53,6 +53,7 @@ fun SeriesListContent(
     seriesTotalCount: Int,
     seriesActions: SeriesMenuActions,
     onSeriesClick: (KomgaSeries) -> Unit,
+    scrollStateKey: String? = null,
 
     editMode: Boolean,
     onEditModeChange: (Boolean) -> Unit,
@@ -88,6 +89,7 @@ fun SeriesListContent(
         )
         SeriesLazyCardGrid(
             series = series,
+            scrollStateKey = scrollStateKey,
             onSeriesClick = if (editMode) onSeriesSelect else onSeriesClick,
             seriesMenuActions = if (editMode) null else seriesActions,
 

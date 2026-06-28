@@ -35,6 +35,7 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyGridState
 import sh.calvin.reorderable.rememberReorderableLazyGridState
 import io.github.vivitoto.vanga.ui.LocalPlatform
+import io.github.vivitoto.vanga.ui.common.rememberRestorableLazyGridState
 import io.github.vivitoto.vanga.ui.common.cards.DraggableImageCard
 import io.github.vivitoto.vanga.ui.common.cards.SeriesImageCard
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
@@ -64,16 +65,22 @@ fun SeriesLazyCardGrid(
     onPageChange: (Int) -> Unit,
     minSize: Dp = 200.dp,
     gridState: LazyGridState = rememberLazyGridState(),
+    scrollStateKey: String? = null,
 
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(bottom = CardGridBottomPadding),
 
     beforeContent: (@Composable () -> Unit)? = null,
 ) {
+    val effectiveGridState = if (scrollStateKey != null) {
+        rememberRestorableLazyGridState(scrollStateKey)
+    } else {
+        gridState
+    }
     val coroutineScope = rememberCoroutineScope()
     val beforeContentItemOffset = if (beforeContent != null) 1 else 0
     val reorderableLazyGridState = rememberReorderableLazyGridState(
-        lazyGridState = gridState,
+        lazyGridState = effectiveGridState,
         onMove = { from, to -> onReorder(from.index - beforeContentItemOffset, to.index - beforeContentItemOffset) }
     )
     LaunchedEffect(reorderableLazyGridState.isAnyItemDragging) {
@@ -84,7 +91,7 @@ fun SeriesLazyCardGrid(
     BoxWithConstraints(modifier) {
         val gridMinSize = adaptiveCardGridMinSize(minSize, maxWidth)
         LazyVerticalGrid(
-            state = gridState,
+            state = effectiveGridState,
             columns = GridCells.Adaptive(gridMinSize),
             horizontalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
             verticalArrangement = Arrangement.spacedBy(CardGridItemSpacing),
@@ -138,7 +145,7 @@ fun SeriesLazyCardGrid(
                         onPageChange = {
                             coroutineScope.launch {
                                 onPageChange(it)
-                                gridState.scrollToItem(0)
+                                effectiveGridState.scrollToItem(0)
                             }
                         }
                     )
@@ -148,7 +155,7 @@ fun SeriesLazyCardGrid(
 
         val emptyStateItemOffset = if (series.isEmpty()) 1 else 0
         val fullSpanItems = beforeContentItemOffset + emptyStateItemOffset + if (totalPages > 1) 1 else 0
-        VerticalScrollbarWithFullSpans(gridState, Modifier.align(Alignment.TopEnd), fullSpanItems)
+        VerticalScrollbarWithFullSpans(effectiveGridState, Modifier.align(Alignment.TopEnd), fullSpanItems)
     }
 }
 

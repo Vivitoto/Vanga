@@ -145,6 +145,7 @@ class LibraryScreen(
             else -> {
                 val loading = state is Loading || state is Uninitialized
                 SeriesListContent(
+                    scrollStateKey = "library_series_grid_${libraryId?.value ?: "all"}",
                     series = seriesTabState.series,
                     seriesActions = seriesTabState.seriesMenuActions(),
                     seriesTotalCount = seriesTabState.totalSeriesCount,
