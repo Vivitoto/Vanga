@@ -2,7 +2,7 @@
 
 Vanga 是面向 Komga 媒体库的跨平台漫画 / 图书客户端，支持 Android、桌面端和 Web 运行方式。项目重点是稳定的本地阅读体验、中文界面、常用媒体库管理，以及与 Komga / Komf 生态的连接能力。
 
-> 当前版本：`v0.1.1`
+> 当前版本：`v1.0.12`
 >
 > Android 包名：`io.github.vivitoto.vanga`
 
@@ -53,7 +53,7 @@ Vanga 是面向 Komga 媒体库的跨平台漫画 / 图书客户端，支持 And
 - 最新版本：https://github.com/Vivitoto/Vanga/releases/tag/latest
 - 历史版本：https://github.com/Vivitoto/Vanga/releases
 
-请优先下载 `vanga-v0_1_1.apk`。后续每次发布都会保留独立的 `vX.Y.Z` 历史版本，同时 `latest` 只保留最新 APK。
+请优先下载 `vanga-v1_0_12.apk`。后续每次发布都会保留独立的 `vX.Y.Z` 历史版本，同时 `latest` 只保留最新 APK。
 
 ## 构建说明
 
