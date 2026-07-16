@@ -119,7 +119,7 @@ class ReaderState(
             val bookProgress = newBook.readProgress
             readProgressPage.value = when {
                 bookProgress == null || bookProgress.completed -> 1
-                else -> bookProgress.page
+                else -> clampReaderPage(bookProgress.page, bookPages.size)
             }
             currentBookId.value = bookId
 
@@ -212,7 +212,10 @@ class ReaderState(
             val previousBookPages =
                 if (previousBook != null) loadBookPages(previousBook.id) else emptyList()
 
-            readProgressPage.value = booksState.previousBookPages.size
+            readProgressPage.value = clampReaderPage(
+                page = booksState.previousBookPages.size,
+                pageCount = booksState.previousBookPages.size,
+            )
             this.booksState.value = BookState(
                 currentBook = booksState.previousBook,
                 currentBookPages = booksState.previousBookPages,
@@ -228,14 +231,15 @@ class ReaderState(
     }
 
     suspend fun onProgressChange(page: Int) {
-        readProgressPage.value = page
+        val clampedPage = clampReaderPage(page, booksState.value?.currentBookPages?.size ?: 0)
+        readProgressPage.value = clampedPage
 
         if (markReadProgress) {
             appNotifications.runCatchingToNotifications {
                 val currentBook = requireNotNull(booksState.value?.currentBook)
                 bookApi.markReadProgress(
                     currentBook.id,
-                    KomgaBookReadProgressUpdateRequest(page)
+                    KomgaBookReadProgressUpdateRequest(clampedPage)
                 )
             }
         }
@@ -301,6 +305,13 @@ class ReaderState(
         currentBookId.value = null
         previewLoadScope.cancel()
     }
+}
+
+internal fun clampReaderPage(page: Int, pageCount: Int): Int = when {
+    pageCount <= 0 -> 1
+    page < 1 -> 1
+    page > pageCount -> pageCount
+    else -> page
 }
 
 @CommonParcelize
