@@ -64,10 +64,11 @@ fun BookBulkActionDialogs(state: BookBulkActionsState) {
         val textBody = remember(booksToDelete.size) {
             buildString {
                 if (booksToDelete.size == 1) {
-                    append("《${booksToDelete.first().metadata.title}》将从本机删除")
+                    append("只会删除《${booksToDelete.first().metadata.title}》在本机的已下载文件")
                 } else {
-                    append("${booksToDelete.size} 本漫画及其本地文件将从本机删除")
+                    append("只会删除 ${booksToDelete.size} 本漫画在本机的已下载文件")
                 }
+                append("，不会删除 Komga 服务器上的漫画。")
             }
         }
 

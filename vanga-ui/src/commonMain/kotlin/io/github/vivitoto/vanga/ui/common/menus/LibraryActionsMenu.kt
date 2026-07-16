@@ -88,7 +88,7 @@ fun LibraryActionsMenu(
     if (deleteOfflineLibraryDialog)
         ConfirmationDialog(
             title = "删除本地下载",
-            body = "书库「${library.name}」的离线内容将只从本机删除。",
+            body = "只会删除书库「${library.name}」在本机的已下载文件，不会删除 Komga 服务器上的内容。",
             onDialogConfirm = { actions.deleteOffline(library) },
             onDialogDismiss = { deleteOfflineLibraryDialog = false },
             buttonConfirmColor = MaterialTheme.colorScheme.errorContainer

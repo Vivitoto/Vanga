@@ -324,7 +324,7 @@ private fun FlowRowScope.BookActionRow(
     if (book.downloaded) {
         BookInfoActionSlot {
             DeleteDownloadedButton(
-                text = "删除已下载",
+                text = "删除本地下载",
                 onClick = onDownloadDelete,
                 modifier = Modifier.fillMaxWidth(),
             )

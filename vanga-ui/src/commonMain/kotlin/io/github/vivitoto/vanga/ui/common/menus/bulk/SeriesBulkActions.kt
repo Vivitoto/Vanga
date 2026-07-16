@@ -82,7 +82,7 @@ fun SeriesBulkActionDialogs(
     if (state.showDeleteDownloadedDialog) {
         ConfirmationDialog(
             title = "删除本地下载",
-            body = "${state.series.size} 个漫画系列将从本机删除，服务器内容不受影响。",
+            body = "只会删除 ${state.series.size} 个漫画系列在本机的已下载文件，不会删除 Komga 服务器上的漫画系列。",
             onDialogConfirm = {
                 coroutineScope.launch { state.actions.deleteDownloaded(state.series) }
                 state.showDeleteDownloadedDialog = false

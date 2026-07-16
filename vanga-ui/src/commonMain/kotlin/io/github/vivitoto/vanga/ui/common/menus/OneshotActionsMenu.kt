@@ -59,7 +59,7 @@ fun OneshotActionsMenu(
     if (showDeleteDownloadedDialog) {
         ConfirmationDialog(
             title = "删除本地下载",
-            body = "《${book.metadata.title}》将只从本机删除，服务器内容不受影响。",
+            body = "只会删除本机已下载文件，不会删除 Komga 服务器上的漫画。",
             onDialogConfirm = {
                 actions.deleteDownloaded(book)
                 onDismissRequest()
