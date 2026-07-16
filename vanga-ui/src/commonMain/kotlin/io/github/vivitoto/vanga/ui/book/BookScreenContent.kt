@@ -368,7 +368,7 @@ fun DownloadButton(
         downloadEvents?.filter { it.bookId == book.id }?.collect { downloadEvent = it }
     }
 
-    val downloadEnabled = downloadEvent == null
+    val downloadEnabled = isDownloadButtonEnabled(downloadEvent)
     val surfaceModifier = modifier.height(48.dp).pointerHoverIcon(PointerIcon.Hand)
     Surface(
         shape = VangaButtonShape,
@@ -401,19 +401,23 @@ fun DownloadButton(
                         )
                     }
                     Spacer(Modifier.width(8.dp))
-                    Text("下载中…")
+                    Text(downloadButtonLabel(event))
                 }
 
                 is DownloadEvent.BookDownloadError -> {
                     Icon(Icons.Default.Download, null)
                     Spacer(Modifier.width(8.dp))
-                    Text(downloadErrorText(event.error), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        "${downloadButtonLabel(event)}：${downloadErrorText(event.error)}",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
 
                 else -> {
                     Icon(Icons.Default.Download, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("下载")
+                    Text(downloadButtonLabel(event))
                 }
             }
         }
