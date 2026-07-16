@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.offline.api
 
 import io.github.vivitoto.vanga.komga.api.KomgaReadListApi
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.KomgaThumbnailId
@@ -24,11 +25,11 @@ class OfflineReadListApi : KomgaReadListApi {
     }
 
     override suspend fun getOne(id: KomgaReadListId): KomgaReadList {
-        TODO("Not yet implemented")
+        offlineUnsupported("查看离线阅读清单详情")
     }
 
     override suspend fun addOne(request: KomgaReadListCreateRequest): KomgaReadList {
-        TODO("Not yet implemented")
+        offlineUnsupported("新增离线阅读清单")
     }
 
     override suspend fun updateOne(
@@ -49,14 +50,14 @@ class OfflineReadListApi : KomgaReadListApi {
     }
 
     override suspend fun getDefaultThumbnail(readListId: KomgaReadListId): ByteArray? {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线阅读清单默认缩略图")
     }
 
     override suspend fun getThumbnail(
         readListId: KomgaReadListId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线阅读清单缩略图")
     }
 
     override suspend fun getThumbnails(readListId: KomgaReadListId): List<KomgaReadListThumbnail> {
@@ -69,7 +70,7 @@ class OfflineReadListApi : KomgaReadListApi {
         filename: String,
         selected: Boolean
     ): KomgaReadListThumbnail {
-        TODO("Not yet implemented")
+        offlineUnsupported("上传离线阅读清单缩略图")
     }
 
     override suspend fun selectThumbnail(
@@ -88,13 +89,13 @@ class OfflineReadListApi : KomgaReadListApi {
         readListId: KomgaReadListId,
         bookId: KomgaBookId
     ): VangaBook {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线阅读清单下一本")
     }
 
     override suspend fun getBookSiblingPrevious(
         readListId: KomgaReadListId,
         bookId: KomgaBookId
     ): VangaBook {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线阅读清单上一本")
     }
 }

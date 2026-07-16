@@ -1,6 +1,7 @@
 package io.github.vivitoto.vanga.offline.api
 
 import io.github.vivitoto.vanga.komga.api.KomgaCollectionsApi
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.collection.KomgaCollection
 import snd.komga.client.collection.KomgaCollectionCreateRequest
 import snd.komga.client.collection.KomgaCollectionId
@@ -23,11 +24,11 @@ class OfflineCollectionsApi : KomgaCollectionsApi {
     }
 
     override suspend fun getOne(id: KomgaCollectionId): KomgaCollection {
-        TODO("Not yet implemented")
+        offlineUnsupported("查看离线合集详情")
     }
 
     override suspend fun addOne(request: KomgaCollectionCreateRequest): KomgaCollection {
-        TODO("Not yet implemented")
+        offlineUnsupported("新增离线合集")
     }
 
     override suspend fun updateOne(
@@ -48,14 +49,14 @@ class OfflineCollectionsApi : KomgaCollectionsApi {
     }
 
     override suspend fun getDefaultThumbnail(collectionId: KomgaCollectionId): ByteArray? {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线合集默认缩略图")
     }
 
     override suspend fun getThumbnail(
         collectionId: KomgaCollectionId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线合集缩略图")
     }
 
     override suspend fun getThumbnails(collectionId: KomgaCollectionId): List<KomgaCollectionThumbnail> {
@@ -68,7 +69,7 @@ class OfflineCollectionsApi : KomgaCollectionsApi {
         filename: String,
         selected: Boolean
     ): KomgaCollectionThumbnail {
-        TODO("Not yet implemented")
+        offlineUnsupported("上传离线合集缩略图")
     }
 
     override suspend fun selectThumbnail(

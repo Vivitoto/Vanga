@@ -18,6 +18,7 @@ import io.github.vivitoto.vanga.offline.book.repository.OfflineThumbnailBookRepo
 import io.github.vivitoto.vanga.offline.media.model.MediaExtensionEpub
 import io.github.vivitoto.vanga.offline.media.repository.OfflineMediaRepository
 import io.github.vivitoto.vanga.offline.mediacontainer.BookContentExtractors
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import io.github.vivitoto.vanga.offline.readprogress.OfflineReadProgressRepository
 import io.github.vivitoto.vanga.offline.readprogress.actions.ProgressCompleteForBookAction
 import io.github.vivitoto.vanga.offline.readprogress.actions.ProgressDeleteForBookAction
@@ -206,7 +207,7 @@ class OfflineBookApi(
         bookId: KomgaBookId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线单本缩略图")
     }
 
     override suspend fun getThumbnails(bookId: KomgaBookId): List<KomgaBookThumbnail> {

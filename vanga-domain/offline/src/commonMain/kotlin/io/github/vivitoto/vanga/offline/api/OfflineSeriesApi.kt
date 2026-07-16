@@ -7,6 +7,7 @@ import io.github.vivitoto.vanga.offline.api.repository.OfflineSeriesDtoRepositor
 import io.github.vivitoto.vanga.offline.book.repository.OfflineBookRepository
 import io.github.vivitoto.vanga.offline.book.repository.OfflineThumbnailBookRepository
 import io.github.vivitoto.vanga.offline.library.repository.OfflineLibraryRepository
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import io.github.vivitoto.vanga.offline.readprogress.actions.ProgressCompleteForSeriesAction
 import io.github.vivitoto.vanga.offline.readprogress.actions.ProgressDeleteForSeriesAction
 import io.github.vivitoto.vanga.offline.series.actions.SeriesAddThumbnailAction
@@ -179,7 +180,7 @@ class OfflineSeriesApi(
         seriesId: KomgaSeriesId,
         thumbnailId: KomgaThumbnailId
     ): ByteArray {
-        TODO("Not yet implemented")
+        offlineUnsupported("获取离线系列缩略图")
     }
 
     override suspend fun getThumbnails(seriesId: KomgaSeriesId): List<KomgaSeriesThumbnail> {

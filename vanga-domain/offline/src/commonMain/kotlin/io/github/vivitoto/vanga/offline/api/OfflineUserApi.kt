@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.offline.api
 
 import kotlinx.coroutines.flow.StateFlow
 import io.github.vivitoto.vanga.komga.api.KomgaUserApi
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import io.github.vivitoto.vanga.offline.user.repository.OfflineUserRepository
 import snd.komga.client.common.KomgaPageRequest
 import snd.komga.client.common.Page
@@ -42,7 +43,7 @@ class OfflineUserApi(
     }
 
     override suspend fun addUser(user: KomgaUserCreateRequest): KomgaUser {
-        TODO("Not yet implemented")
+        offlineUnsupported("新增离线用户")
     }
 
     override suspend fun deleteUser(userId: KomgaUserId) {

@@ -11,6 +11,7 @@ import io.github.vivitoto.vanga.offline.library.actions.LibraryRefreshMetadataAc
 import io.github.vivitoto.vanga.offline.library.actions.LibraryScanAction
 import io.github.vivitoto.vanga.offline.library.model.OfflineLibrary
 import io.github.vivitoto.vanga.offline.library.repository.OfflineLibraryRepository
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import io.github.vivitoto.vanga.offline.server.model.OfflineMediaServer
 import io.github.vivitoto.vanga.offline.user.model.OfflineUser
 import snd.komga.client.library.KomgaLibrary
@@ -44,10 +45,7 @@ class OfflineLibraryApi(
     }
 
     override suspend fun addOne(request: KomgaLibraryCreateRequest): KomgaLibrary {
-        TODO()
-//        return actions.get<LibraryAddAction>()
-//            .run(request, mediaServer.value)
-//            .toKomgaLibrary()
+        offlineUnsupported("新增离线书库")
     }
 
     override suspend fun patchOne(
