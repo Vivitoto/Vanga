@@ -1,6 +1,7 @@
 package io.github.vivitoto.vanga.offline.series.actions
 
 import io.github.vivitoto.vanga.offline.action.OfflineAction
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.common.KomgaThumbnailId
 import snd.komga.client.series.KomgaSeriesId
 
@@ -11,6 +12,6 @@ class SeriesSelectThumbnailAction(
         seriesId: KomgaSeriesId,
         thumbnailId: KomgaThumbnailId
     ) {
-        TODO("Not yet implemented")
+        offlineUnsupported("选择系列缩略图")
     }
 }

@@ -1,6 +1,7 @@
 package io.github.vivitoto.vanga.offline.book.actions
 
 import io.github.vivitoto.vanga.offline.action.OfflineAction
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.book.KomgaBookId
 import snd.komga.client.book.KomgaBookMetadataUpdateRequest
 
@@ -9,6 +10,6 @@ class BookMetadataUpdateAction : OfflineAction {
         bookId: KomgaBookId,
         request: KomgaBookMetadataUpdateRequest
     ) {
-        TODO("Not yet implemented")
+        offlineUnsupported("更新单本元数据")
     }
 }

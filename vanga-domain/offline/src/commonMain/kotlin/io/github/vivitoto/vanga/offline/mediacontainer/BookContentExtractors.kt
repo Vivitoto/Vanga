@@ -3,6 +3,7 @@ package io.github.vivitoto.vanga.offline.mediacontainer
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.vivitoto.vanga.offline.book.model.OfflineBook
 import io.github.vivitoto.vanga.offline.media.model.OfflineMedia
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.book.KomgaMediaStatus
 import snd.komga.client.book.MediaProfile
 
@@ -44,7 +45,7 @@ class BookContentExtractors(
             }
 
             MediaProfile.PDF -> {
-                TODO()
+                offlineUnsupported("离线 PDF 页内容抽取")
             }
 
             null -> throw IllegalStateException("Media is not ready")

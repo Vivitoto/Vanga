@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor
 import java.io.FileInputStream
 import java.io.IOException
 import java.nio.ByteBuffer
+import java.nio.channels.NonWritableChannelException
 import java.nio.channels.SeekableByteChannel
 
 class SafSeekableReadByteChannel(
@@ -50,7 +51,7 @@ class SafSeekableReadByteChannel(
     }
 
     override fun write(src: ByteBuffer?): Int {
-        TODO("Not yet implemented")
+        throw NonWritableChannelException()
     }
 
     override fun close() {

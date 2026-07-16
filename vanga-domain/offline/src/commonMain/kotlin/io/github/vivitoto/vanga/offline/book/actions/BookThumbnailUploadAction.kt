@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.offline.book.actions
 
 import io.github.vivitoto.vanga.offline.action.OfflineAction
 import io.github.vivitoto.vanga.offline.book.model.OfflineThumbnailBook
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.book.KomgaBookId
 
 class BookThumbnailUploadAction : OfflineAction {
@@ -10,6 +11,6 @@ class BookThumbnailUploadAction : OfflineAction {
         file: ByteArray,
         selected: Boolean
     ): OfflineThumbnailBook {
-        TODO("Not yet implemented")
+        offlineUnsupported("上传单本缩略图")
     }
 }

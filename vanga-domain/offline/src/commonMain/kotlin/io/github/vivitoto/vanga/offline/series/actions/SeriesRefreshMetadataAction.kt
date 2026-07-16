@@ -1,6 +1,7 @@
 package io.github.vivitoto.vanga.offline.series.actions
 
 import io.github.vivitoto.vanga.offline.action.OfflineAction
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import snd.komga.client.series.KomgaSeriesId
 
 class SeriesRefreshMetadataAction(
@@ -9,6 +10,6 @@ class SeriesRefreshMetadataAction(
     suspend fun run(
         seriesId: KomgaSeriesId,
     ) {
-        TODO("Not yet implemented")
+        offlineUnsupported("刷新系列元数据")
     }
 }

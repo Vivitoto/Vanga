@@ -2,6 +2,7 @@ package io.github.vivitoto.vanga.offline.library.actions
 
 import kotlinx.coroutines.flow.MutableSharedFlow
 import io.github.vivitoto.vanga.offline.action.OfflineAction
+import io.github.vivitoto.vanga.offline.offlineUnsupported
 import io.github.vivitoto.vanga.offline.library.model.OfflineLibrary
 import io.github.vivitoto.vanga.offline.library.repository.OfflineLibraryRepository
 import io.github.vivitoto.vanga.offline.server.model.OfflineMediaServerId
@@ -15,11 +16,7 @@ class LibraryAddAction(
 ) : OfflineAction {
 
     suspend fun run(request: KomgaLibraryCreateRequest, mediaServerId: OfflineMediaServerId): OfflineLibrary {
-//        val offlineLibrary = TODO()
-//        libraryRepository.save(offlineLibrary)
-//        events.emit(KomgaEvent.LibraryAdded(offlineLibrary.id))
-//        return offlineLibrary
-        TODO()
+        offlineUnsupported("新增库")
     }
 
     private fun KomgaLibrary.toOfflineLibrary(serverId: OfflineMediaServerId) = OfflineLibrary(
