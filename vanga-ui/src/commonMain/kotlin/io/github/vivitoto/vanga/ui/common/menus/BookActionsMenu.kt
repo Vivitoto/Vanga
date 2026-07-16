@@ -114,7 +114,7 @@ fun BookActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
-        if (isAdmin && !isOffline) {
+        if (showOnlineAdminActions(isAdmin, isOffline)) {
             DropdownMenuItem(
                 text = { Text("分析文件") },
                 onClick = {
@@ -160,13 +160,13 @@ fun BookActionsMenu(
             )
         }
 
-        if (isAdmin && !isOffline && showEditOption) {
+        if (showOnlineAdminActions(isAdmin, isOffline) && showEditOption) {
             DropdownMenuItem(
                 text = { Text("编辑") },
                 onClick = { showEditDialog = true },
             )
         }
-        if (!isOffline && showDownloadOption) {
+        if (showOnlineDownloadAction(showDownloadOption, isOffline)) {
             DropdownMenuItem(
                 text = { Text("下载") },
                 onClick = { showDownloadDialog = true },

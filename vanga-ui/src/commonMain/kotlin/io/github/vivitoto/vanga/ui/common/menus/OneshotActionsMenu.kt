@@ -124,7 +124,7 @@ fun OneshotActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
-        if (isAdmin && !isOffline) {
+        if (showOnlineAdminActions(isAdmin, isOffline)) {
             DropdownMenuItem(
                 text = { Text("分析文件") },
                 onClick = {
@@ -175,7 +175,7 @@ fun OneshotActionsMenu(
         }
 
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
-        if (komfIntegration.value) {
+        if (showOnlineKomfActions(komfIntegration.value, isOffline)) {
             DropdownMenuItem(
                 text = { Text("自动识别元数据（Komf）") },
                 onClick = { showKomfDialog = true },
@@ -192,7 +192,7 @@ fun OneshotActionsMenu(
         val deleteColor =
             if (deleteIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
             else Modifier
-        if (isAdmin && !isOffline) {
+        if (showOnlineAdminActions(isAdmin, isOffline)) {
             DropdownMenuItem(
                 text = { Text("删除") },
                 onClick = {
@@ -204,7 +204,7 @@ fun OneshotActionsMenu(
             )
         }
 
-        if (isOffline) {
+        if (showOfflineLocalDeleteAction(isOffline)) {
             DropdownMenuItem(
                 text = { Text("删除本地下载") },
                 onClick = { showDeleteDownloadedDialog = true },

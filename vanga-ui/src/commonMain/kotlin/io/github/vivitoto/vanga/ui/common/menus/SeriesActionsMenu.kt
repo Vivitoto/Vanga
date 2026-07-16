@@ -145,7 +145,7 @@ fun SeriesActionsMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
     ) {
-        if (isAdmin && !isOffline) {
+        if (showOnlineAdminActions(isAdmin, isOffline)) {
             DropdownMenuItem(
                 text = { Text("分析文件") },
                 onClick = {
@@ -190,21 +190,21 @@ fun SeriesActionsMenu(
             )
         }
 
-        if (isAdmin && !isOffline && showEditOption) {
+        if (showOnlineAdminActions(isAdmin, isOffline) && showEditOption) {
             DropdownMenuItem(
                 text = { Text("编辑") },
                 onClick = { showEditDialog = true },
             )
         }
 
-        if (!isOffline && showDownloadOption) {
+        if (showOnlineDownloadAction(showDownloadOption, isOffline)) {
             DropdownMenuItem(
                 text = { Text("下载") },
                 onClick = { showDownloadDialog = true },
             )
         }
 
-        if (isOffline) {
+        if (showOfflineLocalDeleteAction(isOffline)) {
             val deleteInteractionSource = remember { MutableInteractionSource() }
             val deleteIsHovered = deleteInteractionSource.collectIsHoveredAsState()
             val deleteColor =
@@ -221,7 +221,7 @@ fun SeriesActionsMenu(
         }
 
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
-        if (komfIntegration.value) {
+        if (showOnlineKomfActions(komfIntegration.value, isOffline)) {
             DropdownMenuItem(
                 text = { Text("自动识别元数据（Komf）") },
                 onClick = { showKomfDialog = true },

@@ -108,7 +108,7 @@ fun LibraryActionsMenu(
     val isAdmin = LocalKomgaState.current.authenticatedUser.collectAsState().value?.roleAdmin() ?: true
     val isOffline = LocalOfflineMode.current.collectAsState().value
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-        if (isAdmin && !isOffline) {
+        if (showOnlineAdminActions(isAdmin, isOffline)) {
             DropdownMenuItem(
                 text = { Text("扫描书库文件") },
                 onClick = {
@@ -164,7 +164,7 @@ fun LibraryActionsMenu(
         }
 
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
-        if (komfIntegration.value) {
+        if (showOnlineKomfActions(komfIntegration.value, isOffline)) {
             val vmFactory = LocalViewModelFactory.current
             val autoIdentifyVm = remember(library) {
                 vmFactory.getKomfLibraryIdentifyViewModel(library)
@@ -189,7 +189,7 @@ fun LibraryActionsMenu(
             if (deleteScanIsHovered.value) Modifier.background(MaterialTheme.colorScheme.errorContainer)
             else Modifier
 
-        if (!isOffline && isAdmin) {
+        if (showOnlineAdminActions(isAdmin, isOffline)) {
             DropdownMenuItem(
                 text = { Text("删除") },
                 onClick = {
@@ -201,7 +201,7 @@ fun LibraryActionsMenu(
                     .then(deleteScanColor)
             )
         }
-        if (isOffline) {
+        if (showOfflineLocalDeleteAction(isOffline)) {
             DropdownMenuItem(
                 text = { Text("删除本地下载") },
                 onClick = {
