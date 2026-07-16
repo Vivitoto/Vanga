@@ -415,16 +415,15 @@ private fun DoublePageLayout(
     pages: List<Page>,
     readingDirection: PagedReadingDirection,
 ) {
+    val displayPages = displayablePagedReaderSpreadPages(pages)
     Layout(content = {
-        when (pages.size) {
+        when (displayPages.size) {
             0 -> {}
-            1 -> ReaderImageContent(pages.first().imageResult)
+            1 -> ReaderImageContent(displayPages.first().imageResult)
             2 -> {
-                ReaderImageContent(pages[0].imageResult)
-                ReaderImageContent(pages[1].imageResult)
+                ReaderImageContent(displayPages[0].imageResult)
+                ReaderImageContent(displayPages[1].imageResult)
             }
-
-            else -> error("无法同时显示超过 2 张图片")
         }
     }) { measurables, constraints ->
         val measured = measurables
@@ -436,7 +435,7 @@ private fun DoublePageLayout(
                 }
             }
         val startPadding: Int
-        if (measured.size == 1 && !pages.first().metadata.isLandscape()) {
+        if (measured.size == 1 && !displayPages.first().metadata.isLandscape()) {
             startPadding = when (readingDirection) {
                 LEFT_TO_RIGHT -> (constraints.maxWidth - (measured.first().width * 2)) / 2
                 RIGHT_TO_LEFT -> ((constraints.maxWidth - (measured.first().width * 2)) / 2) + measured.first().width

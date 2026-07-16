@@ -119,8 +119,9 @@ class PagedReaderState(
                     readingDirection = readingDirection.value,
                 )
                 val containerSize = screenScaleState.areaSize.value
-                val maxPageSize = getMaxPageSize(spread.pages.map { it.metadata }, containerSize)
-                val targetSize = fitToScreenZoom(spread.pages, maxPageSize, layout.value)
+                val pages = displayablePagedReaderSpreadPages(spread.pages)
+                val maxPageSize = getMaxPageSize(pages.map { it.metadata }, containerSize)
+                val targetSize = fitToScreenZoom(pages, maxPageSize, layout.value)
                 screenScaleState.setTargetSize(targetSize.toSize())
                 delay(100)
             }
@@ -145,14 +146,13 @@ class PagedReaderState(
         screenScaleState: ScreenScaleState,
         readingDirection: PagedReadingDirection,
     ) {
-        val maxPageSize = getMaxPageSize(spread.pages.map { it.metadata }, screenScaleState.areaSize.value)
+        val pages = displayablePagedReaderSpreadPages(spread.pages)
+        val maxPageSize = getMaxPageSize(pages.map { it.metadata }, screenScaleState.areaSize.value)
         val zoomFactor = screenScaleState.transformation.value.scale
         val offset = screenScaleState.transformation.value.offset
         val areaSize = screenScaleState.areaSize.value.toSize()
         val stretchToFit = readerState.imageStretchToFit.value
 
-
-        val pages = spread.pages
         var xOffset = offset.x
         pages.forEachIndexed { index, result ->
             if (result.imageResult is ReaderImageResult.Success) {
@@ -179,7 +179,7 @@ class PagedReaderState(
                         }
                     }
 
-                    else -> throw IllegalStateException("can't display more than 2 images")   //TODO 3 or more images?
+                    else -> offset.x
                 }
 
                 val top =
@@ -389,17 +389,18 @@ class PagedReaderState(
     }
 
     private suspend fun completeLoadJob(pages: List<Page>): PagesLoadJob {
+        val displayPages = displayablePagedReaderSpreadPages(pages)
         val containerSize = screenScaleState.areaSize.value
-        val maxPageSize = getMaxPageSize(pages.map { it.metadata }, containerSize)
+        val maxPageSize = getMaxPageSize(displayPages.map { it.metadata }, containerSize)
         val newScale = calculateScreenScale(
-            pages,
+            displayPages,
             areaSize = containerSize,
             maxPageSize = maxPageSize,
             scaleType = scaleType.value,
             displayLayout = layout.value,
             stretchToFit = readerState.imageStretchToFit.value
         )
-        val spread = PageSpread(pages)
+        val spread = PageSpread(displayPages)
         when (readingDirection.value) {
             LEFT_TO_RIGHT -> newScale.addPan(
                 Offset(
@@ -427,8 +428,9 @@ class PagedReaderState(
     }
 
     private fun getMaxPageSize(pages: List<PageMetadata>, containerSize: IntSize): IntSize {
+        val pageCount = pages.size.coerceAtLeast(1)
         return IntSize(
-            width = containerSize.width / pages.size,
+            width = containerSize.width / pageCount,
             height = containerSize.height
         )
     }
@@ -635,6 +637,8 @@ class PagedReaderState(
         maxPageSize: IntSize,
         displayLayout: PageDisplayLayout,
     ): IntSize {
+        if (pages.isEmpty()) return maxPageSize
+
         return when (displayLayout) {
             SINGLE_PAGE -> {
                 check(pages.size == 1)
@@ -705,3 +709,5 @@ class PagedReaderState(
         ) : TransitionPage
     }
 }
+
+internal fun <T> displayablePagedReaderSpreadPages(pages: List<T>): List<T> = pages.take(2)
