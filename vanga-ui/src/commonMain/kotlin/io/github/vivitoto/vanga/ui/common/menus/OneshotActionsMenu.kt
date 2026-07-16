@@ -22,6 +22,7 @@ import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
 import io.github.vivitoto.vanga.ui.dialogs.collectionadd.AddToCollectionDialog
+import io.github.vivitoto.vanga.ui.dialogs.komf.identify.KomfBookIdentifyDialog
 import io.github.vivitoto.vanga.ui.dialogs.komf.identify.KomfIdentifyDialog
 import io.github.vivitoto.vanga.ui.dialogs.komf.reset.KomfResetSeriesMetadataDialog
 import io.github.vivitoto.vanga.ui.dialogs.readlistadd.AddToReadListDialog
@@ -100,6 +101,16 @@ fun OneshotActionsMenu(
             }
         )
     }
+    var showKomfBookIdentifyDialog by remember { mutableStateOf(false) }
+    if (showKomfBookIdentifyDialog) {
+        KomfBookIdentifyDialog(
+            book = book,
+            onDismissRequest = {
+                showKomfBookIdentifyDialog = false
+                onDismissRequest()
+            }
+        )
+    }
     var showKomfResetDialog by remember { mutableStateOf(false) }
     if (showKomfResetDialog) {
         KomfResetSeriesMetadataDialog(
@@ -115,6 +126,7 @@ fun OneshotActionsMenu(
         expanded &&
                 !showDeleteDialog &&
                 !showKomfDialog &&
+                !showKomfBookIdentifyDialog &&
                 !showKomfResetDialog &&
                 !showAddToCollectionDialog &&
                 !showAddToReadListDialog
@@ -175,6 +187,18 @@ fun OneshotActionsMenu(
         }
 
         val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
+        if (showKomfBookIdentifyAction(
+                komfEnabled = komfIntegration.value,
+                isOffline = isOffline,
+                hasBookContext = true,
+            )
+        ) {
+            DropdownMenuItem(
+                text = { Text("自动识别单本元数据（Komf）") },
+                onClick = { showKomfBookIdentifyDialog = true },
+            )
+        }
+
         if (showOnlineKomfActions(komfIntegration.value, isOffline)) {
             DropdownMenuItem(
                 text = { Text("自动识别元数据（Komf）") },

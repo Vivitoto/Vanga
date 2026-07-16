@@ -23,10 +23,12 @@ import io.github.vivitoto.vanga.AppNotifications
 import io.github.vivitoto.vanga.komga.api.KomgaBookApi
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
 import io.github.vivitoto.vanga.offline.tasks.OfflineTaskEmitter
+import io.github.vivitoto.vanga.ui.LocalKomfIntegration
 import io.github.vivitoto.vanga.ui.LocalKomgaState
 import io.github.vivitoto.vanga.ui.LocalOfflineMode
 import io.github.vivitoto.vanga.ui.dialogs.ConfirmationDialog
 import io.github.vivitoto.vanga.ui.dialogs.book.edit.BookEditDialog
+import io.github.vivitoto.vanga.ui.dialogs.komf.identify.KomfBookIdentifyDialog
 import io.github.vivitoto.vanga.ui.dialogs.permissions.DownloadNotificationRequestDialog
 import io.github.vivitoto.vanga.ui.dialogs.readlistadd.AddToReadListDialog
 import snd.komga.client.book.KomgaBookReadProgressUpdateRequest
@@ -95,6 +97,16 @@ fun BookActionsMenu(
                 onDismissRequest()
             })
     }
+    var showKomfBookIdentifyDialog by remember { mutableStateOf(false) }
+    if (showKomfBookIdentifyDialog) {
+        KomfBookIdentifyDialog(
+            book = book,
+            onDismissRequest = {
+                showKomfBookIdentifyDialog = false
+                onDismissRequest()
+            }
+        )
+    }
     var showDownloadDialog by remember { mutableStateOf(false) }
     if (showDownloadDialog) {
         var permissionRequested by remember { mutableStateOf(false) }
@@ -109,7 +121,13 @@ fun BookActionsMenu(
         }
     }
 
-    val showDropdown = derivedStateOf { expanded && !showDeleteDialog && !showEditDialog }
+    val showDropdown = derivedStateOf {
+        expanded &&
+                !showDeleteDialog &&
+                !showEditDialog &&
+                !showAddToReadListDialog &&
+                !showKomfBookIdentifyDialog
+    }
     DropdownMenu(
         expanded = showDropdown.value,
         onDismissRequest = onDismissRequest
@@ -134,6 +152,19 @@ fun BookActionsMenu(
             DropdownMenuItem(
                 text = { Text("加入阅读清单") },
                 onClick = { showAddToReadListDialog = true },
+            )
+        }
+
+        val komfIntegration = LocalKomfIntegration.current.collectAsState(false)
+        if (showKomfBookIdentifyAction(
+                komfEnabled = komfIntegration.value,
+                isOffline = isOffline,
+                hasBookContext = true,
+            )
+        ) {
+            DropdownMenuItem(
+                text = { Text("自动识别单本元数据（Komf）") },
+                onClick = { showKomfBookIdentifyDialog = true },
             )
         }
 

@@ -10,6 +10,12 @@ internal fun showOnlineKomfActions(
     isOffline: Boolean,
 ): Boolean = komfEnabled && !isOffline
 
+internal fun showKomfBookIdentifyAction(
+    komfEnabled: Boolean,
+    isOffline: Boolean,
+    hasBookContext: Boolean,
+): Boolean = komfEnabled && !isOffline && hasBookContext
+
 internal fun showOnlineDownloadAction(
     showDownloadOption: Boolean,
     isOffline: Boolean,

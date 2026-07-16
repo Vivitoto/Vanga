@@ -21,6 +21,14 @@ class OfflineMenuVisibilityTest {
     }
 
     @Test
+    fun komfBookIdentifyNeedsKomfOnlineAndBookContext() {
+        assertTrue(showKomfBookIdentifyAction(komfEnabled = true, isOffline = false, hasBookContext = true))
+        assertFalse(showKomfBookIdentifyAction(komfEnabled = true, isOffline = true, hasBookContext = true))
+        assertFalse(showKomfBookIdentifyAction(komfEnabled = false, isOffline = false, hasBookContext = true))
+        assertFalse(showKomfBookIdentifyAction(komfEnabled = true, isOffline = false, hasBookContext = false))
+    }
+
+    @Test
     fun downloadActionsAreOnlineOnly() {
         assertTrue(showOnlineDownloadAction(showDownloadOption = true, isOffline = false))
         assertFalse(showOnlineDownloadAction(showDownloadOption = true, isOffline = true))
