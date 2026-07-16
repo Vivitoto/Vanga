@@ -45,6 +45,10 @@ kotlin {
             implementation(libs.ktor.client.core)
         }
 
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+
         androidMain.dependencies {
             implementation(libs.commons.compress)
             implementation(libs.androidx.documentfile)
