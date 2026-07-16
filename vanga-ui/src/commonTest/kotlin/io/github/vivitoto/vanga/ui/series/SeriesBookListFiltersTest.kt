@@ -78,4 +78,27 @@ class SeriesBookListFiltersTest {
 
         assertEquals(listOf("Alpha 01"), result.map { it.title })
     }
+
+    @Test
+    fun detectsActiveFilters() {
+        assertEquals(false, SeriesBookListFilterState().isActive)
+        assertEquals(true, SeriesBookListFilterState(query = "alpha").isActive)
+        assertEquals(true, SeriesBookListFilterState(readStatus = SeriesBookReadStatusFilter.Read).isActive)
+        assertEquals(true, SeriesBookListFilterState(downloadStatus = SeriesBookDownloadStatusFilter.Downloaded).isActive)
+        assertEquals(true, SeriesBookListFilterState(favoritesOnly = true).isActive)
+    }
+
+    @Test
+    fun paginatesClientSideResults() {
+        assertEquals(listOf("Alpha 01", "Beta 02"), paginateSeriesBookList(books, page = 1, pageSize = 2).map { it.title })
+        assertEquals(listOf("Gamma 03"), paginateSeriesBookList(books, page = 2, pageSize = 2).map { it.title })
+        assertEquals(emptyList(), paginateSeriesBookList(books, page = 3, pageSize = 2).map { it.title })
+    }
+
+    @Test
+    fun calculatesClientSidePageCount() {
+        assertEquals(1, seriesBookListPageCount(itemCount = 0, pageSize = 20))
+        assertEquals(1, seriesBookListPageCount(itemCount = 3, pageSize = 20))
+        assertEquals(2, seriesBookListPageCount(itemCount = 21, pageSize = 20))
+    }
 }

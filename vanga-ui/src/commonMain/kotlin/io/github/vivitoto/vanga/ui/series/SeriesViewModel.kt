@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import io.github.vivitoto.vanga.AppNotifications
+import io.github.vivitoto.vanga.favorites.FavoriteReadListService
 import io.github.vivitoto.vanga.komga.api.KomgaBookApi
 import io.github.vivitoto.vanga.komga.api.KomgaCollectionsApi
 import io.github.vivitoto.vanga.komga.api.KomgaReferentialApi
@@ -49,6 +50,7 @@ class SeriesViewModel(
     private val seriesApi: KomgaSeriesApi,
     private val taskEmitter: OfflineTaskEmitter,
     bookApi: KomgaBookApi,
+    favoriteReadListService: FavoriteReadListService,
     collectionApi: KomgaCollectionsApi,
     referentialApi: KomgaReferentialApi,
     settingsRepository: CommonSettingsRepository,
@@ -69,6 +71,7 @@ class SeriesViewModel(
         settingsRepository = settingsRepository,
         notifications = notifications,
         bookApi = bookApi,
+        favoriteReadListService = favoriteReadListService,
         events = events,
         screenModelScope = screenModelScope,
         cardWidth = cardWidth,

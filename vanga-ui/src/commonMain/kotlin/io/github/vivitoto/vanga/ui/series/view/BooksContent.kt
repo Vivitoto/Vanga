@@ -46,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,6 +73,7 @@ import io.github.vivitoto.vanga.ui.common.components.FilterDropdownChoice
 import io.github.vivitoto.vanga.ui.common.components.FilterDropdownMultiChoice
 import io.github.vivitoto.vanga.ui.common.components.EmptyState
 import io.github.vivitoto.vanga.ui.common.components.LabeledEntry
+import io.github.vivitoto.vanga.ui.common.components.NoPaddingTextField
 import io.github.vivitoto.vanga.ui.common.components.PageSizeSelectionDropdown
 import io.github.vivitoto.vanga.ui.common.components.Pagination
 import io.github.vivitoto.vanga.ui.common.components.TagFiltersDropdownMenu
@@ -85,6 +87,9 @@ import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.EXPANDED
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.FULL
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
+import io.github.vivitoto.vanga.ui.series.SeriesBookDownloadStatusFilter
+import io.github.vivitoto.vanga.ui.series.SeriesBookListFilterState
+import io.github.vivitoto.vanga.ui.series.SeriesBookReadStatusFilter
 import io.github.vivitoto.vanga.ui.series.SeriesBooksState.BooksData
 import io.github.vivitoto.vanga.ui.series.SeriesFilterState.TagExclusionMode
 import io.github.vivitoto.vanga.ui.series.SeriesFilterState.TagInclusionMode
@@ -101,6 +106,7 @@ fun LazyGridScope.SeriesBooksContent(
     onBooksGridDensityChange: (Dp) -> Unit,
     onBooksPageSizeChange: (Int) -> Unit,
     onPageChange: (Int) -> Unit,
+    onBookListFiltersChange: (SeriesBookListFilterState) -> Unit,
     onBookSelect: (VangaBook) -> Unit,
     booksFilterState: BooksFilterState,
     bookContextMenuActions: BookMenuActions,
@@ -120,6 +126,8 @@ fun LazyGridScope.SeriesBooksContent(
                 onBooksPageSizeChange = onBooksPageSizeChange,
                 selectionMode = booksState.selectionMode,
                 booksFilterState = booksFilterState,
+                bookListFilters = booksState.listFilters,
+                onBookListFiltersChange = onBookListFiltersChange,
                 totalBookPages = booksState.totalPages,
                 currentBookPage = booksState.currentPage,
                 onPageChange = onPageChange
@@ -237,6 +245,8 @@ private fun BooksToolBar(
     onBooksPageSizeChange: (Int) -> Unit,
     selectionMode: Boolean,
     booksFilterState: BooksFilterState,
+    bookListFilters: SeriesBookListFilterState,
+    onBookListFiltersChange: (SeriesBookListFilterState) -> Unit,
 
     totalBookPages: Int,
     currentBookPage: Int,
@@ -342,6 +352,13 @@ private fun BooksToolBar(
             )
         }
 
+        if (!selectionMode) {
+            SeriesBookListFiltersRow(
+                filters = bookListFilters,
+                onFiltersChange = onBookListFiltersChange,
+            )
+        }
+
         AnimatedVisibility(!selectionMode && totalBookPages > 1) {
             Pagination(
                 totalPages = totalBookPages,
@@ -351,6 +368,77 @@ private fun BooksToolBar(
         }
     }
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SeriesBookListFiltersRow(
+    filters: SeriesBookListFilterState,
+    onFiltersChange: (SeriesBookListFilterState) -> Unit,
+) {
+    var query by remember(filters.query) { mutableStateOf(filters.query) }
+    val latestFilters by rememberUpdatedState(filters)
+    LaunchedEffect(query) {
+        delay(200)
+        val currentFilters = latestFilters
+        if (query != currentFilters.query) onFiltersChange(currentFilters.copy(query = query))
+    }
+
+    FlowRow(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        NoPaddingTextField(
+            text = query,
+            placeholder = "搜索书名或编号",
+            onTextChange = { query = it },
+            modifier = Modifier.weight(1f).height(40.dp).width(220.dp),
+        )
+
+        FilterDropdownChoice(
+            selectedOption = LabeledEntry(filters.readStatus, filters.readStatus.label),
+            options = SeriesBookReadStatusFilter.entries.map { LabeledEntry(it, it.label) },
+            onOptionChange = { onFiltersChange(filters.copy(readStatus = it.value)) },
+            label = null,
+            modifier = Modifier.width(150.dp),
+        )
+
+        FilterDropdownChoice(
+            selectedOption = LabeledEntry(filters.downloadStatus, filters.downloadStatus.label),
+            options = SeriesBookDownloadStatusFilter.entries.map { LabeledEntry(it, it.label) },
+            onOptionChange = { onFiltersChange(filters.copy(downloadStatus = it.value)) },
+            label = null,
+            modifier = Modifier.width(150.dp),
+        )
+
+        FilterDropdownChoice(
+            selectedOption = LabeledEntry(filters.favoritesOnly, if (filters.favoritesOnly) "仅收藏" else "全部收藏状态"),
+            options = listOf(
+                LabeledEntry(false, "全部收藏状态"),
+                LabeledEntry(true, "仅收藏"),
+            ),
+            onOptionChange = { onFiltersChange(filters.copy(favoritesOnly = it.value)) },
+            label = null,
+            modifier = Modifier.width(150.dp),
+        )
+    }
+}
+
+private val SeriesBookReadStatusFilter.label: String
+    get() = when (this) {
+        SeriesBookReadStatusFilter.All -> "全部阅读状态"
+        SeriesBookReadStatusFilter.Unread -> "未读"
+        SeriesBookReadStatusFilter.InProgress -> "阅读中"
+        SeriesBookReadStatusFilter.Read -> "已读"
+    }
+
+private val SeriesBookDownloadStatusFilter.label: String
+    get() = when (this) {
+        SeriesBookDownloadStatusFilter.All -> "全部下载状态"
+        SeriesBookDownloadStatusFilter.Downloaded -> "已下载"
+        SeriesBookDownloadStatusFilter.NotDownloaded -> "未下载"
+        SeriesBookDownloadStatusFilter.Outdated -> "本地已过期"
+    }
 
 private enum class BookGridDensity(
     val label: String,

@@ -196,6 +196,7 @@ fun SeriesContent(
                             onBooksGridDensityChange = booksState::onBookGridDensityChange,
                             onBooksPageSizeChange = booksState::onBookPageSizeChange,
                             onPageChange = booksState::onPageChange,
+                            onBookListFiltersChange = booksState::onBookListFiltersChange,
                             onBookSelect = booksState::onBookSelect,
                             booksFilterState = booksState.filterState,
                             bookContextMenuActions = bookMenuActions,

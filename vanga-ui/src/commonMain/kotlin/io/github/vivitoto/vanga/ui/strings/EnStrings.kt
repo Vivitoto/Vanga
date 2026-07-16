@@ -57,8 +57,8 @@ val EnStrings = AppStrings(
     ),
     booksFilter = BookFilterStrings(
         sort = "排序",
-        sortNumberAsc = "升序",
-        sortNumberDesc = "降序",
+        sortNumberAsc = "编号升序",
+        sortNumberDesc = "编号降序",
 
         sortFileNameAsc = "文件名升序",
         sortFileNameDesc = "文件名降序",

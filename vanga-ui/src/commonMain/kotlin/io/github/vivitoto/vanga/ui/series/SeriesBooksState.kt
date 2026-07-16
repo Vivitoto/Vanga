@@ -20,6 +20,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.math.roundToInt
 import io.github.vivitoto.vanga.AppNotifications
+import io.github.vivitoto.vanga.favorites.FavoriteReadListService
 import io.github.vivitoto.vanga.komga.api.KomgaBookApi
 import io.github.vivitoto.vanga.komga.api.KomgaReferentialApi
 import io.github.vivitoto.vanga.komga.api.model.VangaBook
@@ -43,6 +44,7 @@ class SeriesBooksState(
     private val settingsRepository: CommonSettingsRepository,
     private val notifications: AppNotifications,
     private val bookApi: KomgaBookApi,
+    private val favoriteReadListService: FavoriteReadListService,
     private val events: SharedFlow<KomgaEvent>,
     private val taskEmitter: OfflineTaskEmitter,
     private val screenModelScope: CoroutineScope,
@@ -57,6 +59,7 @@ class SeriesBooksState(
         val layout: BooksLayout = BooksLayout.GRID,
         val selectionMode: Boolean = false,
         val selectedBooks: List<VangaBook> = emptyList(),
+        val listFilters: SeriesBookListFilterState = SeriesBookListFilterState(),
     )
 
     private val mutableState = MutableStateFlow<LoadState<BooksData>>(LoadState.Uninitialized)
@@ -115,6 +118,9 @@ class SeriesBooksState(
 
             val series = series.filterNotNull().first()
             val filter = this.filterState.state.value
+            val listFilters = (currentState as? LoadState.Success<BooksData>)?.value?.listFilters
+                ?: SeriesBookListFilterState()
+            val useClientSideFilters = listFilters.isActive
             val condition = allOfBooks {
                 seriesId { isEqualTo(series.id) }
                 filter.addConditionTo(this)
@@ -123,30 +129,52 @@ class SeriesBooksState(
             val pageResponse = bookApi.getBookList(
                 conditionBuilder = condition,
                 fullTextSearch = null,
-                pageRequest = KomgaPageRequest(
-                    pageIndex = page - 1,
-                    size = pageLoadSize,
-                    sort = filter.sortOrder.komgaSort
-                )
+                pageRequest = if (useClientSideFilters) {
+                    KomgaPageRequest(
+                        unpaged = true,
+                        sort = filter.sortOrder.komgaSort
+                    )
+                } else {
+                    KomgaPageRequest(
+                        pageIndex = page - 1,
+                        size = pageLoadSize,
+                        sort = filter.sortOrder.komgaSort
+                    )
+                }
             )
+
+            val favoriteBookIds = if (listFilters.favoritesOnly) favoriteReadListService.getFavoriteBookIds() else emptySet()
+            val filteredBooks = if (useClientSideFilters) {
+                filterSeriesBookList(pageResponse.content, listFilters, favoriteBookIds)
+            } else pageResponse.content
+            val totalPages = if (useClientSideFilters) {
+                seriesBookListPageCount(filteredBooks.size, pageLoadSize)
+            } else pageResponse.totalPages
+            val currentPage = if (useClientSideFilters) {
+                page.coerceIn(1, totalPages)
+            } else pageResponse.number + 1
+            val pageBooks = if (useClientSideFilters) {
+                paginateSeriesBookList(filteredBooks, currentPage, pageLoadSize)
+            } else filteredBooks
 
             val newState = when (currentState) {
                 is LoadState.Success<BooksData> -> currentState.value.copy(
-                    books = pageResponse.content,
+                    books = pageBooks,
                     pageSize = pageLoadSize,
-                    totalPages = pageResponse.totalPages,
-                    currentPage = pageResponse.number + 1,
-                    selectedBooks = pageResponse.content.filter { it.id in currentState.value.selectedBooks.map { it.id } }
+                    totalPages = totalPages,
+                    currentPage = currentPage,
+                    selectedBooks = pageBooks.filter { it.id in currentState.value.selectedBooks.map { it.id } }
                 )
 
                 else -> BooksData(
-                    books = pageResponse.content,
+                    books = pageBooks,
                     pageSize = pageLoadSize,
-                    totalPages = pageResponse.totalPages,
-                    currentPage = pageResponse.number + 1,
+                    totalPages = totalPages,
+                    currentPage = currentPage,
                     layout = settingsRepository.getBookListLayout().first(),
                     selectionMode = false,
-                    selectedBooks = emptyList()
+                    selectedBooks = emptyList(),
+                    listFilters = listFilters,
                 )
             }
             mutableState.value = LoadState.Success(newState)
@@ -166,6 +194,11 @@ class SeriesBooksState(
             setSelectionMode(false)
             loadBookData(page)
         }
+    }
+
+    fun onBookListFiltersChange(filters: SeriesBookListFilterState) {
+        updateCurrentState { it.copy(listFilters = filters) }
+        screenModelScope.launch { loadBookData(1) }
     }
 
     fun bookMenuActions() = BookMenuActions(bookApi, notifications, screenModelScope, taskEmitter)

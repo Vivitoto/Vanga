@@ -247,20 +247,29 @@ class ViewModelFactory(
         seriesId: KomgaSeriesId,
         series: KomgaSeries? = null,
         defaultTab: SeriesTab? = null,
-    ) = SeriesViewModel(
-        seriesId = seriesId,
-        series = series,
-        libraries = dependencies.komgaSharedState.libraries,
-        seriesApi = komgaApi.seriesApi,
-        taskEmitter = dependencies.offlineDependencies.taskEmitter,
-        bookApi = komgaApi.bookApi,
-        collectionApi = komgaApi.collectionsApi,
-        notifications = dependencies.appNotifications,
-        events = dependencies.komgaEvents.events,
-        settingsRepository = appRepositories.settingsRepository,
-        referentialApi = komgaApi.referentialApi,
-        defaultTab = defaultTab ?: SeriesTab.BOOKS,
-    )
+    ): SeriesViewModel {
+        val ownerLabelProvider = { dependencies.komgaSharedState.authenticatedUser.value?.email }
+        val serverUrlProvider = { dependencies.komgaSharedState.serverUrl.value }
+        return SeriesViewModel(
+            seriesId = seriesId,
+            series = series,
+            libraries = dependencies.komgaSharedState.libraries,
+            seriesApi = komgaApi.seriesApi,
+            taskEmitter = dependencies.offlineDependencies.taskEmitter,
+            bookApi = komgaApi.bookApi,
+            favoriteReadListService = FavoriteReadListService(
+                localFavoritesRepository = appRepositories.localFavoritesRepository,
+                ownerLabelProvider = ownerLabelProvider,
+                serverUrlProvider = serverUrlProvider,
+            ),
+            collectionApi = komgaApi.collectionsApi,
+            notifications = dependencies.appNotifications,
+            events = dependencies.komgaEvents.events,
+            settingsRepository = appRepositories.settingsRepository,
+            referentialApi = komgaApi.referentialApi,
+            defaultTab = defaultTab ?: SeriesTab.BOOKS,
+        )
+    }
 
     fun getBookViewModel(bookId: KomgaBookId, book: VangaBook?): BookViewModel {
         return BookViewModel(
