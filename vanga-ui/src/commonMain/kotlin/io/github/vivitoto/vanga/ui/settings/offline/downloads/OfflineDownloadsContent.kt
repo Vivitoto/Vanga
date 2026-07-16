@@ -32,7 +32,6 @@ import io.github.vivitoto.vanga.ui.settings.SettingsSectionCard
 import io.github.vivitoto.vanga.ui.settings.SettingsSectionHeader
 import io.github.vivitoto.vanga.ui.settings.SettingsValueRow
 import snd.komga.client.book.KomgaBookId
-import kotlin.coroutines.cancellation.CancellationException
 
 @Composable
 fun OfflineDownloadsContent(
@@ -136,10 +135,7 @@ private fun DownloadCompleted(event: DownloadEvent.BookDownloadCompleted) {
 private fun DownloadError(event: DownloadEvent.BookDownloadError) {
     Column {
         Text(event.book?.metadata?.title ?: event.bookId.value)
-        val errorMessage = remember {
-            if (event.error is CancellationException) "已取消"
-            else "${event.error::class.simpleName}: ${event.error.message}"
-        }
+        val errorMessage = remember(event.error) { downloadErrorText(event.error) }
         Text(errorMessage, color = MaterialTheme.colorScheme.error)
     }
 }

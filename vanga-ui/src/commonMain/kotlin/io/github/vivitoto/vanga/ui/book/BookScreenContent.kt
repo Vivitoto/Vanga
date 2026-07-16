@@ -75,6 +75,7 @@ import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.EXPANDED
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.FULL
 import io.github.vivitoto.vanga.ui.platform.WindowSizeClass.MEDIUM
 import io.github.vivitoto.vanga.ui.readlist.BookReadListsContent
+import io.github.vivitoto.vanga.ui.settings.offline.downloads.downloadErrorText
 import snd.komga.client.library.KomgaLibrary
 import snd.komga.client.readlist.KomgaReadList
 
@@ -399,14 +400,22 @@ fun DownloadButton(
                             modifier = Modifier.size(20.dp),
                         )
                     }
+                    Spacer(Modifier.width(8.dp))
+                    Text("下载中…")
+                }
+
+                is DownloadEvent.BookDownloadError -> {
+                    Icon(Icons.Default.Download, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(downloadErrorText(event.error), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
 
                 else -> {
                     Icon(Icons.Default.Download, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("下载")
                 }
             }
-            Spacer(Modifier.width(8.dp))
-            Text("下载")
         }
     }
 
