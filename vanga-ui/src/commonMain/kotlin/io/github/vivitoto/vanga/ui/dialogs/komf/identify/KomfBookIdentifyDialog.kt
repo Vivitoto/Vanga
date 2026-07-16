@@ -20,7 +20,7 @@ import io.github.vivitoto.vanga.ui.dialogs.DialogSimpleHeader
 import io.github.vivitoto.vanga.ui.platform.cursorForHand
 
 @Composable
-fun KomfBookIdentifyDialog(
+internal fun KomfBookIdentifyDialog(
     book: VangaBook,
     support: KomfBookIdentifySupport = KomfBookIdentifySupport.Unsupported(noKomfBookIdentifyEndpointReason),
     onDismissRequest: () -> Unit,

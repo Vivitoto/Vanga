@@ -95,16 +95,18 @@ private fun SeriesBookListFilterItem.matchesDownloadStatusFilter(filter: SeriesB
     SeriesBookDownloadStatusFilter.Outdated -> downloaded && localFileOutdated
 }
 
-private fun VangaBook.toSeriesBookListFilterItem(favoriteBookIds: Set<KomgaBookId>): SeriesBookListFilterItem =
-    SeriesBookListFilterItem(
+private fun VangaBook.toSeriesBookListFilterItem(favoriteBookIds: Set<KomgaBookId>): SeriesBookListFilterItem {
+    val progress = readProgress
+    return SeriesBookListFilterItem(
         title = metadata.title.ifBlank { name },
         number = number,
         readStatus = when {
-            readProgress == null -> SeriesBookReadStatusFilter.Unread
-            readProgress.completed -> SeriesBookReadStatusFilter.Read
+            progress == null -> SeriesBookReadStatusFilter.Unread
+            progress.completed -> SeriesBookReadStatusFilter.Read
             else -> SeriesBookReadStatusFilter.InProgress
         },
         downloaded = downloaded,
         localFileOutdated = isLocalFileOutdated,
         favorite = id in favoriteBookIds,
     )
+}
