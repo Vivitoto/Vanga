@@ -30,7 +30,7 @@ fun ReaderImageContent(imageResult: ReaderImageResult?) {
     when (imageResult) {
         is ReaderImageResult.Success -> ImageContent(imageResult.image)
         is ReaderImageResult.Error -> Text(
-            "${imageResult.throwable::class.simpleName}: ${imageResult.throwable.message}",
+            readerImageErrorText(imageResult.throwable),
             color = MaterialTheme.colorScheme.error
         )
 
@@ -64,7 +64,7 @@ private fun ImageContent(image: ReaderImage) {
     val painter = painterState.value
     if (error != null) {
         Text(
-            "${error::class.simpleName}: ${error.message}",
+            readerImageErrorText(error),
             color = MaterialTheme.colorScheme.error
         )
     } else if (painter == null) {
