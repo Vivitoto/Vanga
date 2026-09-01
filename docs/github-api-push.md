@@ -1,7 +1,7 @@
 # GitHub API Push Workflow
 
-Vanga keeps `scripts/push-via-api.py` as the preferred push path from Vito's
-OpenClaw workstation. Normal `git push` / `git fetch` over GitHub HTTPS can time
+Vanga keeps `scripts/push-via-api.py` as the preferred push path from this
+Hermes workstation. Normal `git push` / `git fetch` over GitHub HTTPS can time
 out on this machine, while `gh api` usually works.
 
 ## When to use it
@@ -10,7 +10,7 @@ Use this after local changes are reviewed, committed, and explicitly approved fo
 push/release:
 
 ```bash
-cd /home/vito/.openclaw/workspace/Vanga
+cd /home/vito/.hermes/workspace/Vanga
 scripts/push-via-api.py
 ```
 

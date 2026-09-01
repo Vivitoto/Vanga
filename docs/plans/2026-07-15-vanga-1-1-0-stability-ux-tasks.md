@@ -640,7 +640,7 @@ Before push, present Vito with:
 
 Only after confirmation:
 ```bash
-cd /home/vito/.openclaw/workspace/Vanga
+cd /home/vito/.hermes/workspace/Vanga
 scripts/push-via-api.py
 ```
 

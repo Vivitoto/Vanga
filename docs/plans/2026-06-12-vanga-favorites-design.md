@@ -19,7 +19,7 @@
 
 ### 1.1 Name Rationale
 
-Following Vito's naming pattern: **Visto** (WebDAV image viewer), **Vink** (e-ink firmware).
+Following Vito's naming pattern: short V-prefixed product names.
 
 **Vanga** = V + Manga — short, two syllables, immediately suggests manga/comics.
 

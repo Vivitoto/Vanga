@@ -8,7 +8,7 @@
 
 ## Current Baseline
 
-- Repo: `/home/vito/.openclaw/workspace/Vanga`
+- Repo: `/home/vito/.hermes/workspace/Vanga`
 - Base: `Vivitoto/Vanga` at `58c97bc`
 - Branch: `vanga/favorites`
 - Target: Android app only
@@ -289,7 +289,7 @@ Test cases:
 Once JDK is available:
 
 ```bash
-cd /home/vito/.openclaw/workspace/Vanga
+cd /home/vito/.hermes/workspace/Vanga
 ./gradlew tasks --all --console=plain
 ./gradlew :vanga-domain:core:allTests --console=plain
 ./gradlew :vanga-ui:compileKotlinAndroid --console=plain
